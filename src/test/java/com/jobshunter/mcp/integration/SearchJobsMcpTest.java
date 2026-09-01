@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import com.jobshunter.mcp.client.TokenExchangeClient;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
@@ -39,9 +38,6 @@ class SearchJobsMcpTest {
   @MockitoBean
   private JwtDecoder jwtDecoder;
 
-  @MockitoBean
-  private TokenExchangeClient tokenExchangeClient;
-
   @LocalServerPort
   private int port;
 
@@ -62,7 +58,7 @@ class SearchJobsMcpTest {
     registry.add("jobshunter.search-jobs-path", () -> "/api/internal/search_jobs");
     registry.add("spring.ai.mcp.server.streamable-http.mcp-endpoint", () -> "/mcp");
     registry.add("mcp.security.audience", () -> "mcp-client-id");
-    registry.add("mcp.security.required-scope", () -> "profile");
+    registry.add("mcp.security.required-scope", () -> "");
   }
 
   @Test
@@ -72,10 +68,9 @@ class SearchJobsMcpTest {
         Instant.now(),
         Instant.now().plusSeconds(300),
         Map.of("alg", "none"),
-        Map.of("sub", "123", "aud", List.of("mcp-client-id"), "scope", "profile email")
+        Map.of("sub", "123", "aud", List.of("mcp-client-id"), "email", "user@example.com")
     );
     when(jwtDecoder.decode(GOOGLE_TOKEN)).thenReturn(jwt);
-    when(tokenExchangeClient.exchangeToken(GOOGLE_TOKEN)).thenReturn("delegated-token");
 
     RestClient mcpClient = RestClient.builder().baseUrl("http://localhost:" + port).build();
     assertThrows(
@@ -120,7 +115,7 @@ class SearchJobsMcpTest {
     RecordedRequest searchRequest = mockJobshunter.takeRequest(2, TimeUnit.SECONDS);
     assertEquals("/api/internal/search_jobs", searchRequest.getPath());
     assertEquals("POST", searchRequest.getMethod());
-    assertEquals("Bearer delegated-token", searchRequest.getHeader(HttpHeaders.AUTHORIZATION));
+    assertEquals("Bearer " + GOOGLE_TOKEN, searchRequest.getHeader(HttpHeaders.AUTHORIZATION));
   }
 
   private String postJsonRpc(

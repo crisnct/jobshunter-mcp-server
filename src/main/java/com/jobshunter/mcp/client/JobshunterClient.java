@@ -18,20 +18,22 @@ import org.springframework.web.client.RestClientResponseException;
 public class JobshunterClient {
   private final RestClient restClient;
   private final String searchJobsPath;
+  private final String baseUrl;
 
   public JobshunterClient(RestClient jobshunterRestClient, JobshunterProperties properties) {
     this.restClient = jobshunterRestClient;
     this.searchJobsPath = properties.searchJobsPath();
+    this.baseUrl = properties.baseUrl();
   }
 
-  public SearchJobsResponse searchJobs(List<SearchConfiguration> configurations, String exchangedToken) {
-    validateDelegatedToken(exchangedToken);
+  public SearchJobsResponse searchJobs(List<SearchConfiguration> configurations, String userToken) {
+    validateUserToken(userToken);
 
     try {
       SearchJobsResponse response = restClient.post()
           .uri(searchJobsPath)
           .contentType(MediaType.APPLICATION_JSON)
-          .header(HttpHeaders.AUTHORIZATION, "Bearer " + exchangedToken)
+          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
           .body(configurations)
           .retrieve()
           .body(SearchJobsResponse.class);
@@ -43,16 +45,22 @@ public class JobshunterClient {
     } catch (RestClientResponseException ex) {
       throw mapStatusCode(ex.getStatusCode().value(), ex);
     } catch (ResourceAccessException ex) {
+      Throwable rootCause = rootCause(ex);
       if (isTimeout(ex)) {
         throw new JobshunterApiException("Job search timed out.", ex);
       }
-      throw new JobshunterApiException("Jobshunter endpoint is not reachable.", ex);
+      if (isLikelyProtocolMismatch(rootCause)) {
+        throw new JobshunterApiException(
+            "Jobshunter endpoint closed connection. Check JOBSHUNTER_BASE_URL protocol (https expected on port 8443/443).",
+            ex);
+      }
+      throw new JobshunterApiException("Jobshunter endpoint is not reachable. "+ex.getMessage(), ex);
     }
   }
 
-  private void validateDelegatedToken(String exchangedToken) {
-    if (!StringUtils.hasText(exchangedToken)) {
-      throw new JobshunterApiException("Delegated Jobshunter token is missing.");
+  private void validateUserToken(String userToken) {
+    if (!StringUtils.hasText(userToken)) {
+      throw new JobshunterApiException("Authenticated user token is missing.");
     }
   }
 
@@ -80,5 +88,26 @@ public class JobshunterClient {
       current = current.getCause();
     }
     return false;
+  }
+
+  private Throwable rootCause(Throwable throwable) {
+    Throwable current = throwable;
+    Throwable root = throwable;
+    while (current != null) {
+      root = current;
+      current = current.getCause();
+    }
+    return root;
+  }
+
+  private boolean isLikelyProtocolMismatch(Throwable rootCause) {
+    if (rootCause == null) {
+      return false;
+    }
+    if (!baseUrl.startsWith("http://")) {
+      return false;
+    }
+    return rootCause instanceof java.nio.channels.ClosedChannelException
+        && (baseUrl.contains(":8443") || baseUrl.contains(":443"));
   }
 }

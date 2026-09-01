@@ -72,13 +72,13 @@ class JobshunterClientTest {
 
     mockServer.expect(requestTo(BASE_URL + "/api/internal/search_jobs"))
         .andExpect(method(HttpMethod.POST))
-        .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer delegated-token"))
+        .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer user-id-token"))
         .andExpect(content().json(requestJson, true))
         .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
 
     SearchJobsResponse response = jobshunterClient.searchJobs(
         List.of(new SearchConfiguration("GROK", "grok-4-1-fast-non-reasoning", false, true)),
-        "delegated-token"
+        "user-id-token"
     );
 
     assertEquals(1, response.jobsFound().size());
@@ -96,7 +96,7 @@ class JobshunterClientTest {
         JobshunterApiException.class,
         () -> jobshunterClient.searchJobs(
             List.of(new SearchConfiguration("GROK", "grok-4-1-fast-non-reasoning", false, true)),
-            "delegated-token"
+            "user-id-token"
         )
     );
 
@@ -105,7 +105,7 @@ class JobshunterClientTest {
   }
 
   @Test
-  void shouldFailFastWhenDelegatedTokenIsMissing() {
+  void shouldFailFastWhenUserTokenIsMissing() {
     JobshunterProperties properties = new JobshunterProperties(
         BASE_URL,
         "/api/internal/search_jobs",
@@ -125,6 +125,6 @@ class JobshunterClientTest {
         )
     );
 
-    assertEquals("Delegated Jobshunter token is missing.", ex.getMessage());
+    assertEquals("Authenticated user token is missing.", ex.getMessage());
   }
 }

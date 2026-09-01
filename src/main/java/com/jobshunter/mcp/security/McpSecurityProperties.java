@@ -8,6 +8,6 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "mcp.security")
 public record McpSecurityProperties(
     @NotBlank String audience,
-    @NotBlank String requiredScope
+    String requiredScope
 ) {
 }

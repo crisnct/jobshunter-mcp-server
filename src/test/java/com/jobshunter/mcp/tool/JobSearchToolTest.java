@@ -3,10 +3,10 @@ package com.jobshunter.mcp.tool;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.jobshunter.mcp.client.JobshunterClient;
-import com.jobshunter.mcp.client.TokenExchangeClient;
 import com.jobshunter.mcp.dto.SearchConfiguration;
 import com.jobshunter.mcp.dto.SearchJobResult;
 import com.jobshunter.mcp.dto.SearchJobsResponse;
@@ -29,9 +29,6 @@ class JobSearchToolTest {
 
   @Mock
   private JobshunterClient jobshunterClient;
-
-  @Mock
-  private TokenExchangeClient tokenExchangeClient;
 
   @InjectMocks
   private JobSearchTool jobSearchTool;
@@ -60,14 +57,12 @@ class JobSearchToolTest {
     SearchJobsResponse expected = new SearchJobsResponse(List.of(
         new SearchJobResult("https://example.com/job-1", "SERP")
     ));
-    when(tokenExchangeClient.exchangeToken("google-user-token")).thenReturn("delegated-token");
-    when(jobshunterClient.searchJobs(request, "delegated-token")).thenReturn(expected);
+    when(jobshunterClient.searchJobs(request, "google-user-token")).thenReturn(expected);
 
     SearchJobsResponse actual = jobSearchTool.searchJobs(request);
 
     assertEquals(expected, actual);
-    verify(tokenExchangeClient).exchangeToken("google-user-token");
-    verify(jobshunterClient).searchJobs(request, "delegated-token");
+    verify(jobshunterClient).searchJobs(request, "google-user-token");
   }
 
   @Test
@@ -81,6 +76,7 @@ class JobSearchToolTest {
         "Invalid search configuration: at least one of searchCompanies or searchWithUserPrompts must be true.",
         ex.getMessage()
     );
+    verifyNoInteractions(jobshunterClient);
   }
 
   @Test

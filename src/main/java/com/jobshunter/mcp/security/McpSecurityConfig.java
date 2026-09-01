@@ -22,20 +22,23 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.util.StringUtils;
 
 @Configuration
 public class McpSecurityConfig {
 
   @Bean
   SecurityFilterChain mcpSecurityFilterChain(HttpSecurity http, McpSecurityProperties securityProperties) throws Exception {
-    String requiredAuthority = "SCOPE_" + securityProperties.requiredScope();
-
     http.csrf(AbstractHttpConfigurer::disable)
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/mcp/**").hasAuthority(requiredAuthority)
-            .anyRequest().permitAll()
-        )
+        .authorizeHttpRequests(auth -> {
+          if (StringUtils.hasText(securityProperties.requiredScope())) {
+            auth.requestMatchers("/mcp/**").hasAuthority("SCOPE_" + securityProperties.requiredScope());
+          } else {
+            auth.requestMatchers("/mcp/**").authenticated();
+          }
+          auth.anyRequest().permitAll();
+        })
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
     return http.build();

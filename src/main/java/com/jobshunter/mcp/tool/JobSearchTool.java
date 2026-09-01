@@ -1,7 +1,6 @@
 package com.jobshunter.mcp.tool;
 
 import com.jobshunter.mcp.client.JobshunterClient;
-import com.jobshunter.mcp.client.TokenExchangeClient;
 import com.jobshunter.mcp.dto.SearchConfiguration;
 import com.jobshunter.mcp.dto.SearchJobsResponse;
 import com.jobshunter.mcp.exception.JobshunterApiException;
@@ -21,11 +20,9 @@ import org.springframework.validation.annotation.Validated;
 public class JobSearchTool {
 
   private final JobshunterClient jobshunterClient;
-  private final TokenExchangeClient tokenExchangeClient;
 
-  public JobSearchTool(JobshunterClient jobshunterClient, TokenExchangeClient tokenExchangeClient) {
+  public JobSearchTool(JobshunterClient jobshunterClient) {
     this.jobshunterClient = jobshunterClient;
-    this.tokenExchangeClient = tokenExchangeClient;
   }
 
   @Tool(name = "search_jobs", description = """
@@ -39,8 +36,7 @@ public class JobSearchTool {
     validateSearchRequest(searchConfigurations);
     try {
       String userToken = resolveUserToken();
-      String exchangedToken = tokenExchangeClient.exchangeToken(userToken);
-      return jobshunterClient.searchJobs(searchConfigurations, exchangedToken);
+      return jobshunterClient.searchJobs(searchConfigurations, userToken);
     } catch (JobshunterApiException ex) {
       throw ex;
     } catch (Exception ex) {

@@ -26,24 +26,17 @@ spring:
 mcp:
   security:
     audience: ${MCP_GOOGLE_AUDIENCE:${GOOGLE_CLIENT_ID:notset}}
-    required-scope: ${MCP_REQUIRED_SCOPE:profile}
-  token-exchange:
-    sts-url: ${GOOGLE_STS_URL:https://sts.googleapis.com/v1/token}
-    audience: ${JOBSHUNTER_TOKEN_AUDIENCE:jobshunter-internal}
-    scopes: ${JOBSHUNTER_TOKEN_SCOPES:search_jobs.execute}
-    timeout: ${TOKEN_EXCHANGE_TIMEOUT:10s}
-    grant-type: ${TOKEN_EXCHANGE_GRANT_TYPE:urn:ietf:params:oauth:grant-type:token-exchange}
-    subject-token-type: ${TOKEN_EXCHANGE_SUBJECT_TOKEN_TYPE:urn:ietf:params:oauth:token-type:access_token}
-    requested-token-type: ${TOKEN_EXCHANGE_REQUESTED_TOKEN_TYPE:urn:ietf:params:oauth:token-type:access_token}
+    required-scope: ${MCP_REQUIRED_SCOPE:}
 
 jobshunter:
-  base-url: ${JOBSHUNTER_BASE_URL:https://localhost:8444}
+  # base-url: ${JOBSHUNTER_BASE_URL:https://localhost:8444}
+  base-url: ${JOBSHUNTER_BASE_URL:https://ronin-archesporial-lonnie.ngrok-free.dev}
   search-jobs-path: ${JOBSHUNTER_SEARCH_JOBS_PATH:/api/internal/search_jobs}
   connect-timeout: ${JOBSHUNTER_CONNECT_TIMEOUT:5s}
-  response-timeout: ${JOBSHUNTER_RESPONSE_TIMEOUT:5m}
+  response-timeout: ${JOBSHUNTER_RESPONSE_TIMEOUT:25m}
   ssl:
-    trust-store: ${JOBSHUNTER_TRUST_STORE:}
-    trust-store-password: ${JOBSHUNTER_TRUST_STORE_PASSWORD:}
-    trust-store-type: ${JOBSHUNTER_TRUST_STORE_TYPE:PKCS12}
+    trust-store: classpath:ngrok-truststore.p12
+    trust-store-password: changeit
+    trust-store-type: PKCS12
 
 
