@@ -1,0 +1,275 @@
+openapi: 3.1.0
+info:
+  title: Jobshunter MCP Server API
+  version: 1.0.0
+  description: |
+    OpenAPI description for the MCP HTTP entrypoint exposed by this service.
+
+    Notes:
+    - The server exposes a single JSON-RPC endpoint: `POST /mcp`.
+    - Tools are invoked through JSON-RPC method `tools/call`.
+    - This document focuses on tool contracts implemented by this project:
+      `search_jobs` and `get_user_info`.
+servers:
+  - url: http://localhost:8081
+    description: Local MCP server
+security:
+  - bearerAuth: []
+paths:
+  /mcp:
+    post:
+      summary: MCP JSON-RPC endpoint
+      description: |
+        Entry point for MCP protocol messages (`initialize`, `tools/list`, `tools/call`).
+        Use `tools/call` to invoke `search_jobs` or `get_user_info`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: header
+          name: Mcp-Session-Id
+          required: false
+          description: Session id returned by `initialize`; required by subsequent MCP calls.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JsonRpcRequest'
+            examples:
+              initialize:
+                summary: Initialize MCP session
+                value:
+                  jsonrpc: "2.0"
+                  id: "1"
+                  method: "initialize"
+                  params:
+                    protocolVersion: "2025-03-26"
+                    capabilities: {}
+                    clientInfo:
+                      name: "postman"
+                      version: "1.0.0"
+              toolsList:
+                summary: List available tools
+                value:
+                  jsonrpc: "2.0"
+                  id: "2"
+                  method: "tools/list"
+                  params: {}
+              searchJobsCall:
+                summary: Call search_jobs tool
+                value:
+                  jsonrpc: "2.0"
+                  id: "3"
+                  method: "tools/call"
+                  params:
+                    name: "search_jobs"
+                    arguments:
+                      searchConfigurations:
+                        - provider: "GROK"
+                          model: "grok-4-1-fast-non-reasoning"
+                          searchCompanies: false
+                          searchWithUserPrompts: true
+              getUserInfoCall:
+                summary: Call get_user_info tool
+                value:
+                  jsonrpc: "2.0"
+                  id: "4"
+                  method: "tools/call"
+                  params:
+                    name: "get_user_info"
+                    arguments: {}
+      responses:
+        '200':
+          description: JSON-RPC response payload (result or error encoded by MCP transport).
+          headers:
+            Mcp-Session-Id:
+              description: Returned on initialize and required for stateful subsequent calls.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonRpcResponse'
+        '400':
+          description: Invalid MCP request.
+        '401':
+          description: Missing or invalid Bearer token.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Google JWT validated by MCP security configuration.
+  schemas:
+    JsonRpcRequest:
+      type: object
+      required: [jsonrpc, id, method, params]
+      properties:
+        jsonrpc:
+          type: string
+          const: "2.0"
+        id:
+          oneOf:
+            - type: string
+            - type: integer
+        method:
+          type: string
+          description: MCP method name (`initialize`, `tools/list`, `tools/call`).
+        params:
+          type: object
+          additionalProperties: true
+    JsonRpcResponse:
+      type: object
+      properties:
+        jsonrpc:
+          type: string
+          const: "2.0"
+        id:
+          oneOf:
+            - type: string
+            - type: integer
+        result:
+          type: object
+          description: MCP method-specific result payload.
+        error:
+          type: object
+          description: JSON-RPC error object when request-level failure occurs.
+          properties:
+            code:
+              type: integer
+            message:
+              type: string
+            data:
+              additionalProperties: true
+    SearchConfiguration:
+      type: object
+      required: [provider, model, searchCompanies, searchWithUserPrompts]
+      properties:
+        provider:
+          type: string
+          description: Provider key configured in Jobshunter (example: GROK, SERP, GEMINI, GPT).
+        model:
+          type: string
+          description: Model identifier configured for the selected provider.
+        searchCompanies:
+          type: boolean
+          description: Include company-oriented search strategy.
+        searchWithUserPrompts:
+          type: boolean
+          description: Include user-prompt-oriented search strategy.
+      description: |
+        At least one of `searchCompanies` or `searchWithUserPrompts` must be true.
+    SearchJobResult:
+      type: object
+      required: [url, source]
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Canonical URL of the found job posting.
+        source:
+          type: string
+          description: Source platform/provider where the job was found.
+    SearchJobsResponse:
+      type: object
+      required: [jobsFound]
+      properties:
+        jobsFound:
+          type: array
+          description: Deduplicated list of synchronous search results.
+          items:
+            $ref: '#/components/schemas/SearchJobResult'
+    UserInfoResponse:
+      type: object
+      required:
+        - username
+        - email
+        - notifyWhatsapp
+        - notifyEmail
+        - emailVerified
+        - prompts
+        - roles
+        - jobRoles
+        - jobTypes
+        - contractTypes
+      properties:
+        username:
+          type: string
+          description: Unique username in Jobshunter.
+        email:
+          type: string
+          format: email
+          description: Primary user email.
+        phoneNumber:
+          type: string
+          nullable: true
+          description: Phone number from user profile.
+        notifyWhatsapp:
+          type: boolean
+          description: Whether WhatsApp notifications are enabled.
+        notifyEmail:
+          type: boolean
+          description: Whether email notifications are enabled.
+        emailVerified:
+          type: boolean
+          description: Whether user email is verified.
+        verificationToken:
+          type: string
+          nullable: true
+          description: Current verification token, if any.
+        cvFilename:
+          type: string
+          nullable: true
+          description: Uploaded CV file name, if present.
+        notifiedAt:
+          type: string
+          nullable: true
+          description: ISO-8601 timestamp of latest notification.
+        prompts:
+          type: array
+          items:
+            type: string
+          description: User prompts/preferences used by search.
+        createdAt:
+          type: string
+          nullable: true
+          description: ISO-8601 account creation timestamp.
+        roles:
+          type: array
+          items:
+            type: string
+          description: Security roles assigned to the user.
+        city:
+          type: string
+          nullable: true
+          description: User profile city.
+        country:
+          type: string
+          nullable: true
+          description: User profile country.
+        jobDomain:
+          type: string
+          nullable: true
+          description: User profile job domain/category.
+        jobRoles:
+          type: array
+          items:
+            type: string
+          description: Preferred job role names.
+        jobTypes:
+          type: array
+          items:
+            type: string
+          description: Preferred job type values.
+        relocation:
+          type: string
+          nullable: true
+          description: Relocation preference value.
+        contractTypes:
+          type: array
+          items:
+            type: string
+          description: Preferred contract type values.

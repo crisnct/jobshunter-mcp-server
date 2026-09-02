@@ -95,6 +95,7 @@ class SearchJobsMcpTest {
 
     String toolsListResponse = postJsonRpc(mcpClient, GOOGLE_TOKEN, sessionId, "tools/list", "2", Map.of());
     assertTrue(toolsListResponse.contains("\"search_jobs\""));
+    assertTrue(toolsListResponse.contains("\"get_user_info\""));
     assertTrue(toolsListResponse.contains("searchConfigurations"));
 
     String toolCallResponse = postJsonRpc(mcpClient, GOOGLE_TOKEN, sessionId, "tools/call", "3", Map.of(

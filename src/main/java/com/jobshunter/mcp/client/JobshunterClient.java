@@ -3,6 +3,7 @@ package com.jobshunter.mcp.client;
 import com.jobshunter.mcp.config.JobshunterProperties;
 import com.jobshunter.mcp.dto.SearchConfiguration;
 import com.jobshunter.mcp.dto.SearchJobsResponse;
+import com.jobshunter.mcp.dto.UserInfoResponse;
 import com.jobshunter.mcp.exception.JobshunterApiException;
 import java.net.http.HttpTimeoutException;
 import java.util.List;
@@ -18,11 +19,13 @@ import org.springframework.web.client.RestClientResponseException;
 public class JobshunterClient {
   private final RestClient restClient;
   private final String searchJobsPath;
+  private final String userInfoPath;
   private final String baseUrl;
 
   public JobshunterClient(RestClient jobshunterRestClient, JobshunterProperties properties) {
     this.restClient = jobshunterRestClient;
     this.searchJobsPath = properties.searchJobsPath();
+    this.userInfoPath = properties.userInfoPath();
     this.baseUrl = properties.baseUrl();
   }
 
@@ -55,6 +58,35 @@ public class JobshunterClient {
             ex);
       }
       throw new JobshunterApiException("Jobshunter endpoint is not reachable. "+ex.getMessage(), ex);
+    }
+  }
+
+  public UserInfoResponse getUserInfo(String userToken) {
+    validateUserToken(userToken);
+
+    try {
+      UserInfoResponse response = restClient.get()
+          .uri(userInfoPath)
+          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .retrieve()
+          .body(UserInfoResponse.class);
+      if (response == null) {
+        throw new JobshunterApiException("Jobshunter returned an empty user response.");
+      }
+      return response;
+    } catch (RestClientResponseException ex) {
+      throw mapStatusCode(ex.getStatusCode().value(), ex);
+    } catch (ResourceAccessException ex) {
+      Throwable rootCause = rootCause(ex);
+      if (isTimeout(ex)) {
+        throw new JobshunterApiException("User info request timed out.", ex);
+      }
+      if (isLikelyProtocolMismatch(rootCause)) {
+        throw new JobshunterApiException(
+            "Jobshunter endpoint closed connection. Check JOBSHUNTER_BASE_URL protocol (https expected on port 8443/443).",
+            ex);
+      }
+      throw new JobshunterApiException("Jobshunter endpoint is not reachable. " + ex.getMessage(), ex);
     }
   }
 

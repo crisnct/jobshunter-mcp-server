@@ -12,6 +12,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 import com.jobshunter.mcp.config.JobshunterProperties;
 import com.jobshunter.mcp.dto.SearchConfiguration;
 import com.jobshunter.mcp.dto.SearchJobsResponse;
+import com.jobshunter.mcp.dto.UserInfoResponse;
 import com.jobshunter.mcp.exception.JobshunterApiException;
 import java.time.Duration;
 import java.util.List;
@@ -41,6 +42,7 @@ class JobshunterClientTest {
     JobshunterProperties properties = new JobshunterProperties(
         BASE_URL,
         "/api/internal/search_jobs",
+        "/api/internal/me",
         Duration.ofSeconds(5),
         Duration.ofMinutes(5),
         new JobshunterProperties.Ssl(null, null, "PKCS12")
@@ -109,6 +111,7 @@ class JobshunterClientTest {
     JobshunterProperties properties = new JobshunterProperties(
         BASE_URL,
         "/api/internal/search_jobs",
+        "/api/internal/me",
         Duration.ofSeconds(5),
         Duration.ofMinutes(5),
         new JobshunterProperties.Ssl(null, null, "PKCS12")
@@ -126,5 +129,44 @@ class JobshunterClientTest {
     );
 
     assertEquals("Authenticated user token is missing.", ex.getMessage());
+  }
+
+  @Test
+  void shouldGetUserInfoFromInternalMeEndpoint() {
+    String responseJson = """
+        {
+          "username":"user@example.com",
+          "email":"user@example.com",
+          "phoneNumber":"0700000000",
+          "notifyWhatsapp":false,
+          "notifyEmail":true,
+          "emailVerified":true,
+          "verificationToken":null,
+          "cvFilename":"cv.pdf",
+          "notifiedAt":null,
+          "prompts":[],
+          "createdAt":"2026-09-01T00:00:00Z",
+          "roles":["USER"],
+          "city":"Cluj",
+          "country":"RO",
+          "jobDomain":"Software",
+          "jobRoles":["Java Developer"],
+          "jobTypes":["REMOTE"],
+          "relocation":"NO",
+          "contractTypes":["FULL_TIME"]
+        }
+        """;
+
+    mockServer.expect(requestTo(BASE_URL + "/api/internal/me"))
+        .andExpect(method(HttpMethod.GET))
+        .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer user-id-token"))
+        .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
+
+    UserInfoResponse response = jobshunterClient.getUserInfo("user-id-token");
+
+    assertEquals("user@example.com", response.username());
+    assertEquals("user@example.com", response.email());
+    assertEquals("REMOTE", response.jobTypes().getFirst());
+    mockServer.verify();
   }
 }

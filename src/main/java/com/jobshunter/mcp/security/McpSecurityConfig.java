@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -28,19 +29,28 @@ import org.springframework.util.StringUtils;
 public class McpSecurityConfig {
 
   @Bean
+  @Order(1)
   SecurityFilterChain mcpSecurityFilterChain(HttpSecurity http, McpSecurityProperties securityProperties) throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
+        .securityMatcher("/mcp", "/mcp/**")
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> {
           if (StringUtils.hasText(securityProperties.requiredScope())) {
-            auth.requestMatchers("/mcp/**").hasAuthority("SCOPE_" + securityProperties.requiredScope());
+            auth.anyRequest().hasAuthority("SCOPE_" + securityProperties.requiredScope());
           } else {
-            auth.requestMatchers("/mcp/**").authenticated();
+            auth.anyRequest().authenticated();
           }
-          auth.anyRequest().permitAll();
         })
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
+    return http.build();
+  }
+
+  @Bean
+  @Order(2)
+  SecurityFilterChain publicEndpointsFilterChain(HttpSecurity http) throws Exception {
+    http.csrf(AbstractHttpConfigurer::disable)
+        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
     return http.build();
   }
 

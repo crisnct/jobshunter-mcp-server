@@ -1,0 +1,9 @@
+target
+.git
+.idea
+.vscode
+*.iml
+*.log
+node_modules
+terminals
+agent-transcripts

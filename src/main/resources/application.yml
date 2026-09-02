@@ -1,5 +1,6 @@
 server:
   port: 8081
+  forward-headers-strategy: framework
 
 spring:
   security:
@@ -25,13 +26,20 @@ spring:
 
 mcp:
   security:
-    audience: ${MCP_GOOGLE_AUDIENCE:${GOOGLE_CLIENT_ID:notset}}
+    audience: ${MCP_GOOGLE_AUDIENCE:${MCP_OAUTH_CLIENT_ID:${GOOGLE_CLIENT_ID:notset}}}
     required-scope: ${MCP_REQUIRED_SCOPE:}
+  oauth:
+    google-authorization-endpoint: ${MCP_OAUTH_GOOGLE_AUTH_ENDPOINT:https://accounts.google.com/o/oauth2/v2/auth}
+    google-token-endpoint: ${MCP_OAUTH_GOOGLE_TOKEN_ENDPOINT:https://oauth2.googleapis.com/token}
+    jwks-uri: ${MCP_OAUTH_JWKS_URI:https://www.googleapis.com/oauth2/v3/certs}
+    client-id: ${MCP_OAUTH_CLIENT_ID:${GOOGLE_CLIENT_ID:notset}}
+    client-secret: ${MCP_OAUTH_CLIENT_SECRET:${GOOGLE_CLIENT_SECRET:notset}}
+    scope: ${MCP_OAUTH_SCOPE:openid email profile}
 
 jobshunter:
-  # base-url: ${JOBSHUNTER_BASE_URL:https://localhost:8444}
   base-url: ${JOBSHUNTER_BASE_URL:https://ronin-archesporial-lonnie.ngrok-free.dev}
   search-jobs-path: ${JOBSHUNTER_SEARCH_JOBS_PATH:/api/internal/search_jobs}
+  user-info-path: ${JOBSHUNTER_USER_INFO_PATH:/api/internal/me}
   connect-timeout: ${JOBSHUNTER_CONNECT_TIMEOUT:5s}
   response-timeout: ${JOBSHUNTER_RESPONSE_TIMEOUT:25m}
   ssl:

@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 public record JobshunterProperties(
     @NotBlank String baseUrl,
     @NotBlank String searchJobsPath,
+    @NotBlank String userInfoPath,
     @NotNull Duration connectTimeout,
     @NotNull Duration responseTimeout,
     Ssl ssl

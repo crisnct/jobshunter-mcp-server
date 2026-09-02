@@ -10,6 +10,7 @@ import com.jobshunter.mcp.client.JobshunterClient;
 import com.jobshunter.mcp.dto.SearchConfiguration;
 import com.jobshunter.mcp.dto.SearchJobResult;
 import com.jobshunter.mcp.dto.SearchJobsResponse;
+import com.jobshunter.mcp.dto.UserInfoResponse;
 import com.jobshunter.mcp.exception.JobshunterApiException;
 import java.time.Instant;
 import java.util.List;
@@ -87,5 +88,50 @@ class JobSearchToolTest {
 
     JobshunterApiException ex = assertThrows(JobshunterApiException.class, () -> jobSearchTool.searchJobs(request));
     assertEquals("Authenticated Google token is required to call search_jobs.", ex.getMessage());
+  }
+
+  @Test
+  void shouldReturnUserInfoFromDelegatedToken() {
+    Jwt jwt = new Jwt(
+        "google-user-token",
+        Instant.now(),
+        Instant.now().plusSeconds(300),
+        Map.of("alg", "none"),
+        Map.of("sub", "user1", "scope", "profile email")
+    );
+    SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+    UserInfoResponse expected = new UserInfoResponse(
+        "user@example.com",
+        "user@example.com",
+        "0700000000",
+        false,
+        true,
+        true,
+        null,
+        "cv.pdf",
+        null,
+        List.of(),
+        "2026-09-01T00:00:00Z",
+        List.of("USER"),
+        "Cluj",
+        "RO",
+        "Software",
+        List.of("Java Developer"),
+        List.of("REMOTE"),
+        "NO",
+        List.of("FULL_TIME")
+    );
+    when(jobshunterClient.getUserInfo("google-user-token")).thenReturn(expected);
+
+    UserInfoResponse actual = jobSearchTool.getUserInfo();
+
+    assertEquals(expected, actual);
+    verify(jobshunterClient).getUserInfo("google-user-token");
+  }
+
+  @Test
+  void shouldRejectUserInfoRequestWhenGoogleTokenIsMissingFromContext() {
+    JobshunterApiException ex = assertThrows(JobshunterApiException.class, () -> jobSearchTool.getUserInfo());
+    assertEquals("Authenticated Google token is required to call get_user_info.", ex.getMessage());
   }
 }
