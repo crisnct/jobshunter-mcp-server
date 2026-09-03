@@ -1,17 +1,15 @@
 package com.jobshunter.mcp.security;
 
-import java.util.Collection;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
@@ -30,7 +28,11 @@ public class McpSecurityConfig {
 
   @Bean
   @Order(1)
-  SecurityFilterChain mcpSecurityFilterChain(HttpSecurity http, McpSecurityProperties securityProperties) throws Exception {
+  SecurityFilterChain mcpSecurityFilterChain(
+      HttpSecurity http,
+      McpSecurityProperties securityProperties,
+      @Qualifier("mcpJwtDecoder") JwtDecoder mcpJwtDecoder
+  ) {
     http.csrf(AbstractHttpConfigurer::disable)
         .securityMatcher("/mcp", "/mcp/**")
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -41,7 +43,9 @@ public class McpSecurityConfig {
             auth.anyRequest().authenticated();
           }
         })
-        .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+        .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt
+            .decoder(mcpJwtDecoder)
+            .jwtAuthenticationConverter(jwtAuthenticationConverter())));
 
     return http.build();
   }
@@ -54,17 +58,19 @@ public class McpSecurityConfig {
     return http.build();
   }
 
-  @Bean
+  @Bean("mcpJwtDecoder")
   JwtDecoder jwtDecoder(
-      @Value("${spring.security.oauth2.resourceserver.jwt.issuer-uri}") String issuerUri,
-      McpSecurityProperties securityProperties
+      McpAuthorizationServerProperties authorizationServerProperties,
+      McpJwtSigningService jwtSigningService
   ) {
-    NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withIssuerLocation(issuerUri).build();
+    String resolvedIssuer = authorizationServerProperties.issuer();
+    String resolvedAudience = authorizationServerProperties.mcpAudience();
+    NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(jwtSigningService.publicKey()).build();
 
-    OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(issuerUri);
+    OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(resolvedIssuer);
     OAuth2TokenValidator<Jwt> audienceValidator = token -> {
       List<String> audiences = token.getAudience();
-      if (audiences != null && audiences.contains(securityProperties.audience())) {
+      if (audiences != null && audiences.contains(resolvedAudience)) {
         return OAuth2TokenValidatorResult.success();
       }
       return OAuth2TokenValidatorResult.failure(
@@ -76,16 +82,30 @@ public class McpSecurityConfig {
     return jwtDecoder;
   }
 
+  @Bean("googleIdTokenDecoder")
+  JwtDecoder googleIdTokenDecoder(McpOAuthProperties oauthProperties) {
+    NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(oauthProperties.jwksUri()).build();
+    OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(oauthProperties.googleIssuerUri());
+    OAuth2TokenValidator<Jwt> audienceValidator = token -> {
+      List<String> audiences = token.getAudience();
+      if (audiences != null && audiences.contains(oauthProperties.clientId())) {
+        return OAuth2TokenValidatorResult.success();
+      }
+      return OAuth2TokenValidatorResult.failure(
+          new OAuth2Error("invalid_token", "Google id_token audience mismatch", null)
+      );
+    };
+    jwtDecoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(withIssuer, audienceValidator));
+    return jwtDecoder;
+  }
+
   private Converter<Jwt, ? extends AbstractAuthenticationToken> jwtAuthenticationConverter() {
     JwtGrantedAuthoritiesConverter authoritiesConverter = new JwtGrantedAuthoritiesConverter();
     authoritiesConverter.setAuthoritiesClaimName("scope");
     authoritiesConverter.setAuthorityPrefix("SCOPE_");
 
     JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-    converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-      Collection<GrantedAuthority> authorities = authoritiesConverter.convert(jwt);
-      return authorities == null ? List.of() : authorities;
-    });
+    converter.setJwtGrantedAuthoritiesConverter(authoritiesConverter);
     return converter;
   }
 }

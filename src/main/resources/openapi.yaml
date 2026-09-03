@@ -102,7 +102,10 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: Google JWT validated by MCP security configuration.
+      description: |
+        MCP bearer token validated on `/mcp`.
+        In `MCP_INTERNAL_AS` mode this token is minted by MCP (`aud=<mcp audience>`).
+        In rollback mode (`GOOGLE_PASSTHROUGH`) validation remains compatible with Google token settings.
   schemas:
     JsonRpcRequest:
       type: object

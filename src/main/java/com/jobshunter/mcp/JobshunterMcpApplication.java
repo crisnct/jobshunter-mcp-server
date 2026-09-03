@@ -1,6 +1,7 @@
 package com.jobshunter.mcp;
 
 import com.jobshunter.mcp.config.JobshunterProperties;
+import com.jobshunter.mcp.security.McpAuthorizationServerProperties;
 import com.jobshunter.mcp.security.McpOAuthProperties;
 import com.jobshunter.mcp.security.McpSecurityProperties;
 import org.springframework.boot.SpringApplication;
@@ -11,7 +12,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @EnableConfigurationProperties({
     JobshunterProperties.class,
     McpSecurityProperties.class,
-    McpOAuthProperties.class
+    McpOAuthProperties.class,
+    McpAuthorizationServerProperties.class
 })
 public class JobshunterMcpApplication {
 

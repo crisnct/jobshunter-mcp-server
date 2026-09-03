@@ -1,8 +1,20 @@
 # jobshunter-mcp-server
 
-Standalone Spring Boot MCP server exposing one tool: `search_jobs`.
+Spring Boot MCP server exposing `search_jobs` and `get_user_info` tools.
 
-The tool calls Jobshunter synchronously using pass-through authentication (Google OAuth2 `id_token` validated on `/mcp`, then forwarded to Jobshunter internal API) and returns the same `jobsFound` payload.
+## Token model
+
+The server supports two delegation modes:
+
+- `GOOGLE_PASSTHROUGH` (rollback mode): legacy behavior where the upstream Google token payload is proxied and normalized.
+- `MCP_INTERNAL_AS` (target mode): MCP acts as a first-party Authorization Server.
+
+In `MCP_INTERNAL_AS`, token responsibilities are separated:
+
+- MCP access token for `/mcp`: `aud=<mcp audience>`
+- Delegated Jobshunter token for internal API calls: `aud=<jobshunter audience>`
+
+No standard path rewrites `id_token` into `access_token` in internal-AS mode.
 
 ## Runtime stack
 
@@ -10,29 +22,48 @@ The tool calls Jobshunter synchronously using pass-through authentication (Googl
 - Spring Boot 4
 - Spring AI MCP Server (WebMVC, Streamable HTTP)
 
-## MCP endpoint
+## Endpoints
 
-- URL: `http://localhost:8081/mcp`
-- Protocol: `STREAMABLE`
-- Tool enabled: `search_jobs`
-- Authentication: `Authorization: Bearer <google-id-token>`
+- MCP endpoint: `POST /mcp`
+- OAuth discovery:
+  - `GET /.well-known/oauth-protected-resource`
+  - `GET /.well-known/oauth-authorization-server`
+- OAuth bridge:
+  - `GET /authorize` (redirects to Google)
+  - `POST /token` (exchanges Google code and returns MCP access token in internal-AS mode)
+- MCP JWKS:
+  - `GET /.well-known/jwks.json`
 
-## Required environment variables
+## Configuration
 
-- `MCP_GOOGLE_AUDIENCE` or `GOOGLE_CLIENT_ID` - audience accepted by MCP JWT validation
-- `DELEGATED_AUTH_AUDIENCE` in Jobshunter app should match the same audience used to mint client ID tokens
+### Required (all modes)
 
-## Optional environment variables
+- `MCP_OAUTH_CLIENT_ID`
+- `MCP_OAUTH_CLIENT_SECRET`
+- `JOBSHUNTER_BASE_URL`
 
-- `JOBSHUNTER_BASE_URL` (default: `https://localhost:8443`)
-- `JOBSHUNTER_SEARCH_JOBS_PATH` (default: `/api/internal/search_jobs`)
-- `JOBSHUNTER_CONNECT_TIMEOUT` (default: `5s`)
-- `JOBSHUNTER_RESPONSE_TIMEOUT` (default: `5m`)
-- `MCP_REQUIRED_SCOPE` (optional; empty by default)
-- `GOOGLE_ISSUER_URI` (default: `https://accounts.google.com`)
-- `JOBSHUNTER_TRUST_STORE` (optional path/resource for local self-signed TLS)
-- `JOBSHUNTER_TRUST_STORE_PASSWORD` (required when trust store is configured)
-- `JOBSHUNTER_TRUST_STORE_TYPE` (default: `PKCS12`)
+### Internal-AS mode (`MCP_DELEGATION_MODE=MCP_INTERNAL_AS`)
+
+- `MCP_AS_ISSUER` (issuer used in MCP-minted JWTs)
+- `MCP_AS_MCP_AUDIENCE` (audience accepted on `/mcp`)
+- `MCP_AS_JOBSHUNTER_AUDIENCE` (audience expected by Jobshunter for delegated JWT)
+- `MCP_AS_SIGNING_KEY_PEM` (optional PKCS#8 RSA private key PEM; if omitted, ephemeral key is generated at startup)
+- `MCP_AS_KEY_ID` (defaults to `mcp-key-1`)
+- `MCP_AS_ACCESS_TOKEN_TTL` (default `15m`)
+- `MCP_AS_DELEGATED_TOKEN_TTL` (default `5m`)
+
+### Rollback mode (`MCP_DELEGATION_MODE=GOOGLE_PASSTHROUGH`)
+
+- `MCP_GOOGLE_AUDIENCE` / `MCP_OAUTH_CLIENT_ID` for `/mcp` audience validation
+- `GOOGLE_ISSUER_URI` (default `https://accounts.google.com`)
+
+## Jobshunter trust configuration (internal-AS)
+
+Configure Jobshunter to validate delegated JWTs against MCP trust material:
+
+- `DELEGATED_AUTH_ISSUER_URI=<MCP_AS_ISSUER>`
+- `DELEGATED_AUTH_AUDIENCE=<MCP_AS_JOBSHUNTER_AUDIENCE>`
+- `DELEGATED_AUTH_JWKS_URI=<MCP_BASE_URL>/.well-known/jwks.json`
 
 ## Run locally
 
@@ -46,14 +77,9 @@ mvn spring-boot:run
 mvn test
 ```
 
-## Security note
+## Rollout strategy
 
-`/mcp` is protected with Google JWT validation (issuer + audience by default; scope enforcement is optional via `MCP_REQUIRED_SCOPE`).
-The MCP server never sends browser-specific credentials (`device_id`, CSRF) to Jobshunter and forwards the authenticated user JWT to the internal Jobshunter endpoint.
-
-## Pass-through checklist
-
-1. Configure your Google OAuth application so MCP clients can obtain Google ID tokens.
-2. Set `MCP_GOOGLE_AUDIENCE` (or `GOOGLE_CLIENT_ID`) to the audience claim accepted by MCP.
-3. Configure Jobshunter `DELEGATED_AUTH_ISSUER_URI` and `DELEGATED_AUTH_AUDIENCE` to validate the same token.
-4. Keep `DELEGATED_AUTH_REQUIRED_SCOPE` empty unless your ID token actually contains a compatible scope claim.
+1. Deploy with `MCP_DELEGATION_MODE=GOOGLE_PASSTHROUGH`.
+2. Enable `MCP_INTERNAL_AS` in dev and validate Claude, Postman, and Jobshunter.
+3. Roll out gradually (canary) with auth/error monitoring.
+4. Cut over production to `MCP_INTERNAL_AS`.

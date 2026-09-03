@@ -5,6 +5,7 @@ import com.jobshunter.mcp.dto.SearchConfiguration;
 import com.jobshunter.mcp.dto.SearchJobsResponse;
 import com.jobshunter.mcp.dto.UserInfoResponse;
 import com.jobshunter.mcp.exception.JobshunterApiException;
+import com.jobshunter.mcp.security.DelegatedTokenResolver;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
@@ -21,9 +22,11 @@ import org.springframework.validation.annotation.Validated;
 public class JobSearchTool {
 
   private final JobshunterClient jobshunterClient;
+  private final DelegatedTokenResolver delegatedTokenResolver;
 
-  public JobSearchTool(JobshunterClient jobshunterClient) {
+  public JobSearchTool(JobshunterClient jobshunterClient, DelegatedTokenResolver delegatedTokenResolver) {
     this.jobshunterClient = jobshunterClient;
+    this.delegatedTokenResolver = delegatedTokenResolver;
   }
 
   @Tool(name = "search_jobs", description = """
@@ -43,8 +46,8 @@ public class JobSearchTool {
       - jobsFound[].source: source platform/provider where the job was found.
 
       Authentication:
-      - Requires a valid Google JWT already authenticated on MCP (/mcp).
-      - The tool forwards the delegated bearer token to Jobshunter internal API.
+      - Requires a valid MCP bearer token already authenticated on /mcp.
+      - The tool resolves a delegated bearer token and forwards it to Jobshunter internal API.
       """)
   public SearchJobsResponse searchJobs(
       @ToolParam(description = """
@@ -97,8 +100,8 @@ public class JobSearchTool {
       - contractTypes: preferred contract type values.
 
       Authentication:
-      - Requires a valid Google JWT already authenticated on MCP (/mcp).
-      - The tool forwards the delegated bearer token to Jobshunter internal API.
+      - Requires a valid MCP bearer token already authenticated on /mcp.
+      - The tool resolves a delegated bearer token and forwards it to Jobshunter internal API.
       """)
   public UserInfoResponse getUserInfo() {
     try {
@@ -114,9 +117,9 @@ public class JobSearchTool {
   private String resolveUserToken(String toolName) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (!(authentication instanceof JwtAuthenticationToken jwtAuthenticationToken)) {
-      throw new JobshunterApiException("Authenticated Google token is required to call " + toolName + ".");
+      throw new JobshunterApiException("Authenticated MCP token is required to call " + toolName + ".");
     }
-    return jwtAuthenticationToken.getToken().getTokenValue();
+    return delegatedTokenResolver.resolveDelegatedToken(jwtAuthenticationToken.getToken());
   }
 
   private void validateSearchRequest(List<SearchConfiguration> searchConfigurations) {

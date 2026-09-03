@@ -48,7 +48,8 @@ sequenceDiagram
                 ToolSvc-->>McpServer: Raise JobshunterApiException (invalid search configuration)
             else Arguments valid
                 ToolSvc->>ToolSvc: Read JwtAuthenticationToken from SecurityContext
-                ToolSvc->>JhClient: searchJobs(searchConfigurations, userToken)
+                ToolSvc->>ToolSvc: Mint delegated JWT via DelegatedTokenResolver
+                ToolSvc->>JhClient: searchJobs(searchConfigurations, delegatedToken)
                 activate JhClient
                 JhClient->>JhClient: validateUserToken(non-empty)
                 JhClient->>JobApi: POST /api/internal/search_jobs<br/>Headers: Authorization Bearer token, Content-Type application-json<br/>Body searchConfigurations array
@@ -67,7 +68,8 @@ sequenceDiagram
 
         else Tool is get_user_info
             ToolSvc->>ToolSvc: Read JwtAuthenticationToken from SecurityContext
-            ToolSvc->>JhClient: getUserInfo(userToken)
+            ToolSvc->>ToolSvc: Mint delegated JWT via DelegatedTokenResolver
+            ToolSvc->>JhClient: getUserInfo(delegatedToken)
             activate JhClient
             JhClient->>JobApi: GET /api/internal/me<br/>Header Authorization Bearer token
             activate JobApi
@@ -97,7 +99,7 @@ This flow shows the full runtime chain from user intent to AI tool reasoning, MC
 Important security and architecture considerations:
 - Authorization is enforced twice by design: once at MCP ingress, then again by Jobshunter when delegated token is received.
 - Tool argument validation combines schema-level constraints and business-level rules before upstream calls.
-- Identity propagation is explicit via `Authorization: Bearer <token>` from MCP request to Jobshunter API.
+- Identity propagation is explicit via dedicated delegated JWT (`aud=jobshunter`, `token_use=jobshunter_delegated`).
 - Error domains are separated: MCP auth failures return `401`, while upstream/service failures are mapped into tool-level exceptions.
 
 Assumptions and unknowns (explicit):

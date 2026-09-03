@@ -7,12 +7,12 @@ sequenceDiagram
     participant AIHost as AIClient_or_ModelHost
     participant McpClient as MCPClient
     participant McpServer as MCPServer_jobshunter_mcp_server
-    participant Authz as OAuth2AuthorizationServer_Google
+    participant Google as OAuth2AuthorizationServer_Google
     participant JobApi as JobshunterAPI_ResourceServer
 
     Note over AIHost,McpClient: SecurityBoundary_AIHost_MCPClient (client owns PKCE state, code_verifier, access/refresh tokens)
-    Note over McpServer: SecurityBoundary_MCPServer (stateless JWT validation on POST /mcp)
-    Note over Authz: SecurityBoundary_OAuth2Infra (issues auth code and tokens)
+    Note over McpServer: SecurityBoundary_MCPServer (stateless JWT validation on POST /mcp, signs JWT with local RSA key)
+    Note over Google: SecurityBoundary_OAuth2Infra (issues auth code and identity proof)
     Note over JobApi: SecurityBoundary_Jobshunter (independent delegated token validation)
 
     activate AIHost
@@ -27,7 +27,12 @@ sequenceDiagram
 
     McpClient->>McpServer: GET /.well-known/oauth-authorization-server (HTTPS)
     activate McpServer
-    McpServer-->>McpClient: 200 JSON (issuer, authorization_endpoint=/authorize, token_endpoint=/token, jwks_uri)
+    McpServer-->>McpClient: 200 JSON (issuer, authorization_endpoint=/authorize, token_endpoint=/token, jwks_uri=/.well-known/jwks.json)
+    deactivate McpServer
+
+    McpClient->>McpServer: GET /.well-known/jwks.json (HTTPS)
+    activate McpServer
+    McpServer-->>McpClient: 200 JSON (RSA public key set for MCP-signed JWT verification)
     deactivate McpServer
 
     McpClient->>McpServer: GET /authorize?response_type=code&redirect_uri&scope&state&code_challenge...
@@ -36,27 +41,21 @@ sequenceDiagram
     deactivate McpServer
 
     McpClient->>User: Open consent/login page in browser
-    User->>Authz: Authenticate and grant consent
-    Authz-->>McpClient: Redirect to client redirect_uri?code=...&state=...
+    User->>Google: Authenticate and grant consent
+    Google-->>McpClient: Redirect to client redirect_uri?code=...&state=...
 
     McpClient->>McpServer: POST /token (application/x-www-form-urlencoded)<br/>grant_type=authorization_code&code&redirect_uri&code_verifier
     activate McpServer
-    McpServer->>Authz: POST Google token endpoint (+client_id, client_secret, scope)
-    activate Authz
-    Authz-->>McpServer: 200 JSON (access_token, id_token, refresh_token?, expires_in, token_type?)
-    deactivate Authz
-    McpServer->>McpServer: Normalize token response (access_token from id_token, token_type Bearer)
-    McpServer-->>McpClient: 200 JSON normalized token payload
+    McpServer->>Google: POST Google token endpoint (+client_id, client_secret, scope)
+    activate Google
+    Google-->>McpServer: 200 JSON (google_access_token, id_token, refresh_token?, expires_in)
+    deactivate Google
+    McpServer->>McpServer: Validate Google id_token (issuer/audience/exp)
+    McpServer->>McpServer: Issue MCP access token (iss=MCP, aud=mcp, token_use=mcp_access)
+    McpServer-->>McpClient: 200 JSON (access_token=MCP JWT, token_type=Bearer, expires_in, id_token=Google id_token, refresh_token?)
     deactivate McpServer
 
-    opt Later token renewal path (client-driven)
-        McpClient->>McpServer: POST /token grant_type=refresh_token&refresh_token=...
-        activate McpServer
-        McpServer->>Authz: Proxy refresh-token request
-        Authz-->>McpServer: Refreshed token response
-        McpServer-->>McpClient: Proxied/normalized token response
-        deactivate McpServer
-    end
+    Note over McpServer: /token requires Google response to include id_token so MCP can mint access token
 
     Note over McpClient,McpServer: MCP protocol initialization over Streamable HTTP JSON-RPC
     McpClient->>McpServer: POST /mcp<br/>Headers: Authorization Bearer token, Accept text-event-stream and application-json<br/>Body: JSON-RPC initialize
@@ -78,7 +77,8 @@ sequenceDiagram
     opt First delegated business request after initialization
         McpClient->>McpServer: POST /mcp method=tools/call
         activate McpServer
-        McpServer->>JobApi: HTTPS request with Authorization Bearer same_token
+        McpServer->>McpServer: Mint delegated JWT (iss=MCP, aud=jobshunter, token_use=jobshunter_delegated, short TTL)
+        McpServer->>JobApi: HTTPS request with Authorization Bearer delegated_token
         JobApi-->>McpServer: Business response
         McpServer-->>McpClient: MCP tool result
         deactivate McpServer
@@ -86,17 +86,17 @@ sequenceDiagram
     deactivate McpClient
 ```
 
-The MCP server acts as both a protected MCP endpoint and an OAuth facade. It publishes OAuth discovery metadata, redirects authorization to Google, proxies token exchange, then enforces JWT validation on each `POST /mcp` request.
+The MCP server acts as both a protected MCP endpoint and a first-party Authorization Server. It uses Google only as upstream identity proof, mints its own `/mcp` bearer token, and mints a separate delegated token for Jobshunter.
 
 Important security and architecture considerations:
 
--   The server is stateless for OAuth sessions and token storage; the MCP client owns token lifecycle.
--   The `/token` proxy normalizes Google `id_token` into `access_token`, which is the bearer used downstream.
--   `Mcp-Session-Id` scopes protocol continuity, but authentication still depends on per-request bearer JWT.
--   Delegated calls to Jobshunter propagate the same bearer token, preserving user identity boundary end-to-end.
+- The server is stateless for OAuth sessions and token storage; the MCP client owns token lifecycle.
+- `id_token` and `access_token` have distinct roles and are not rewritten.
+- `Mcp-Session-Id` scopes protocol continuity, but authentication still depends on per-request bearer JWT.
+- Delegated calls to Jobshunter use a dedicated short-lived JWT (`aud=jobshunter`) distinct from MCP bearer token.
 
 Assumptions and unknowns (explicit):
 
--   Spring AI internal JSON-RPC error envelope details are framework-managed and not fully specified by this repository.
--   Actual refresh-token behavior depends on external client usage and provider response, not custom server-side persistence.
--   Jobshunter-side JWT validation internals are external to this repository.
+- Spring AI internal JSON-RPC error envelope details are framework-managed and not fully specified by this repository.
+- Refresh token behavior depends on upstream provider behavior and whether refreshed responses include `id_token`.
+- Jobshunter-side JWT validation internals are external to this repository.

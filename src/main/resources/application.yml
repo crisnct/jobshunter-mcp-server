@@ -7,7 +7,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${GOOGLE_ISSUER_URI:https://accounts.google.com}
+          issuer-uri: ${MCP_JWT_ISSUER_URI:${GOOGLE_ISSUER_URI:https://accounts.google.com}}
   ai:
     mcp:
       server:
@@ -25,6 +25,14 @@ spring:
           mcp-endpoint: /mcp
 
 mcp:
+  authorization-server:
+    issuer: ${MCP_AS_ISSUER:https://ronin-archesporial-lonnie.ngrok-free.dev}
+    mcp-audience: ${MCP_AS_MCP_AUDIENCE:${MCP_OAUTH_CLIENT_ID:${GOOGLE_CLIENT_ID:notset}}}
+    jobshunter-audience: ${MCP_AS_JOBSHUNTER_AUDIENCE:jobshunter-internal-api}
+    access-token-ttl: ${MCP_AS_ACCESS_TOKEN_TTL:15m}
+    delegated-token-ttl: ${MCP_AS_DELEGATED_TOKEN_TTL:5m}
+    signing-key-pem: ${MCP_AS_SIGNING_KEY_PEM:}
+    key-id: ${MCP_AS_KEY_ID:mcp-key-1}
   security:
     audience: ${MCP_GOOGLE_AUDIENCE:${MCP_OAUTH_CLIENT_ID:${GOOGLE_CLIENT_ID:notset}}}
     required-scope: ${MCP_REQUIRED_SCOPE:}
@@ -32,9 +40,10 @@ mcp:
     google-authorization-endpoint: ${MCP_OAUTH_GOOGLE_AUTH_ENDPOINT:https://accounts.google.com/o/oauth2/v2/auth}
     google-token-endpoint: ${MCP_OAUTH_GOOGLE_TOKEN_ENDPOINT:https://oauth2.googleapis.com/token}
     jwks-uri: ${MCP_OAUTH_JWKS_URI:https://www.googleapis.com/oauth2/v3/certs}
+    google-issuer-uri: ${MCP_OAUTH_GOOGLE_ISSUER_URI:https://accounts.google.com}
     client-id: ${MCP_OAUTH_CLIENT_ID:${GOOGLE_CLIENT_ID:notset}}
     client-secret: ${MCP_OAUTH_CLIENT_SECRET:${GOOGLE_CLIENT_SECRET:notset}}
-    scope: ${MCP_OAUTH_SCOPE:openid email profile}
+    scope: openid email profile
 
 jobshunter:
   base-url: ${JOBSHUNTER_BASE_URL:https://ronin-archesporial-lonnie.ngrok-free.dev}

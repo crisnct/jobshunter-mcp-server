@@ -1,19 +1,19 @@
 package com.jobshunter.mcp.security;
 
-import jakarta.servlet.http.HttpServletRequest;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jobshunter.mcp.exception.JobshunterApiException;
 import java.net.URI;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestClient;
@@ -22,48 +22,27 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Controller
 public class McpOAuthController {
-  private static final Pattern ID_TOKEN_PATTERN = Pattern.compile("\"id_token\"\\s*:\\s*\"([^\"]+)\"");
-  private static final Pattern ACCESS_TOKEN_PATTERN = Pattern.compile("\"access_token\"\\s*:\\s*\"([^\"]+)\"");
-  private static final Pattern TOKEN_TYPE_PATTERN = Pattern.compile("\"token_type\"\\s*:\\s*\"([^\"]+)\"");
 
   private final McpOAuthProperties oauthProperties;
+  private final McpAuthorizationServerProperties authorizationServerProperties;
+  private final GoogleIdTokenValidator googleIdTokenValidator;
+  private final McpTokenIssuer tokenIssuer;
   private final RestClient restClient;
+  private final ObjectMapper objectMapper;
 
-  public McpOAuthController(McpOAuthProperties oauthProperties) {
+  public McpOAuthController(
+      McpOAuthProperties oauthProperties,
+      McpAuthorizationServerProperties authorizationServerProperties,
+      GoogleIdTokenValidator googleIdTokenValidator,
+      McpTokenIssuer tokenIssuer
+  ) {
+
     this.oauthProperties = oauthProperties;
+    this.authorizationServerProperties = authorizationServerProperties;
+    this.googleIdTokenValidator = googleIdTokenValidator;
+    this.tokenIssuer = tokenIssuer;
     this.restClient = RestClient.create();
-  }
-
-  @GetMapping("/.well-known/oauth-protected-resource")
-  @ResponseBody
-  public Map<String, Object> protectedResourceMetadata(HttpServletRequest request) {
-    String issuer = publicBaseUrl(request);
-    return Map.of(
-        "resource", issuer + "/mcp",
-        "authorization_servers", List.of(issuer),
-        "bearer_methods_supported", List.of("header"),
-        "scopes_supported", scopesList(),
-        "tls_client_certificate_bound_access_tokens", false
-    );
-  }
-
-  @GetMapping("/.well-known/oauth-authorization-server")
-  @ResponseBody
-  public Map<String, Object> authorizationServerMetadata(HttpServletRequest request) {
-    String issuer = publicBaseUrl(request);
-    return Map.ofEntries(
-        Map.entry("issuer", issuer),
-        Map.entry("authorization_endpoint", issuer + "/authorize"),
-        Map.entry("token_endpoint", issuer + "/token"),
-        Map.entry("jwks_uri", oauthProperties.jwksUri()),
-        Map.entry("response_types_supported", List.of("code")),
-        Map.entry("grant_types_supported", List.of("authorization_code", "refresh_token")),
-        Map.entry("subject_types_supported", List.of("public")),
-        Map.entry("id_token_signing_alg_values_supported", List.of("RS256")),
-        Map.entry("token_endpoint_auth_methods_supported", List.of("none")),
-        Map.entry("code_challenge_methods_supported", List.of("S256")),
-        Map.entry("scopes_supported", scopesList())
-    );
+    this.objectMapper = new ObjectMapper();
   }
 
   @GetMapping("/authorize")
@@ -104,30 +83,23 @@ public class McpOAuthController {
           .retrieve()
           .body(String.class);
 
-      String normalizedBody = normalizeTokenResponse(responseBody == null ? "{}" : responseBody);
+      String normalizedBody = processTokenResponse(responseBody == null ? "{}" : responseBody);
       return ResponseEntity.ok()
           .contentType(MediaType.APPLICATION_JSON)
           .body(normalizedBody);
+    } catch (JobshunterApiException ex) {
+      return ResponseEntity.status(401)
+          .contentType(MediaType.APPLICATION_JSON)
+          .body("{\"error\":\"invalid_token\",\"error_description\":\"" + escapeJson(ex.getMessage()) + "\"}");
     } catch (RestClientResponseException ex) {
       return ResponseEntity.status(ex.getStatusCode())
           .contentType(MediaType.APPLICATION_JSON)
           .body(ex.getResponseBodyAsString());
+    } catch (Exception ex) {
+      return ResponseEntity.status(500)
+          .contentType(MediaType.APPLICATION_JSON)
+          .body("{\"error\":\"server_error\",\"error_description\":\"Failed to process token response.\"}");
     }
-  }
-
-  private String publicBaseUrl(HttpServletRequest request) {
-    String proto = headerOrDefault(request, "X-Forwarded-Proto", request.getScheme());
-    String host = headerOrDefault(request, "Host", request.getServerName());
-    return proto + "://" + host;
-  }
-
-  private String headerOrDefault(HttpServletRequest request, String header, String defaultValue) {
-    String value = request.getHeader(header);
-    return StringUtils.hasText(value) ? value : defaultValue;
-  }
-
-  private List<String> scopesList() {
-    return List.of(oauthProperties.scope().split("\\s+"));
   }
 
   private void addIfPresent(UriComponentsBuilder builder, String key, String value) {
@@ -141,19 +113,60 @@ public class McpOAuthController {
     return StringUtils.hasText(value) ? value : fallback;
   }
 
-  private String normalizeTokenResponse(String responseBody) {
-    Matcher idTokenMatcher = ID_TOKEN_PATTERN.matcher(responseBody);
-    if (!idTokenMatcher.find()) {
-      return responseBody;
+  private String processTokenResponse(String responseBody) {
+    return issueInternalMcpTokenResponse(responseBody);
+  }
+
+  private String issueInternalMcpTokenResponse(String googleResponseBody) {
+    Map<String, Object> googleResponse = parseJsonObject(googleResponseBody);
+    String idToken = stringValue(googleResponse.get("id_token"));
+    if (!StringUtils.hasText(idToken)) {
+      throw new JobshunterApiException("Google token response does not contain id_token required for MCP_INTERNAL_AS.");
     }
 
-    String idToken = idTokenMatcher.group(1);
-    String normalized = ACCESS_TOKEN_PATTERN.matcher(responseBody)
-        .replaceFirst("\"access_token\":\"" + Matcher.quoteReplacement(idToken) + "\"");
+    var googleIdentity = googleIdTokenValidator.validateAndDecode(idToken);
+    String mcpAccessToken = tokenIssuer.issueMcpAccessToken(googleIdentity);
 
-    if (!TOKEN_TYPE_PATTERN.matcher(normalized).find()) {
-      normalized = normalized.replaceFirst("\\{", "{\"token_type\":\"Bearer\",");
+    Map<String, Object> response = new LinkedHashMap<>();
+    response.put("access_token", mcpAccessToken);
+    response.put("token_type", "Bearer");
+    response.put("expires_in", authorizationServerProperties.accessTokenTtl().toSeconds());
+    response.put("scope", stringValueOrDefault(googleResponse.get("scope"), oauthProperties.scope()));
+    response.put("id_token", idToken);
+
+    if (googleResponse.get("refresh_token") != null) {
+      response.put("refresh_token", googleResponse.get("refresh_token"));
     }
-    return normalized;
+    return toJson(response);
+  }
+
+  private Map<String, Object> parseJsonObject(String payload) {
+    try {
+      return objectMapper.readValue(payload, new TypeReference<>() {
+      });
+    } catch (Exception ex) {
+      throw new JobshunterApiException("Failed to parse OAuth token response.", ex);
+    }
+  }
+
+  private String toJson(Map<String, Object> map) {
+    try {
+      return objectMapper.writeValueAsString(map);
+    } catch (Exception ex) {
+      throw new JobshunterApiException("Failed to serialize MCP token response.", ex);
+    }
+  }
+
+  private String stringValue(Object value) {
+    return value == null ? "" : String.valueOf(value);
+  }
+
+  private String stringValueOrDefault(Object value, String fallback) {
+    String stringValue = stringValue(value);
+    return StringUtils.hasText(stringValue) ? stringValue : fallback;
+  }
+
+  private String escapeJson(String value) {
+    return value == null ? "" : value.replace("\"", "\\\"");
   }
 }

@@ -12,6 +12,7 @@ import com.jobshunter.mcp.dto.SearchJobResult;
 import com.jobshunter.mcp.dto.SearchJobsResponse;
 import com.jobshunter.mcp.dto.UserInfoResponse;
 import com.jobshunter.mcp.exception.JobshunterApiException;
+import com.jobshunter.mcp.security.DelegatedTokenResolver;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,9 @@ class JobSearchToolTest {
   @Mock
   private JobshunterClient jobshunterClient;
 
+  @Mock
+  private DelegatedTokenResolver delegatedTokenResolver;
+
   @InjectMocks
   private JobSearchTool jobSearchTool;
 
@@ -49,6 +53,7 @@ class JobSearchToolTest {
         Map.of("sub", "user1", "scope", "profile email")
     );
     SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+    when(delegatedTokenResolver.resolveDelegatedToken(jwt)).thenReturn("delegated-token");
 
     List<SearchConfiguration> request = List.of(
         new SearchConfiguration("GROK", "grok-4-1-fast-non-reasoning", false, true),
@@ -58,12 +63,12 @@ class JobSearchToolTest {
     SearchJobsResponse expected = new SearchJobsResponse(List.of(
         new SearchJobResult("https://example.com/job-1", "SERP")
     ));
-    when(jobshunterClient.searchJobs(request, "google-user-token")).thenReturn(expected);
+    when(jobshunterClient.searchJobs(request, "delegated-token")).thenReturn(expected);
 
     SearchJobsResponse actual = jobSearchTool.searchJobs(request);
 
     assertEquals(expected, actual);
-    verify(jobshunterClient).searchJobs(request, "google-user-token");
+    verify(jobshunterClient).searchJobs(request, "delegated-token");
   }
 
   @Test
@@ -87,7 +92,7 @@ class JobSearchToolTest {
     );
 
     JobshunterApiException ex = assertThrows(JobshunterApiException.class, () -> jobSearchTool.searchJobs(request));
-    assertEquals("Authenticated Google token is required to call search_jobs.", ex.getMessage());
+    assertEquals("Authenticated MCP token is required to call search_jobs.", ex.getMessage());
   }
 
   @Test
@@ -100,6 +105,7 @@ class JobSearchToolTest {
         Map.of("sub", "user1", "scope", "profile email")
     );
     SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+    when(delegatedTokenResolver.resolveDelegatedToken(jwt)).thenReturn("delegated-token");
     UserInfoResponse expected = new UserInfoResponse(
         "user@example.com",
         "user@example.com",
@@ -121,17 +127,17 @@ class JobSearchToolTest {
         "NO",
         List.of("FULL_TIME")
     );
-    when(jobshunterClient.getUserInfo("google-user-token")).thenReturn(expected);
+    when(jobshunterClient.getUserInfo("delegated-token")).thenReturn(expected);
 
     UserInfoResponse actual = jobSearchTool.getUserInfo();
 
     assertEquals(expected, actual);
-    verify(jobshunterClient).getUserInfo("google-user-token");
+    verify(jobshunterClient).getUserInfo("delegated-token");
   }
 
   @Test
   void shouldRejectUserInfoRequestWhenGoogleTokenIsMissingFromContext() {
     JobshunterApiException ex = assertThrows(JobshunterApiException.class, () -> jobSearchTool.getUserInfo());
-    assertEquals("Authenticated Google token is required to call get_user_info.", ex.getMessage());
+    assertEquals("Authenticated MCP token is required to call get_user_info.", ex.getMessage());
   }
 }
