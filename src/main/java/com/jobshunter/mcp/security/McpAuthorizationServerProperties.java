@@ -12,9 +12,10 @@ public record McpAuthorizationServerProperties(
     @NotBlank String issuer,
     @NotBlank String mcpAudience,
     @NotBlank String jobshunterAudience,
-    @DefaultValue("PT15M") Duration accessTokenTtl,
-    @DefaultValue("PT5M") Duration delegatedTokenTtl,
+    @DefaultValue("PT15M") Duration mcpAccessTokenTtl,
+    @DefaultValue("PT5M") Duration jobshunterDelegatedTokenTtl,
+    @DefaultValue("jobshunter_delegated") String jobshunterDelegatedTokenUse,
     String signingKeyPem,
-    @DefaultValue("mcp-key-1") String keyId
+    @NotBlank @DefaultValue("mcp-key-1") String keyId
 ) {
 }

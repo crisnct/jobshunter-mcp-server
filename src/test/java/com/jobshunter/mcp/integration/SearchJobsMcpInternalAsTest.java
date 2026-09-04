@@ -62,8 +62,6 @@ class SearchJobsMcpInternalAsTest {
     registry.add("mcp.authorization-server.issuer", () -> "https://mcp.local");
     registry.add("mcp.authorization-server.mcp-audience", () -> "mcp-api");
     registry.add("mcp.authorization-server.jobshunter-audience", () -> "jobshunter-api");
-    registry.add("mcp.security.audience", () -> "legacy-audience");
-    registry.add("mcp.security.required-scope", () -> "");
     registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> "https://mcp.local");
   }
 

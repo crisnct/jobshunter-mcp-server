@@ -20,7 +20,7 @@ public class McpTokenIssuer {
   }
 
   public String issueMcpAccessToken(Jwt upstreamIdentityToken) {
-    Instant expiresAt = Instant.now().plus(properties.accessTokenTtl());
+    Instant expiresAt = Instant.now().plus(properties.mcpAccessTokenTtl());
     String subject = resolveSubject(upstreamIdentityToken);
     Map<String, Object> claims = Map.of(
         "email", stringClaim(upstreamIdentityToken, "email"),
@@ -31,12 +31,12 @@ public class McpTokenIssuer {
   }
 
   public String issueDelegatedJobshunterToken(Jwt authenticatedMcpToken) {
-    Instant expiresAt = Instant.now().plus(properties.delegatedTokenTtl());
+    Instant expiresAt = Instant.now().plus(properties.jobshunterDelegatedTokenTtl());
     String subject = resolveSubject(authenticatedMcpToken);
     Map<String, Object> claims = Map.of(
         "email", stringClaim(authenticatedMcpToken, "email"),
         "scope", stringClaim(authenticatedMcpToken, "scope"),
-        "token_use", "jobshunter_delegated"
+        "token_use", properties.jobshunterDelegatedTokenUse()
     );
     return jwtSigningService.signToken(subject, properties.jobshunterAudience(), expiresAt, claims);
   }

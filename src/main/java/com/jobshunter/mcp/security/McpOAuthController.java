@@ -130,7 +130,7 @@ public class McpOAuthController {
     Map<String, Object> response = new LinkedHashMap<>();
     response.put("access_token", mcpAccessToken);
     response.put("token_type", "Bearer");
-    response.put("expires_in", authorizationServerProperties.accessTokenTtl().toSeconds());
+    response.put("expires_in", authorizationServerProperties.mcpAccessTokenTtl().toSeconds());
     response.put("scope", stringValueOrDefault(googleResponse.get("scope"), oauthProperties.scope()));
     response.put("id_token", idToken);
 

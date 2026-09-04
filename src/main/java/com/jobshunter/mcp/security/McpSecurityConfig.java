@@ -21,7 +21,6 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.util.StringUtils;
 
 @Configuration
 public class McpSecurityConfig {
@@ -30,19 +29,12 @@ public class McpSecurityConfig {
   @Order(1)
   SecurityFilterChain mcpSecurityFilterChain(
       HttpSecurity http,
-      McpSecurityProperties securityProperties,
       @Qualifier("mcpJwtDecoder") JwtDecoder mcpJwtDecoder
   ) {
     http.csrf(AbstractHttpConfigurer::disable)
         .securityMatcher("/mcp", "/mcp/**")
         .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-        .authorizeHttpRequests(auth -> {
-          if (StringUtils.hasText(securityProperties.requiredScope())) {
-            auth.anyRequest().hasAuthority("SCOPE_" + securityProperties.requiredScope());
-          } else {
-            auth.anyRequest().authenticated();
-          }
-        })
+        .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
         .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt
             .decoder(mcpJwtDecoder)
             .jwtAuthenticationConverter(jwtAuthenticationConverter())));

@@ -53,13 +53,13 @@ class McpOAuthControllerInternalAsTest {
     registry.add("mcp.authorization-server.issuer", () -> "https://mcp.local");
     registry.add("mcp.authorization-server.mcp-audience", () -> "mcp-api");
     registry.add("mcp.authorization-server.jobshunter-audience", () -> "jobshunter-api");
+    registry.add("mcp.authorization-server.key-id", () -> "test-mcp-key-id");
     registry.add("mcp.oauth.google-token-endpoint", () -> mockGoogleTokenServer.url("/oauth/token").toString());
     registry.add("mcp.oauth.google-authorization-endpoint", () -> "https://accounts.google.com/o/oauth2/v2/auth");
     registry.add("mcp.oauth.jwks-uri", () -> "https://www.googleapis.com/oauth2/v3/certs");
     registry.add("mcp.oauth.client-id", () -> "test-client-id");
     registry.add("mcp.oauth.client-secret", () -> "test-client-secret");
     registry.add("mcp.oauth.scope", () -> "openid email profile");
-    registry.add("mcp.security.audience", () -> "ignored-in-internal-mode");
     registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> "https://mcp.local");
   }
 
@@ -90,6 +90,7 @@ class McpOAuthControllerInternalAsTest {
     String issuedAccessToken = extractTokenValue(responseBody, "\"access_token\":\"");
     assertNotEquals("google-id-token", issuedAccessToken);
     SignedJWT parsed = SignedJWT.parse(issuedAccessToken);
+    assertEquals("test-mcp-key-id", parsed.getHeader().getKeyID());
     assertEquals("https://mcp.local", parsed.getJWTClaimsSet().getIssuer());
     assertEquals(List.of("mcp-api"), parsed.getJWTClaimsSet().getAudience());
     assertEquals("mcp_access", parsed.getJWTClaimsSet().getStringClaim("token_use"));

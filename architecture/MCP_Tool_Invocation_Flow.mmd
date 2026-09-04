@@ -1,6 +1,3 @@
-# MCP Tool Invocation Flow
-
-```mermaid
 %%{init: {'theme':'base','themeVariables':{
 'fontSize':'16px',
 'fontFamily':'Inter, Segoe UI, Arial',
@@ -49,6 +46,3 @@ sequenceDiagram
         McpServer-->>McpClient: JSON-RPC response
         McpClient-->>AIHost: structured result
     end
-```
-
-This sequence reflects current code paths for `search_jobs` and `get_user_info`, including MCP JWT validation, delegated token minting, adapter call, and response propagation.

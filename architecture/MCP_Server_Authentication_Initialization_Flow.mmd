@@ -1,6 +1,3 @@
-# MCP Server Authentication and Initialization Flow
-
-```mermaid
 %%{init: {'theme':'base','themeVariables':{
 'fontSize':'16px',
 'fontFamily':'Inter, Segoe UI, Arial',
@@ -58,11 +55,3 @@ sequenceDiagram
     McpServer->>JobApi: call Jobshunter with delegated Bearer
     JobApi-->>McpServer: business response
     McpServer-->>McpClient: tool result payload
-```
-
-The current implementation is internal-AS only: Google is used for identity proof, MCP mints its own access token for `/mcp`, and MCP mints a separate delegated token for Jobshunter calls.
-
-Alignment with current code:
-- `/mcp` authorization is `authenticated()` with issuer and audience checks from `mcp.authorization-server.*`.
-- No `required-scope` gate is applied on `/mcp`.
-- Delegated token `token_use` is configurable via `mcp.authorization-server.jobshunter-delegated-token-use`.

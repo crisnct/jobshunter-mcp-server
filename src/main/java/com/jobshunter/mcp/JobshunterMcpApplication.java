@@ -3,7 +3,6 @@ package com.jobshunter.mcp;
 import com.jobshunter.mcp.config.JobshunterProperties;
 import com.jobshunter.mcp.security.McpAuthorizationServerProperties;
 import com.jobshunter.mcp.security.McpOAuthProperties;
-import com.jobshunter.mcp.security.McpSecurityProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -11,7 +10,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @SpringBootApplication
 @EnableConfigurationProperties({
     JobshunterProperties.class,
-    McpSecurityProperties.class,
     McpOAuthProperties.class,
     McpAuthorizationServerProperties.class
 })
