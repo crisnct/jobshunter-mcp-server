@@ -44,13 +44,17 @@ No standard path rewrites `id_token` into `access_token` in internal-AS mode.
 
 ### Internal-AS mode (`MCP_DELEGATION_MODE=MCP_INTERNAL_AS`)
 
-- `MCP_AS_ISSUER` (issuer used in MCP-minted JWTs)
+- `MCP_AS_ISSUER` (canonical public issuer/base URL used for MCP-minted JWT `iss` and OAuth discovery metadata)
 - `MCP_AS_MCP_AUDIENCE` (audience accepted on `/mcp`)
 - `MCP_AS_JOBSHUNTER_AUDIENCE` (audience expected by Jobshunter for delegated JWT)
 - `MCP_AS_SIGNING_KEY_PEM` (optional PKCS#8 RSA private key PEM; if omitted, ephemeral key is generated at startup)
 - `MCP_AS_KEY_ID` (defaults to `mcp-key-1`)
 - `MCP_AS_ACCESS_TOKEN_TTL` (default `15m`)
 - `MCP_AS_DELEGATED_TOKEN_TTL` (default `5m`)
+
+OAuth discovery hardening:
+- `/.well-known/oauth-authorization-server` and `/.well-known/oauth-protected-resource` are built from `MCP_AS_ISSUER`.
+- Discovery metadata is not derived from `Host` or `X-Forwarded-*` request headers.
 
 ### Rollback mode (`MCP_DELEGATION_MODE=GOOGLE_PASSTHROUGH`)
 
@@ -63,7 +67,7 @@ Configure Jobshunter to validate delegated JWTs against MCP trust material:
 
 - `DELEGATED_AUTH_ISSUER_URI=<MCP_AS_ISSUER>`
 - `DELEGATED_AUTH_AUDIENCE=<MCP_AS_JOBSHUNTER_AUDIENCE>`
-- `DELEGATED_AUTH_JWKS_URI=<MCP_BASE_URL>/.well-known/jwks.json`
+- `DELEGATED_AUTH_JWKS_URI=<MCP_AS_ISSUER>/.well-known/jwks.json`
 
 ## Run locally
 

@@ -12,7 +12,6 @@ import org.springframework.web.client.RestClient;
 
 @Configuration
 public class RestClientConfig {
-
   @Bean
   RestClient jobshunterRestClient(JobshunterProperties properties) {
     return RestClient.builder()

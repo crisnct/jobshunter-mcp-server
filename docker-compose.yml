@@ -12,6 +12,7 @@ services:
     environment:
       GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-notset}"
       GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-notset}"
+      MCP_AS_ISSUER: "${MCP_AS_ISSUER:-https://ronin-archesporial-lonnie.ngrok-free.dev}"
       MCP_AS_ACCESS_TOKEN_TTL: "${MCP_AS_ACCESS_TOKEN_TTL:-15m}"
       MCP_AS_SIGNING_KEY_PEM: "${MCP_AS_SIGNING_KEY_PEM:-}"
       MCP_AS_DELEGATED_TOKEN_TTL: "${MCP_AS_DELEGATED_TOKEN_TTL:-5m}"

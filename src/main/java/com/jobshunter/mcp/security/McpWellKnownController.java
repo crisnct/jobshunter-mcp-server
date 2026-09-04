@@ -1,30 +1,32 @@
 package com.jobshunter.mcp.security;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.util.StringUtils;
 
 @RestController
 @RequestMapping("/.well-known")
 public class McpWellKnownController {
   private final McpOAuthProperties oauthProperties;
   private final McpJwtSigningService jwtSigningService;
+  private final McpAuthorizationServerProperties authorizationServerProperties;
 
   public McpWellKnownController(
       McpOAuthProperties oauthProperties,
-      McpJwtSigningService jwtSigningService
+      McpJwtSigningService jwtSigningService,
+      McpAuthorizationServerProperties authorizationServerProperties
   ) {
     this.oauthProperties = oauthProperties;
     this.jwtSigningService = jwtSigningService;
+    this.authorizationServerProperties = authorizationServerProperties;
   }
 
   @GetMapping("/oauth-protected-resource")
-  public Map<String, Object> protectedResourceMetadata(HttpServletRequest request) {
-    String issuer = publicBaseUrl(request);
+  public Map<String, Object> protectedResourceMetadata() {
+    String issuer = publicBaseUrl();
     return Map.of(
         "resource", issuer + "/mcp",
         "authorization_servers", List.of(issuer),
@@ -35,8 +37,8 @@ public class McpWellKnownController {
   }
 
   @GetMapping("/oauth-authorization-server")
-  public Map<String, Object> authorizationServerMetadata(HttpServletRequest request) {
-    String issuer = publicBaseUrl(request);
+  public Map<String, Object> authorizationServerMetadata() {
+    String issuer = publicBaseUrl();
     String jwksUri = issuer + "/.well-known/jwks.json";
     return Map.ofEntries(
         Map.entry("issuer", issuer),
@@ -58,15 +60,12 @@ public class McpWellKnownController {
     return jwtSigningService.jwks();
   }
 
-  private String publicBaseUrl(HttpServletRequest request) {
-    String proto = headerOrDefault(request, "X-Forwarded-Proto", request.getScheme());
-    String host = headerOrDefault(request, "Host", request.getServerName());
-    return proto + "://" + host;
-  }
-
-  private String headerOrDefault(HttpServletRequest request, String header, String defaultValue) {
-    String value = request.getHeader(header);
-    return StringUtils.hasText(value) ? value : defaultValue;
+  private String publicBaseUrl() {
+    String issuer = authorizationServerProperties.issuer();
+    if (!StringUtils.hasText(issuer)) {
+      throw new IllegalStateException("mcp.authorization-server.issuer must not be blank");
+    }
+    return issuer.endsWith("/") ? issuer.substring(0, issuer.length() - 1) : issuer;
   }
 
   private List<String> scopesList() {

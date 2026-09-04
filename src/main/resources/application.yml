@@ -21,7 +21,9 @@ spring:
 
 mcp:
   authorization-server:
-    issuer: https://ronin-archesporial-lonnie.ngrok-free.dev
+    # Canonical public issuer/base URL for OAuth discovery metadata and MCP-minted JWT iss claim.
+    # Must be a fixed externally reachable URL, not derived from request headers.
+    issuer: ${MCP_AS_ISSUER:https://ronin-archesporial-lonnie.ngrok-free.dev}
     ## Audience for MCP access tokens used to authenticate requests to /mcp (must match MCP resource server validation).
     mcp-audience: mcp-api
     # Lifetime of the MCP access token issued for /mcp clients; shorter values reduce exposure if token is leaked.

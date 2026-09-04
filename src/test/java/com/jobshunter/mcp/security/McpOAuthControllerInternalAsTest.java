@@ -104,7 +104,8 @@ class McpOAuthControllerInternalAsTest {
         .retrieve()
         .body(String.class);
 
-    assertTrue(metadata.contains("\"jwks_uri\":\"http://localhost:" + port + "/.well-known/jwks.json\""));
+    assertTrue(metadata.contains("\"issuer\":\"https://mcp.local\""));
+    assertTrue(metadata.contains("\"jwks_uri\":\"https://mcp.local/.well-known/jwks.json\""));
   }
 
   private MultiValueMap<String, String> defaultTokenRequest() {
