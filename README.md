@@ -34,6 +34,17 @@ No standard path rewrites `id_token` into `access_token` in internal-AS mode.
 - MCP JWKS:
   - `GET /.well-known/jwks.json`
 
+## Security policy
+
+- Public endpoints are explicitly allowlisted:
+  - `GET /.well-known/oauth-protected-resource`
+  - `GET /.well-known/oauth-authorization-server`
+  - `GET /.well-known/jwks.json`
+  - `GET /authorize`
+  - `POST /token`
+- `POST /mcp` requires a valid MCP JWT (missing or invalid token returns `401`).
+- Any endpoint outside this allowlist is denied by default (`403`).
+
 ## Configuration
 
 ### Required (all modes)

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -24,6 +25,14 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class McpSecurityConfig {
+
+  private static final List<String> PUBLIC_ENDPOINTS = List.of(
+      "/.well-known/oauth-authorization-server",
+      "/.well-known/oauth-protected-resource",
+      "/.well-known/jwks.json",
+      "/authorize",
+      "/token"
+  );
 
   @Bean
   @Order(1)
@@ -46,7 +55,22 @@ public class McpSecurityConfig {
   @Order(2)
   SecurityFilterChain publicEndpointsFilterChain(HttpSecurity http) throws Exception {
     http.csrf(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll());
+        .securityMatcher(PUBLIC_ENDPOINTS.toArray(String[]::new))
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers(HttpMethod.GET, "/.well-known/oauth-authorization-server").permitAll()
+            .requestMatchers(HttpMethod.GET, "/.well-known/oauth-protected-resource").permitAll()
+            .requestMatchers(HttpMethod.GET, "/.well-known/jwks.json").permitAll()
+            .requestMatchers(HttpMethod.GET, "/authorize").permitAll()
+            .requestMatchers(HttpMethod.POST, "/token").permitAll()
+            .anyRequest().denyAll());
+    return http.build();
+  }
+
+  @Bean
+  @Order(3)
+  SecurityFilterChain denyAllFallbackFilterChain(HttpSecurity http) throws Exception {
+    http.csrf(AbstractHttpConfigurer::disable)
+        .authorizeHttpRequests(auth -> auth.anyRequest().denyAll());
     return http.build();
   }
 
