@@ -30,6 +30,7 @@ class McpWellKnownControllerTest {
         "mcp-api",
         "jobshunter-api",
         Duration.ofMinutes(15),
+        "mcp_access",
         Duration.ofMinutes(5),
         "jobshunter_delegated",
         null,
@@ -46,6 +47,16 @@ class McpWellKnownControllerTest {
     assertEquals("https://mcp.local/authorize", metadata.get("authorization_endpoint"));
     assertEquals("https://mcp.local/token", metadata.get("token_endpoint"));
     assertEquals("https://mcp.local/.well-known/jwks.json", metadata.get("jwks_uri"));
+    assertEquals(List.of("authorization_code"), metadata.get("grant_types_supported"));
+    assertEquals(Boolean.TRUE, metadata.get("x_oauth_broker_mode"));
+    assertEquals("https://accounts.google.com/o/oauth2/v2/auth", metadata.get("x_upstream_authorization_endpoint"));
+    assertEquals("https://oauth2.googleapis.com/token", metadata.get("x_upstream_token_endpoint"));
+
+    @SuppressWarnings("unchecked")
+    Map<String, Object> tokenContract = (Map<String, Object>) metadata.get("x_token_contract");
+    assertTrue(tokenContract.get("mcp_access_token_usage").toString().contains("/mcp"));
+    assertTrue(tokenContract.get("jobshunter_token_usage").toString().contains("never returns"));
+    assertTrue(tokenContract.get("token_endpoint_auth_methods_supported_semantics").toString().contains("local /token"));
   }
 
   @Test

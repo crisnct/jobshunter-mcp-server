@@ -22,6 +22,7 @@ class McpTokenIssuerTest {
         "mcp-api",
         "jobshunter-api",
         Duration.ofMinutes(15),
+        "mcp_access",
         Duration.ofMinutes(5),
         "jobshunter_delegated",
         null,

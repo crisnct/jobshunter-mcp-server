@@ -28,6 +28,8 @@ mcp:
     mcp-audience: mcp-api
     # Lifetime of the MCP access token issued for /mcp clients; shorter values reduce exposure if token is leaked.
     mcp-access-token-ttl: ${MCP_AS_ACCESS_TOKEN_TTL:15m}
+    # token_use claim value set in MCP access tokens accepted on /mcp.
+    mcp-access-token-use: mcp_access
     # Audience for delegated tokens sent from MCP to Jobshunter internal API (keep different from mcp-audience for security isolation).
     jobshunter-audience: jobshunter-internal-api
     # Lifetime of the delegated token used by MCP when calling Jobshunter API; keep short because it is a downstream service token.

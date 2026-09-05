@@ -11,10 +11,17 @@ The server supports two delegation modes:
 
 In `MCP_INTERNAL_AS`, token responsibilities are separated:
 
-- MCP access token for `/mcp`: `aud=<mcp audience>`
-- Delegated Jobshunter token for internal API calls: `aud=<jobshunter audience>`
+- MCP access token for `/mcp`: `aud=<mcp audience>`, `token_use=mcp_access`
+- Delegated Jobshunter token for internal API calls: `aud=<jobshunter audience>`, `token_use=<jobshunter delegated token use>`
 
 No standard path rewrites `id_token` into `access_token` in internal-AS mode.
+
+The OAuth bridge uses a broker model:
+
+- MCP publishes local AS metadata and local JWKS for MCP-issued tokens.
+- `POST /token` accepts public client calls (PKCE, `token_endpoint_auth_methods_supported=["none"]`).
+- MCP performs confidential server-side token exchange to Google using configured `client_id` and `client_secret`.
+- Google `id_token` is identity proof for MCP minting and is returned as upstream evidence; it is not the MCP access token.
 
 ## Runtime stack
 
@@ -61,11 +68,13 @@ No standard path rewrites `id_token` into `access_token` in internal-AS mode.
 - `MCP_AS_SIGNING_KEY_PEM` (optional PKCS#8 RSA private key PEM; if omitted, ephemeral key is generated at startup)
 - `MCP_AS_KEY_ID` (defaults to `mcp-key-1`)
 - `MCP_AS_ACCESS_TOKEN_TTL` (default `15m`)
+- `MCP_AS_MCP_ACCESS_TOKEN_USE` (default `mcp_access`)
 - `MCP_AS_DELEGATED_TOKEN_TTL` (default `5m`)
 
 OAuth discovery hardening:
 - `/.well-known/oauth-authorization-server` and `/.well-known/oauth-protected-resource` are built from `MCP_AS_ISSUER`.
 - Discovery metadata is not derived from `Host` or `X-Forwarded-*` request headers.
+- Metadata includes extension fields that describe broker mode and upstream OAuth endpoints.
 
 ### Rollback mode (`MCP_DELEGATION_MODE=GOOGLE_PASSTHROUGH`)
 

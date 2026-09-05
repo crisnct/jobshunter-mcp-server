@@ -81,6 +81,7 @@ public class McpSecurityConfig {
   ) {
     String resolvedIssuer = authorizationServerProperties.issuer();
     String resolvedAudience = authorizationServerProperties.mcpAudience();
+    String resolvedTokenUse = authorizationServerProperties.mcpAccessTokenUse();
     NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withPublicKey(jwtSigningService.publicKey()).build();
 
     OAuth2TokenValidator<Jwt> withIssuer = JwtValidators.createDefaultWithIssuer(resolvedIssuer);
@@ -94,7 +95,17 @@ public class McpSecurityConfig {
       );
     };
 
-    jwtDecoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(withIssuer, audienceValidator));
+    OAuth2TokenValidator<Jwt> tokenUseValidator = token -> {
+      String tokenUse = token.getClaimAsString("token_use");
+      if (resolvedTokenUse.equals(tokenUse)) {
+        return OAuth2TokenValidatorResult.success();
+      }
+      return OAuth2TokenValidatorResult.failure(
+          new OAuth2Error("invalid_token", "Token token_use is invalid for MCP server", null)
+      );
+    };
+
+    jwtDecoder.setJwtValidator(new DelegatingOAuth2TokenValidator<>(withIssuer, audienceValidator, tokenUseValidator));
     return jwtDecoder;
   }
 

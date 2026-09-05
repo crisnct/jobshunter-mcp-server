@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -25,6 +26,7 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -108,6 +110,62 @@ class McpOAuthControllerInternalAsTest {
     assertTrue(metadata.contains("\"jwks_uri\":\"https://mcp.local/.well-known/jwks.json\""));
   }
 
+  @Test
+  void shouldRejectUnsupportedGrantType() {
+    LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+    form.add("grant_type", "refresh_token");
+    form.add("code", "auth-code");
+    form.add("redirect_uri", "http://localhost/callback");
+    form.add("code_verifier", "verifier");
+
+    ResponseEntity<String> response = postToken(form);
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertTrue(response.getBody().contains("\"error\":\"unsupported_grant_type\""));
+  }
+
+  @Test
+  void shouldRejectRequestWhenRequiredParameterIsMissing() {
+    LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+    form.add("grant_type", "authorization_code");
+    form.add("code", "auth-code");
+    form.add("redirect_uri", "http://localhost/callback");
+
+    ResponseEntity<String> response = postToken(form);
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertTrue(response.getBody().contains("\"error\":\"invalid_request\""));
+    assertTrue(response.getBody().contains("code_verifier"));
+  }
+
+  @Test
+  void shouldAllowTokenRequestWithAdditionalClientParameters() {
+    mockGoogleTokenServer.enqueue(new MockResponse()
+        .setHeader("Content-Type", "application/json")
+        .setBody("""
+            {"access_token":"google-access-token","id_token":"google-id-token","expires_in":3599}
+            """));
+    Jwt googleIdentityJwt = new Jwt(
+        "google-id-token",
+        Instant.now(),
+        Instant.now().plusSeconds(300),
+        Map.of("alg", "RS256"),
+        Map.of("sub", "user-123", "email", "user@example.com", "scope", "openid email profile")
+    );
+    when(googleIdTokenValidator.validateAndDecode("google-id-token")).thenReturn(googleIdentityJwt);
+
+    LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+    form.add("grant_type", "authorization_code");
+    form.add("code", "auth-code");
+    form.add("redirect_uri", "http://localhost/callback");
+    form.add("code_verifier", "verifier");
+    form.add("audience", "some-audience");
+    form.add("resource", "https://resource.example");
+    form.add("client_id", "different-client-id-from-caller");
+
+    ResponseEntity<String> response = postToken(form);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertTrue(response.getBody().contains("\"access_token\""));
+  }
+
   private MultiValueMap<String, String> defaultTokenRequest() {
     LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
     form.setAll(Map.of(
@@ -120,12 +178,16 @@ class McpOAuthControllerInternalAsTest {
 
   private ResponseEntity<String> postToken(MultiValueMap<String, String> form) {
     RestClient mcpClient = RestClient.builder().baseUrl("http://localhost:" + port).build();
-    return mcpClient.post()
-        .uri("/token")
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-        .body(form)
-        .retrieve()
-        .toEntity(String.class);
+    try {
+      return mcpClient.post()
+          .uri("/token")
+          .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+          .body(form)
+          .retrieve()
+          .toEntity(String.class);
+    } catch (HttpClientErrorException ex) {
+      return ResponseEntity.status(ex.getStatusCode()).body(ex.getResponseBodyAsString());
+    }
   }
 
   private String extractTokenValue(String responseBody, String marker) {

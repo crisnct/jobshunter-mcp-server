@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.Map;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,9 @@ class McpSecurityFilterChainIT {
 
   @MockitoBean
   private GoogleIdTokenValidator googleIdTokenValidator;
+
+  @Autowired
+  private McpJwtSigningService mcpJwtSigningService;
 
   @LocalServerPort
   private int port;
@@ -118,6 +122,31 @@ class McpSecurityFilterChainIT {
   void shouldRequireAuthenticationForMcpEndpoint() {
     assertEquals(HttpStatus.UNAUTHORIZED, postMcp(null).getStatusCode());
     assertEquals(HttpStatus.UNAUTHORIZED, postMcp("not-a-valid-jwt").getStatusCode());
+  }
+
+  @Test
+  void shouldRejectMcpTokenWhenTokenUseIsNotMcpAccess() {
+    String delegatedLikeToken = mcpJwtSigningService.signToken(
+        "user-123",
+        "mcp-api",
+        Instant.now().plusSeconds(300),
+        Map.of("email", "user@example.com", "scope", "openid email profile", "token_use", "jobshunter_delegated")
+    );
+
+    assertEquals(HttpStatus.UNAUTHORIZED, postMcp(delegatedLikeToken).getStatusCode());
+  }
+
+  @Test
+  void shouldAllowMcpTokenWhenTokenUseIsMcpAccess() {
+    String mcpAccessToken = mcpJwtSigningService.signToken(
+        "user-123",
+        "mcp-api",
+        Instant.now().plusSeconds(300),
+        Map.of("email", "user@example.com", "scope", "openid email profile", "token_use", "mcp_access")
+    );
+
+    int status = postMcp(mcpAccessToken).getStatusCode().value();
+    assertTrue(status == HttpStatus.OK.value() || status == HttpStatus.ACCEPTED.value());
   }
 
   @Test

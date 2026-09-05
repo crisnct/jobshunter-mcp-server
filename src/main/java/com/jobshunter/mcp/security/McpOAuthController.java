@@ -6,6 +6,7 @@ import com.jobshunter.mcp.exception.JobshunterApiException;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,6 +23,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Controller
 public class McpOAuthController {
+  private static final String AUTHORIZATION_CODE_GRANT = "authorization_code";
 
   private final McpOAuthProperties oauthProperties;
   private final McpAuthorizationServerProperties authorizationServerProperties;
@@ -68,6 +70,12 @@ public class McpOAuthController {
   @PostMapping(path = "/token", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
   @ResponseBody
   public ResponseEntity<String> tokenProxy(@RequestBody MultiValueMap<String, String> form) {
+    try {
+      validateTokenRequest(form);
+    } catch (OAuthValidationException ex) {
+      return oauthError(ex.status, ex.errorCode, ex.getMessage());
+    }
+
     MultiValueMap<String, String> requestBody = new org.springframework.util.LinkedMultiValueMap<>(form);
     requestBody.set("client_id", oauthProperties.clientId());
     requestBody.set("client_secret", oauthProperties.clientSecret());
@@ -88,17 +96,13 @@ public class McpOAuthController {
           .contentType(MediaType.APPLICATION_JSON)
           .body(normalizedBody);
     } catch (JobshunterApiException ex) {
-      return ResponseEntity.status(401)
-          .contentType(MediaType.APPLICATION_JSON)
-          .body("{\"error\":\"invalid_token\",\"error_description\":\"" + escapeJson(ex.getMessage()) + "\"}");
+      return oauthError(HttpStatus.UNAUTHORIZED, "invalid_token", ex.getMessage());
     } catch (RestClientResponseException ex) {
       return ResponseEntity.status(ex.getStatusCode())
           .contentType(MediaType.APPLICATION_JSON)
           .body(ex.getResponseBodyAsString());
     } catch (Exception ex) {
-      return ResponseEntity.status(500)
-          .contentType(MediaType.APPLICATION_JSON)
-          .body("{\"error\":\"server_error\",\"error_description\":\"Failed to process token response.\"}");
+      return oauthError(HttpStatus.INTERNAL_SERVER_ERROR, "server_error", "Failed to process token response.");
     }
   }
 
@@ -166,7 +170,63 @@ public class McpOAuthController {
     return StringUtils.hasText(stringValue) ? stringValue : fallback;
   }
 
+  private void validateTokenRequest(MultiValueMap<String, String> form) {
+    if (form == null || form.isEmpty()) {
+      throw new OAuthValidationException(HttpStatus.BAD_REQUEST, "invalid_request", "Token request body is required.");
+    }
+
+    String grantType = firstValue(form, "grant_type");
+    if (!AUTHORIZATION_CODE_GRANT.equals(grantType)) {
+      throw new OAuthValidationException(
+          HttpStatus.BAD_REQUEST,
+          "unsupported_grant_type",
+          "Only authorization_code grant_type is supported by this token endpoint."
+      );
+    }
+
+    requireText(form, "code");
+    requireText(form, "redirect_uri");
+    requireText(form, "code_verifier");
+  }
+
+  private String firstValue(MultiValueMap<String, String> form, String key) {
+    return stringValue(form.getFirst(key));
+  }
+
+  private void requireText(MultiValueMap<String, String> form, String key) {
+    if (!StringUtils.hasText(firstValue(form, key))) {
+      throw new OAuthValidationException(
+          HttpStatus.BAD_REQUEST,
+          "invalid_request",
+          "Missing required token request parameter: " + key + "."
+      );
+    }
+  }
+
+  private ResponseEntity<String> oauthError(HttpStatus status, String error, String description) {
+    return ResponseEntity.status(status)
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(
+            "{\"error\":\""
+                + escapeJson(error)
+                + "\",\"error_description\":\""
+                + escapeJson(description)
+                + "\"}"
+        );
+  }
+
   private String escapeJson(String value) {
     return value == null ? "" : value.replace("\"", "\\\"");
+  }
+
+  private static final class OAuthValidationException extends RuntimeException {
+    private final HttpStatus status;
+    private final String errorCode;
+
+    private OAuthValidationException(HttpStatus status, String errorCode, String message) {
+      super(message);
+      this.status = status;
+      this.errorCode = errorCode;
+    }
   }
 }

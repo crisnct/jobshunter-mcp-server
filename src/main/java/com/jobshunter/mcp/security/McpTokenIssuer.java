@@ -25,7 +25,7 @@ public class McpTokenIssuer {
     Map<String, Object> claims = Map.of(
         "email", stringClaim(upstreamIdentityToken, "email"),
         "scope", stringClaim(upstreamIdentityToken, "scope"),
-        "token_use", "mcp_access"
+        "token_use", properties.mcpAccessTokenUse()
     );
     return jwtSigningService.signToken(subject, properties.mcpAudience(), expiresAt, claims);
   }

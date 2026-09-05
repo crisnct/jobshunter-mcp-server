@@ -46,12 +46,24 @@ public class McpWellKnownController {
         Map.entry("token_endpoint", issuer + "/token"),
         Map.entry("jwks_uri", jwksUri),
         Map.entry("response_types_supported", List.of("code")),
-        Map.entry("grant_types_supported", List.of("authorization_code", "refresh_token")),
+        Map.entry("grant_types_supported", List.of("authorization_code")),
         Map.entry("subject_types_supported", List.of("public")),
         Map.entry("id_token_signing_alg_values_supported", List.of("RS256")),
         Map.entry("token_endpoint_auth_methods_supported", List.of("none")),
         Map.entry("code_challenge_methods_supported", List.of("S256")),
-        Map.entry("scopes_supported", scopesList())
+        Map.entry("scopes_supported", scopesList()),
+        Map.entry("x_oauth_broker_mode", true),
+        Map.entry("x_upstream_authorization_endpoint", oauthProperties.googleAuthorizationEndpoint()),
+        Map.entry("x_upstream_token_endpoint", oauthProperties.googleTokenEndpoint()),
+        Map.entry(
+            "x_token_contract",
+            Map.of(
+                "mcp_access_token_usage", "Use access_token returned by /token as Bearer token only for /mcp.",
+                "jobshunter_token_usage", "MCP mints delegated Jobshunter token server-side and never returns it to clients.",
+                "token_endpoint_auth_methods_supported_semantics",
+                "none applies to client authentication at local /token endpoint, not MCP to upstream provider exchange."
+            )
+        )
     );
   }
 

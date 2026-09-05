@@ -68,5 +68,9 @@ Alignment with current code:
 - Any non-allowlisted endpoint is denied by default (`403`).
 - OAuth discovery metadata (`issuer`, `authorization_endpoint`, `token_endpoint`, `jwks_uri`, `resource`) is derived from the fixed `mcp.authorization-server.issuer` value.
 - OAuth discovery metadata is not derived from `Host` or `X-Forwarded-*` request headers.
+- `token_endpoint_auth_methods_supported=["none"]` describes client authentication requirements at local `/token`, not the MCP-to-Google exchange.
+- `/token` supports authorization code + PKCE input and performs confidential server-side exchange against Google using configured client credentials.
+- `/token` returns MCP `access_token` for `/mcp`, and may include upstream Google `id_token` for identity evidence.
+- Jobshunter token is minted by MCP during tool execution and is never exposed to MCP clients.
 - No `required-scope` gate is applied on `/mcp`.
 - Delegated token `token_use` is configurable via `mcp.authorization-server.jobshunter-delegated-token-use`.
