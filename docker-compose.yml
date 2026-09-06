@@ -10,16 +10,15 @@ services:
     ports:
       - "9002:8081"
     environment:
-      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:-notset}"
-      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:-notset}"
-      MCP_AS_ISSUER: "${MCP_AS_ISSUER:-https://ronin-archesporial-lonnie.ngrok-free.dev}"
-      MCP_AS_ACCESS_TOKEN_TTL: "${MCP_AS_ACCESS_TOKEN_TTL:-15m}"
-      MCP_AS_SIGNING_KEY_PEM: "${MCP_AS_SIGNING_KEY_PEM:-}"
-      MCP_AS_DELEGATED_TOKEN_TTL: "${MCP_AS_DELEGATED_TOKEN_TTL:-5m}"
-      MCP_AS_KEY_ID: "${MCP_AS_KEY_ID:-notset}"
-      JOBSHUNTER_BASE_URL: "https://ronin-archesporial-lonnie.ngrok-free.dev"
-      JOBSHUNTER_CONNECT_TIMEOUT: "5s"
-      JOBSHUNTER_RESPONSE_TIMEOUT: "25m"
+      GOOGLE_CLIENT_ID: "${GOOGLE_CLIENT_ID:?GOOGLE_CLIENT_ID is required}"
+      GOOGLE_CLIENT_SECRET: "${GOOGLE_CLIENT_SECRET:?GOOGLE_CLIENT_SECRET is required}"
+      MCP_AS_ISSUER: "${MCP_AS_ISSUER:?MCP_AS_ISSUER is required}"
+      MCP_AS_MCP_AUDIENCE: "${MCP_AS_MCP_AUDIENCE:?MCP_AS_MCP_AUDIENCE is required}"
+      MCP_AS_JOBSHUNTER_AUDIENCE: "${MCP_AS_JOBSHUNTER_AUDIENCE:?MCP_AS_JOBSHUNTER_AUDIENCE is required}"
+      MCP_AS_SIGNING_KEY_PEM: "${MCP_AS_SIGNING_KEY_PEM:?MCP_AS_SIGNING_KEY_PEM is required}"
+      MCP_AS_KEY_ID: "${MCP_AS_KEY_ID:?MCP_AS_KEY_ID is required}"
+      JOBSHUNTER_BASE_URL: "${JOBSHUNTER_BASE_URL:?JOBSHUNTER_BASE_URL is required}"
+      JOBSHUNTER_TRUST_STORE_PASSWORD: "${JOBSHUNTER_TRUST_STORE_PASSWORD:?JOBSHUNTER_TRUST_STORE_PASSWORD is required}"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped

@@ -23,17 +23,17 @@ mcp:
   authorization-server:
     # Canonical public issuer/base URL for OAuth discovery metadata and MCP-minted JWT iss claim.
     # Must be a fixed externally reachable URL, not derived from request headers.
-    issuer: ${MCP_AS_ISSUER:https://ronin-archesporial-lonnie.ngrok-free.dev}
+    issuer: ${MCP_AS_ISSUER}
     ## Audience for MCP access tokens used to authenticate requests to /mcp (must match MCP resource server validation).
-    mcp-audience: mcp-api
+    mcp-audience: ${MCP_AS_MCP_AUDIENCE}
     # Lifetime of the MCP access token issued for /mcp clients; shorter values reduce exposure if token is leaked.
-    mcp-access-token-ttl: ${MCP_AS_ACCESS_TOKEN_TTL:15m}
+    mcp-access-token-ttl: 15m
     # token_use claim value set in MCP access tokens accepted on /mcp.
     mcp-access-token-use: mcp_access
     # Audience for delegated tokens sent from MCP to Jobshunter internal API (keep different from mcp-audience for security isolation).
-    jobshunter-audience: jobshunter-internal-api
+    jobshunter-audience: ${MCP_AS_JOBSHUNTER_AUDIENCE}
     # Lifetime of the delegated token used by MCP when calling Jobshunter API; keep short because it is a downstream service token.
-    jobshunter-delegated-token-ttl: ${MCP_AS_DELEGATED_TOKEN_TTL:5m}
+    jobshunter-delegated-token-ttl: 5m
     # token_use claim value set in delegated JWTs minted by MCP for Jobshunter API calls.
     jobshunter-delegated-token-use: jobshunter_delegated
     # Optional PKCS#8 RSA private key (PEM/Base64) used to sign MCP-issued JWTs; if empty, an ephemeral key is generated at startup.
@@ -85,14 +85,14 @@ mcp:
       - scope
 
 jobshunter:
-  base-url: ${JOBSHUNTER_BASE_URL:https://ronin-archesporial-lonnie.ngrok-free.dev}
-  connect-timeout: ${JOBSHUNTER_CONNECT_TIMEOUT:5s}
-  response-timeout: ${JOBSHUNTER_RESPONSE_TIMEOUT:25m}
+  base-url: ${JOBSHUNTER_BASE_URL}
+  connect-timeout: 5s
+  response-timeout: 25m
   search-jobs-path: /api/internal/search_jobs
   user-info-path: /api/internal/me
   ssl:
     trust-store: classpath:ngrok-truststore.p12
-    trust-store-password: changeit
+    trust-store-password: ${JOBSHUNTER_TRUST_STORE_PASSWORD:}
     trust-store-type: PKCS12
 
 

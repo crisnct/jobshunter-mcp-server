@@ -55,11 +55,28 @@ The OAuth bridge uses a broker model:
 
 ## Configuration
 
+### Local development with `.env`
+
+Keep runtime values in a local `.env` file (already ignored by git via `.gitignore`) and avoid committing secrets or environment-specific URLs in repo defaults.
+
+Minimal `.env` example:
+
+```dotenv
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+MCP_AS_ISSUER=https://your-public-issuer.example
+MCP_AS_MCP_AUDIENCE=mcp-api
+MCP_AS_JOBSHUNTER_AUDIENCE=jobshunter-internal-api
+JOBSHUNTER_BASE_URL=https://your-jobshunter.example
+JOBSHUNTER_TRUST_STORE_PASSWORD=your-trust-store-password
+```
+
 ### Required (all modes)
 
-- `MCP_OAUTH_CLIENT_ID`
-- `MCP_OAUTH_CLIENT_SECRET`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
 - `JOBSHUNTER_BASE_URL`
+- `JOBSHUNTER_TRUST_STORE_PASSWORD` (required when `jobshunter.ssl.trust-store` is configured)
 
 ### Internal-AS mode (`MCP_DELEGATION_MODE=MCP_INTERNAL_AS`)
 
@@ -68,9 +85,12 @@ The OAuth bridge uses a broker model:
 - `MCP_AS_JOBSHUNTER_AUDIENCE` (audience expected by Jobshunter for delegated JWT)
 - `MCP_AS_SIGNING_KEY_PEM` (optional PKCS#8 RSA private key PEM; if omitted, ephemeral key is generated at startup)
 - `MCP_AS_KEY_ID` (defaults to `mcp-key-1`)
-- `MCP_AS_ACCESS_TOKEN_TTL` (default `15m`)
 - `MCP_AS_MCP_ACCESS_TOKEN_USE` (default `mcp_access`)
-- `MCP_AS_DELEGATED_TOKEN_TTL` (default `5m`)
+
+Token timings are intentionally fixed in application configuration for simplicity:
+- MCP access token TTL: `15m`
+- Jobshunter delegated token TTL: `5m`
+- Jobshunter HTTP timeouts: connect `5s`, response `25m`
 
 OAuth discovery hardening:
 - `/.well-known/oauth-authorization-server` and `/.well-known/oauth-protected-resource` are built from `MCP_AS_ISSUER`.
@@ -87,8 +107,16 @@ OAuth request hardening:
 
 ### Rollback mode (`MCP_DELEGATION_MODE=GOOGLE_PASSTHROUGH`)
 
-- `MCP_GOOGLE_AUDIENCE` / `MCP_OAUTH_CLIENT_ID` for `/mcp` audience validation
+- `MCP_GOOGLE_AUDIENCE` / `GOOGLE_CLIENT_ID` for `/mcp` audience validation
 - `GOOGLE_ISSUER_URI` (default `https://accounts.google.com`)
+
+### Fail-fast behavior
+
+The server is intentionally fail-fast for critical configuration:
+
+- Spring `@ConfigurationProperties` + validation (`@NotBlank`) stop startup when required values are missing.
+- `jobshunter.ssl.trust-store-password` is mandatory when a trust store is configured.
+- Docker Compose uses `${VAR:?VAR is required}` for critical env vars, so container startup fails immediately when they are absent.
 
 ## Jobshunter trust configuration (internal-AS)
 
