@@ -1,3 +1,20 @@
+spring:
+  ai:
+    mcp:
+      server:
+        name: jobshunter-mcp
+        version: 1.0.0
+        protocol: STREAMABLE
+        type: SYNC
+        request-timeout: 5m
+        capabilities:
+          tool: true
+          resource: false
+          prompt: false
+          completion: false
+        streamable-http:
+          mcp-endpoint: /mcp
+
 mcp:
   authorization-server:
     issuer: https://mcp.test
