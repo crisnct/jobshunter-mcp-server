@@ -29,19 +29,29 @@ sequenceDiagram
     McpServer-->>McpClient: MCP public JWK set
 
     McpClient->>McpServer: GET /authorize with PKCE and scope
-    McpServer-->>McpClient: 302 redirect to Google
-    McpClient->>Google: open consent and authenticate user
-    Google-->>McpClient: redirect with authorization code
+    McpServer->>McpServer: OAuthRequestValidator checks params, response_type=code, S256, redirect_uri allowlist/loopback
+    alt request invalid
+        McpServer-->>McpClient: 400 invalid_request or unsupported_response_type
+    else request valid
+        McpServer-->>McpClient: 302 redirect to Google
+        McpClient->>Google: open consent and authenticate user
+        Google-->>McpClient: redirect with authorization code
+    end
 
     McpClient->>McpServer: POST /token with code and code_verifier
-    McpServer->>Google: exchange code at token endpoint
-    Google-->>McpServer: id_token, refresh_token optional
-    McpServer->>McpServer: validate Google id_token
-    McpServer->>McpServer: mint MCP access JWT (token_use mcp_access)
-    McpServer-->>McpClient: access_token, expires_in, id_token
+    McpServer->>McpServer: OAuthRequestValidator checks grant_type, redirect_uri, single-valued params
+    alt request invalid
+        McpServer-->>McpClient: 400 invalid_request or unsupported_grant_type
+    else request valid
+        McpServer->>Google: exchange code at token endpoint
+        Google-->>McpServer: id_token, refresh_token optional
+        McpServer->>McpServer: strip refresh_token, validate Google id_token
+        McpServer->>McpServer: mint MCP access JWT (token_use mcp_access)
+        McpServer-->>McpClient: access_token, expires_in, id_token
+    end
 
     McpClient->>McpServer: POST /mcp initialize with Bearer token
-    McpServer->>McpServer: validate MCP JWT (signature, iss, aud, exp)
+    McpServer->>McpServer: validate MCP JWT (signature, iss, aud, exp, token_use)
     alt JWT invalid
         McpServer-->>McpClient: 401 unauthorized
     else JWT valid

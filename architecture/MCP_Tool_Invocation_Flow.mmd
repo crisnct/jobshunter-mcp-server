@@ -29,20 +29,34 @@ sequenceDiagram
 
     AIHost->>McpClient: decide tool and send tools/call
     McpClient->>McpServer: POST /mcp tools/call with Bearer and session id
-    McpServer->>McpServer: validate JWT signature, iss, aud, exp
+    McpServer->>McpServer: validate JWT signature, iss, aud, exp, token_use
     alt JWT invalid
         McpServer-->>McpClient: 401 unauthorized
         McpClient-->>AIHost: re-authentication required
     else JWT valid
         McpServer->>ToolSvc: dispatch @Tool callback
         ToolSvc->>ToolSvc: validate input and business rules
-        ToolSvc->>ToolSvc: read JwtAuthenticationToken
-        ToolSvc->>ToolSvc: mint delegated JWT (config token_use)
-        ToolSvc->>JhClient: searchJobs or getUserInfo
-        JhClient->>JobApi: call internal API with delegated Bearer
-        JobApi-->>JhClient: business response or error
-        JhClient-->>ToolSvc: mapped DTO or domain exception
-        ToolSvc-->>McpServer: tool result payload
-        McpServer-->>McpClient: JSON-RPC response
-        McpClient-->>AIHost: structured result
+        alt input invalid
+            ToolSvc-->>McpServer: JobshunterApiException (validation)
+            McpServer-->>McpClient: tool error result
+            McpClient-->>AIHost: structured error
+        else input valid
+            ToolSvc->>ToolSvc: read JwtAuthenticationToken
+            ToolSvc->>ToolSvc: mint delegated JWT (config token_use)
+            ToolSvc->>JhClient: searchJobs or getUserInfo
+            JhClient->>JobApi: call internal API with delegated Bearer (connect/response timeouts)
+            alt Jobshunter error, timeout, or unreachable
+                JobApi-->>JhClient: 4xx/5xx or connection failure
+                JhClient-->>ToolSvc: mapped JobshunterApiException
+                ToolSvc-->>McpServer: propagate exception
+                McpServer-->>McpClient: tool error result
+                McpClient-->>AIHost: structured error
+            else success
+                JobApi-->>JhClient: business response
+                JhClient-->>ToolSvc: mapped DTO
+                ToolSvc-->>McpServer: tool result payload
+                McpServer-->>McpClient: JSON-RPC response
+                McpClient-->>AIHost: structured result
+            end
+        end
     end

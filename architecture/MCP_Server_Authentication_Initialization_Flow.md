@@ -32,19 +32,29 @@ sequenceDiagram
     McpServer-->>McpClient: MCP public JWK set
 
     McpClient->>McpServer: GET /authorize with PKCE and scope
-    McpServer-->>McpClient: 302 redirect to Google
-    McpClient->>Google: open consent and authenticate user
-    Google-->>McpClient: redirect with authorization code
+    McpServer->>McpServer: OAuthRequestValidator checks params, response_type=code, S256, redirect_uri allowlist/loopback
+    alt request invalid
+        McpServer-->>McpClient: 400 invalid_request or unsupported_response_type
+    else request valid
+        McpServer-->>McpClient: 302 redirect to Google
+        McpClient->>Google: open consent and authenticate user
+        Google-->>McpClient: redirect with authorization code
+    end
 
     McpClient->>McpServer: POST /token with code and code_verifier
-    McpServer->>Google: exchange code at token endpoint
-    Google-->>McpServer: id_token, refresh_token optional
-    McpServer->>McpServer: validate Google id_token
-    McpServer->>McpServer: mint MCP access JWT (token_use mcp_access)
-    McpServer-->>McpClient: access_token, expires_in, id_token
+    McpServer->>McpServer: OAuthRequestValidator checks grant_type, redirect_uri, single-valued params
+    alt request invalid
+        McpServer-->>McpClient: 400 invalid_request or unsupported_grant_type
+    else request valid
+        McpServer->>Google: exchange code at token endpoint
+        Google-->>McpServer: id_token, refresh_token optional
+        McpServer->>McpServer: strip refresh_token, validate Google id_token
+        McpServer->>McpServer: mint MCP access JWT (token_use mcp_access)
+        McpServer-->>McpClient: access_token, expires_in, id_token
+    end
 
     McpClient->>McpServer: POST /mcp initialize with Bearer token
-    McpServer->>McpServer: validate MCP JWT (signature, iss, aud, exp)
+    McpServer->>McpServer: validate MCP JWT (signature, iss, aud, exp, token_use)
     alt JWT invalid
         McpServer-->>McpClient: 401 unauthorized
     else JWT valid
@@ -63,14 +73,15 @@ sequenceDiagram
 The current implementation is internal-AS only: Google is used for identity proof, MCP mints its own access token for `/mcp`, and MCP mints a separate delegated token for Jobshunter calls.
 
 Alignment with current code:
-- `/mcp` authorization is `authenticated()` with issuer and audience checks from `mcp.authorization-server.*`.
-- Public HTTP access is allowlisted only for OAuth discovery endpoints, `GET /authorize`, and `POST /token`.
-- Any non-allowlisted endpoint is denied by default (`403`).
-- OAuth discovery metadata (`issuer`, `authorization_endpoint`, `token_endpoint`, `jwks_uri`, `resource`) is derived from the fixed `mcp.authorization-server.issuer` value.
-- OAuth discovery metadata is not derived from `Host` or `X-Forwarded-*` request headers.
+- `/mcp` authorization is `authenticated()` with issuer, audience, and `token_use` checks from `mcp.authorization-server.*`, enforced by a `NimbusJwtDecoder` with a `DelegatingOAuth2TokenValidator` (`McpSecurityConfig`).
+- Public HTTP access is allowlisted only for OAuth discovery endpoints, `GET /authorize`, and `POST /token` (`McpSecurityConfig` order-1/2/3 filter chains).
+- Any non-allowlisted endpoint is denied by default (`403`) via an explicit `denyAllFallbackFilterChain`.
+- OAuth discovery metadata (`issuer`, `authorization_endpoint`, `token_endpoint`, `jwks_uri`, `resource`) is derived from the fixed `mcp.authorization-server.issuer` value, never from `Host` or `X-Forwarded-*` request headers.
 - `token_endpoint_auth_methods_supported=["none"]` describes client authentication requirements at local `/token`, not the MCP-to-Google exchange.
-- `/token` supports authorization code + PKCE input and performs confidential server-side exchange against Google using configured client credentials.
-- `/token` returns MCP `access_token` for `/mcp`, and may include upstream Google `id_token` for identity evidence.
+- `OAuthRequestValidator` enforces the request contract before any upstream call: required/single-valued parameters, `response_type=code`, `code_challenge_method=S256` on `/authorize`, and `grant_type=authorization_code` on `/token`; unknown parameters are rejected by default (`mcp.oauth.reject-unknown-authorize-parameters` / `-token-parameters`).
+- `redirect_uri` must match `mcp.oauth.allowed-redirect-uris`, or a loopback URI (`http://localhost` / `127.0.0.1` plus `mcp.oauth.allowed-loopback-redirect-paths`) when `mcp.oauth.allow-loopback-redirect-uris=true`; enforcement is toggled by `mcp.oauth.enforce-redirect-allowlist` and validated at startup.
+- `/token` performs a confidential server-side exchange against Google using configured client credentials, then strips any `refresh_token` before responding — only `access_token`, `token_type`, `expires_in`, `scope`, and `id_token` are returned to the MCP client.
 - Jobshunter token is minted by MCP during tool execution and is never exposed to MCP clients.
 - No `required-scope` gate is applied on `/mcp`.
 - Delegated token `token_use` is configurable via `mcp.authorization-server.jobshunter-delegated-token-use`.
+- OAuth request/response logging is redacted by `OAuthLogSanitizer` (truncated state, redacted query values, sanitized form bodies) before being written to logs.
