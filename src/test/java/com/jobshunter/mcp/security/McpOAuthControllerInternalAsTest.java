@@ -62,6 +62,14 @@ class McpOAuthControllerInternalAsTest {
     registry.add("mcp.oauth.client-id", () -> "test-client-id");
     registry.add("mcp.oauth.client-secret", () -> "test-client-secret");
     registry.add("mcp.oauth.scope", () -> "openid email profile");
+    registry.add("mcp.oauth.enforce-redirect-allowlist", () -> "true");
+    registry.add("mcp.oauth.allowed-redirect-uris[0]", () -> "http://localhost/callback");
+    registry.add("mcp.oauth.allow-loopback-redirect-uris", () -> "true");
+    registry.add("mcp.oauth.allowed-loopback-redirect-paths[0]", () -> "/callback");
+    registry.add("mcp.oauth.reject-unknown-authorize-parameters", () -> "true");
+    registry.add("mcp.oauth.reject-unknown-token-parameters", () -> "true");
+    registry.add("mcp.oauth.additional-token-parameters[0]", () -> "audience");
+    registry.add("mcp.oauth.additional-token-parameters[1]", () -> "resource");
     registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", () -> "https://mcp.local");
   }
 
@@ -111,6 +119,73 @@ class McpOAuthControllerInternalAsTest {
   }
 
   @Test
+  void shouldRejectAuthorizeWhenResponseTypeIsInvalid() {
+    ResponseEntity<String> response = getAuthorize(
+        "/authorize?response_type=token&redirect_uri=http://localhost/callback&state=test-state"
+            + "&code_challenge=test-challenge&code_challenge_method=S256"
+    );
+
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertTrue(response.getBody().contains("\"error\":\"unsupported_response_type\""));
+  }
+
+  @Test
+  void shouldRejectAuthorizeWhenPkceMethodIsNotS256() {
+    ResponseEntity<String> response = getAuthorize(defaultAuthorizeQuery() + "&code_challenge_method=plain");
+
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertTrue(response.getBody().contains("\"error\":\"invalid_request\""));
+    assertTrue(response.getBody().contains("code_challenge_method"));
+  }
+
+  @Test
+  void shouldRejectAuthorizeWhenStateIsMissing() {
+    ResponseEntity<String> response = getAuthorize(
+        "/authorize?response_type=code&redirect_uri=http://localhost/callback"
+            + "&code_challenge=test-challenge&code_challenge_method=S256"
+    );
+
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertTrue(response.getBody().contains("\"error\":\"invalid_request\""));
+    assertTrue(response.getBody().contains("state"));
+  }
+
+  @Test
+  void shouldRejectAuthorizeWhenRedirectUriIsNotAllowlisted() {
+    ResponseEntity<String> response = getAuthorize(
+        "/authorize?response_type=code&redirect_uri=http://localhost/not-allowed&state=test-state"
+            + "&code_challenge=test-challenge&code_challenge_method=S256"
+    );
+
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertTrue(response.getBody().contains("\"error\":\"invalid_request\""));
+    assertTrue(response.getBody().contains("redirect_uri is not allowed"));
+  }
+
+  @Test
+  void shouldAllowAuthorizeWhenRequestIsValid() {
+    ResponseEntity<String> response = getAuthorize(defaultAuthorizeQuery()
+        + "&client_id=test-client-id&scope=openid%20email%20profile&resource=https%3A%2F%2Fmcp.local%2Fmcp");
+
+    assertEquals(HttpStatus.FOUND, response.getStatusCode());
+    assertTrue(response.getHeaders().getLocation() != null);
+    assertTrue(response.getHeaders().getLocation().toString().contains("response_type=code"));
+    assertTrue(response.getHeaders().getLocation().toString().contains("code_challenge_method=S256"));
+  }
+
+  @Test
+  void shouldAllowAuthorizeWhenLoopbackRedirectUsesDynamicPort() {
+    ResponseEntity<String> response = getAuthorize(
+        "/authorize?response_type=code&redirect_uri=http://127.0.0.1:59123/callback&state=test-state"
+            + "&code_challenge=test-challenge&code_challenge_method=S256"
+            + "&client_id=test-client-id&scope=openid%20email%20profile&resource=https%3A%2F%2Fmcp.local%2Fmcp"
+    );
+
+    assertEquals(HttpStatus.FOUND, response.getStatusCode());
+    assertTrue(response.getHeaders().getLocation() != null);
+  }
+
+  @Test
   void shouldRejectUnsupportedGrantType() {
     LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
     form.add("grant_type", "refresh_token");
@@ -137,7 +212,7 @@ class McpOAuthControllerInternalAsTest {
   }
 
   @Test
-  void shouldAllowTokenRequestWithAdditionalClientParameters() {
+  void shouldAllowTokenRequestWithAllowlistedAdditionalParameters() {
     mockGoogleTokenServer.enqueue(new MockResponse()
         .setHeader("Content-Type", "application/json")
         .setBody("""
@@ -159,7 +234,77 @@ class McpOAuthControllerInternalAsTest {
     form.add("code_verifier", "verifier");
     form.add("audience", "some-audience");
     form.add("resource", "https://resource.example");
-    form.add("client_id", "different-client-id-from-caller");
+
+    ResponseEntity<String> response = postToken(form);
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+    assertTrue(response.getBody().contains("\"access_token\""));
+  }
+
+  @Test
+  void shouldRejectTokenRequestWhenUnknownParameterIsSent() {
+    LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+    form.add("grant_type", "authorization_code");
+    form.add("code", "auth-code");
+    form.add("redirect_uri", "http://localhost/callback");
+    form.add("code_verifier", "verifier");
+    form.add("client_id", "untrusted-public-client-id");
+
+    ResponseEntity<String> response = postToken(form);
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertTrue(response.getBody().contains("\"error\":\"invalid_request\""));
+    assertTrue(response.getBody().contains("Unsupported token request parameters: client_id."));
+  }
+
+  @Test
+  void shouldRejectTokenRequestWhenRedirectUriIsNotAllowlisted() {
+    LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+    form.add("grant_type", "authorization_code");
+    form.add("code", "auth-code");
+    form.add("redirect_uri", "http://localhost/not-allowed");
+    form.add("code_verifier", "verifier");
+
+    ResponseEntity<String> response = postToken(form);
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertTrue(response.getBody().contains("\"error\":\"invalid_request\""));
+    assertTrue(response.getBody().contains("redirect_uri is not allowed"));
+  }
+
+  @Test
+  void shouldRejectTokenRequestWhenRequiredParameterHasMultipleValues() {
+    LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+    form.add("grant_type", "authorization_code");
+    form.add("code", "auth-code");
+    form.add("redirect_uri", "http://localhost/callback");
+    form.add("redirect_uri", "http://localhost/callback-2");
+    form.add("code_verifier", "verifier");
+
+    ResponseEntity<String> response = postToken(form);
+    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    assertTrue(response.getBody().contains("\"error\":\"invalid_request\""));
+    assertTrue(response.getBody().contains("Parameter must be single-valued: redirect_uri."));
+  }
+
+  @Test
+  void shouldAllowTokenRequestWhenLoopbackRedirectUsesDynamicPort() {
+    mockGoogleTokenServer.enqueue(new MockResponse()
+        .setHeader("Content-Type", "application/json")
+        .setBody("""
+            {"access_token":"google-access-token","id_token":"google-id-token","expires_in":3599}
+            """));
+    Jwt googleIdentityJwt = new Jwt(
+        "google-id-token",
+        Instant.now(),
+        Instant.now().plusSeconds(300),
+        Map.of("alg", "RS256"),
+        Map.of("sub", "user-123", "email", "user@example.com", "scope", "openid email profile")
+    );
+    when(googleIdTokenValidator.validateAndDecode("google-id-token")).thenReturn(googleIdentityJwt);
+
+    LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+    form.add("grant_type", "authorization_code");
+    form.add("code", "auth-code");
+    form.add("redirect_uri", "http://127.0.0.1:51999/callback");
+    form.add("code_verifier", "verifier");
 
     ResponseEntity<String> response = postToken(form);
     assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -188,6 +333,23 @@ class McpOAuthControllerInternalAsTest {
     } catch (HttpClientErrorException ex) {
       return ResponseEntity.status(ex.getStatusCode()).body(ex.getResponseBodyAsString());
     }
+  }
+
+  private ResponseEntity<String> getAuthorize(String path) {
+    RestClient mcpClient = RestClient.builder().baseUrl("http://localhost:" + port).build();
+    try {
+      return mcpClient.get()
+          .uri(path)
+          .retrieve()
+          .toEntity(String.class);
+    } catch (HttpClientErrorException ex) {
+      return ResponseEntity.status(ex.getStatusCode()).body(ex.getResponseBodyAsString());
+    }
+  }
+
+  private String defaultAuthorizeQuery() {
+    return "/authorize?response_type=code&redirect_uri=http://localhost/callback&state=test-state"
+        + "&code_challenge=test-challenge&code_challenge_method=S256";
   }
 
   private String extractTokenValue(String responseBody, String marker) {

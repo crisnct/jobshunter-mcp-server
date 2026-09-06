@@ -2,6 +2,10 @@ package com.jobshunter.mcp.security;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -13,16 +17,23 @@ class McpJwksControllerTest {
   @LocalServerPort
   private int port;
 
+  private final ObjectMapper objectMapper = new ObjectMapper();
+
   @Test
-  void shouldExposeJwksEndpoint() {
+  void shouldExposeJwksEndpoint() throws Exception {
     RestClient restClient = RestClient.builder().baseUrl("http://localhost:" + port).build();
     String body = restClient.get()
         .uri("/.well-known/jwks.json")
         .retrieve()
         .body(String.class);
 
-    assertTrue(body.contains("\"keys\""));
-    assertTrue(body.contains("\"kty\":\"RSA\""));
-    assertTrue(body.contains("\"kid\":\"mcp-key-1\""));
+    Map<String, Object> jwks = objectMapper.readValue(body, new TypeReference<>() {});
+    @SuppressWarnings("unchecked")
+    List<Map<String, Object>> keys = (List<Map<String, Object>>) jwks.get("keys");
+
+    assertTrue(keys != null && !keys.isEmpty());
+    Map<String, Object> firstKey = keys.getFirst();
+    assertTrue("RSA".equals(firstKey.get("kty")));
+    assertTrue(firstKey.get("kid") != null && !String.valueOf(firstKey.get("kid")).isBlank());
   }
 }

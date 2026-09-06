@@ -55,6 +55,34 @@ mcp:
     client-id: ${GOOGLE_CLIENT_ID:}
     # Client secret for Google OAuth 2.0 application.
     client-secret: ${GOOGLE_CLIENT_SECRET:}
+    # Enforce redirect_uri allowlist validation in both /authorize and /token.
+    enforce-redirect-allowlist: true
+    # Explicit redirect_uri allowlist for known clients.
+    allowed-redirect-uris:
+      - http://127.0.0.1:8787/callback
+      - https://oauth.pstmn.io/v1/callback
+      - https://claude.ai/api/mcp/auth_callback
+      - https://www.cursor.com/agents/mcp/oauth/callback
+      - https://chat.openai.com/aip/g-43199b6ccac3d0a13b65c79a21c8cc2010aee226/oauth/callback
+    # Allow loopback redirects used by native/desktop clients on dynamic local ports.
+    allow-loopback-redirect-uris: true
+    # Restrict loopback redirects to specific callback paths.
+    allowed-loopback-redirect-paths:
+      - /callback
+    # Reject unknown query parameters on /authorize for a strict and auditable broker surface.
+    reject-unknown-authorize-parameters: true
+    # Reject unknown form parameters on /token (unless explicitly allowed below).
+    reject-unknown-token-parameters: true
+    # Additional allowlisted /authorize parameters for controlled compatibility.
+    additional-authorize-parameters:
+      - ${MCP_OAUTH_ADDITIONAL_AUTHORIZE_PARAM_1:}
+    # Additional allowlisted /token parameters (example extensions: audience/resource).
+    additional-token-parameters:
+      - audience
+      - resource
+      - client_id
+      - client_secret
+      - scope
 
 jobshunter:
   base-url: ${JOBSHUNTER_BASE_URL:https://ronin-archesporial-lonnie.ngrok-free.dev}

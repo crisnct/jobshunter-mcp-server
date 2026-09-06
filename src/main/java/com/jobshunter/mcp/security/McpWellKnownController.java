@@ -2,11 +2,15 @@ package com.jobshunter.mcp.security;
 
 import java.util.List;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/.well-known")
 public class McpWellKnownController {
@@ -27,6 +31,7 @@ public class McpWellKnownController {
   @GetMapping("/oauth-protected-resource")
   public Map<String, Object> protectedResourceMetadata() {
     String issuer = publicBaseUrl();
+    log.info("Serving OAuth protected resource metadata for issuer={}", issuer);
     return Map.of(
         "resource", issuer + "/mcp",
         "authorization_servers", List.of(issuer),
@@ -40,6 +45,7 @@ public class McpWellKnownController {
   public Map<String, Object> authorizationServerMetadata() {
     String issuer = publicBaseUrl();
     String jwksUri = issuer + "/.well-known/jwks.json";
+    log.info("Serving OAuth authorization server metadata for issuer={}, jwksUri={}", issuer, jwksUri);
     return Map.ofEntries(
         Map.entry("issuer", issuer),
         Map.entry("authorization_endpoint", issuer + "/authorize"),
@@ -69,7 +75,10 @@ public class McpWellKnownController {
 
   @GetMapping("/jwks.json")
   public Map<String, Object> jwks() {
-    return jwtSigningService.jwks();
+    Map<String, Object> jwks = jwtSigningService.jwks();
+    int keyCount = extractJwkCount(jwks);
+    log.info("Serving JWKS document with keyCount={}", keyCount);
+    return jwks;
   }
 
   private String publicBaseUrl() {
@@ -82,5 +91,16 @@ public class McpWellKnownController {
 
   private List<String> scopesList() {
     return List.of(oauthProperties.scope().split("\\s+"));
+  }
+
+  private int extractJwkCount(Map<String, Object> jwks) {
+    if (jwks == null) {
+      return 0;
+    }
+    Object keys = jwks.get("keys");
+    if (keys instanceof List<?> list) {
+      return list.size();
+    }
+    return 0;
   }
 }

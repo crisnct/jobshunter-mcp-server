@@ -75,10 +75,11 @@ class McpSecurityFilterChainIT {
 
   @Test
   void shouldAllowAuthorizeEndpointWithoutAuthentication() {
-    ResponseEntity<Void> response = client().get()
-        .uri("/authorize?redirect_uri=http://localhost/callback&state=test-state")
+    ResponseEntity<String> response = client().get()
+        .uri("/authorize?response_type=code&redirect_uri=http://localhost/callback&state=test-state"
+            + "&code_challenge=test-challenge&code_challenge_method=S256")
         .retrieve()
-        .toBodilessEntity();
+        .toEntity(String.class);
 
     assertEquals(HttpStatus.FOUND, response.getStatusCode());
     assertTrue(response.getHeaders().getFirst(HttpHeaders.LOCATION) != null);

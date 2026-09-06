@@ -19,7 +19,8 @@ No standard path rewrites `id_token` into `access_token` in internal-AS mode.
 The OAuth bridge uses a broker model:
 
 - MCP publishes local AS metadata and local JWKS for MCP-issued tokens.
-- `POST /token` accepts public client calls (PKCE, `token_endpoint_auth_methods_supported=["none"]`).
+- `GET /authorize` enforces strict public-client authorization request validation before redirecting upstream.
+- `POST /token` accepts public client calls (`token_endpoint_auth_methods_supported=["none"]`) with strict grant-specific validation.
 - MCP performs confidential server-side token exchange to Google using configured `client_id` and `client_secret`.
 - Google `id_token` is identity proof for MCP minting and is returned as upstream evidence; it is not the MCP access token.
 
@@ -36,8 +37,8 @@ The OAuth bridge uses a broker model:
   - `GET /.well-known/oauth-protected-resource`
   - `GET /.well-known/oauth-authorization-server`
 - OAuth bridge:
-  - `GET /authorize` (redirects to Google)
-  - `POST /token` (exchanges Google code and returns MCP access token in internal-AS mode)
+  - `GET /authorize` (validates `response_type=code`, PKCE `code_challenge_method=S256`, required `state`/`redirect_uri`, and redirect allowlist, then redirects to Google)
+  - `POST /token` (validates `grant_type=authorization_code`, required parameters and redirect allowlist, then exchanges code and returns MCP access token in internal-AS mode)
 - MCP JWKS:
   - `GET /.well-known/jwks.json`
 
@@ -75,6 +76,14 @@ OAuth discovery hardening:
 - `/.well-known/oauth-authorization-server` and `/.well-known/oauth-protected-resource` are built from `MCP_AS_ISSUER`.
 - Discovery metadata is not derived from `Host` or `X-Forwarded-*` request headers.
 - Metadata includes extension fields that describe broker mode and upstream OAuth endpoints.
+
+OAuth request hardening:
+- `MCP_OAUTH_ENFORCE_REDIRECT_ALLOWLIST` (default `true`) enables strict `redirect_uri` allowlisting on both `/authorize` and `/token`.
+- `MCP_OAUTH_REDIRECT_URI_1` (and additional indexed values) define allowed redirect URIs used by controlled clients.
+- `MCP_OAUTH_ALLOW_LOOPBACK_REDIRECT_URIS` (default `true`) permits loopback redirects (`localhost`/`127.0.0.1`) for native clients using dynamic ports.
+- `mcp.oauth.allowed-loopback-redirect-paths` restricts loopback redirects to approved callback paths (default `/callback`).
+- `MCP_OAUTH_REJECT_UNKNOWN_AUTHORIZE_PARAMS` and `MCP_OAUTH_REJECT_UNKNOWN_TOKEN_PARAMS` (both default `true`) reject unknown request parameters.
+- `mcp.oauth.additional-token-parameters` can explicitly allow vetted extension parameters (default includes `audience`, `resource`, `client_id`, and `scope`).
 
 ### Rollback mode (`MCP_DELEGATION_MODE=GOOGLE_PASSTHROUGH`)
 

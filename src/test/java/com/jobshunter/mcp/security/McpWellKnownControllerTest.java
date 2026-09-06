@@ -24,7 +24,15 @@ class McpWellKnownControllerTest {
         "https://accounts.google.com",
         "client-id",
         "client-secret",
-        "openid email profile");
+        "openid email profile",
+        true,
+        List.of("http://localhost/callback"),
+        true,
+        List.of("/callback"),
+        true,
+        true,
+        List.of(),
+        List.of("audience", "resource"));
     McpAuthorizationServerProperties authorizationServerProperties = new McpAuthorizationServerProperties(
         "https://mcp.local/",
         "mcp-api",

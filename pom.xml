@@ -20,6 +20,7 @@
         <java.version>25</java.version>
         <spring-ai.version>2.0.0</spring-ai.version>
         <mockwebserver.version>4.12.0</mockwebserver.version>
+        <lombok.version>1.18.38</lombok.version>
     </properties>
 
     <dependencyManagement>
@@ -60,6 +61,12 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
         <dependency>
+            <artifactId>lombok</artifactId>
+            <groupId>org.projectlombok</groupId>
+            <scope>provided</scope>
+            <version>${lombok.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -84,6 +91,13 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <parameters>true</parameters>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
             <plugin>
