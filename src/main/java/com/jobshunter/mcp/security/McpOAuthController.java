@@ -221,9 +221,6 @@ public class McpOAuthController {
     response.put("scope", stringValueOrDefault(googleResponse.get("scope"), oauthProperties.scope()));
     response.put("id_token", idToken);
 
-    if (googleResponse.get("refresh_token") != null) {
-      response.put("refresh_token", googleResponse.get("refresh_token"));
-    }
     return toJson(response);
   }
 

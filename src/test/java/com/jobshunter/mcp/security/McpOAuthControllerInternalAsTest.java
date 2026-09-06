@@ -1,6 +1,7 @@
 package com.jobshunter.mcp.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -94,7 +95,7 @@ class McpOAuthControllerInternalAsTest {
 
     assertTrue(responseBody.contains("\"access_token\""));
     assertTrue(responseBody.contains("\"id_token\":\"google-id-token\""));
-    assertTrue(responseBody.contains("\"refresh_token\":\"r1\""));
+    assertFalse(responseBody.contains("refresh_token"));
     assertTrue(responseBody.contains("\"token_type\":\"Bearer\""));
 
     String issuedAccessToken = extractTokenValue(responseBody, "\"access_token\":\"");
