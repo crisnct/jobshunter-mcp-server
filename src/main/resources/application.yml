@@ -55,6 +55,10 @@ mcp:
     client-id: ${GOOGLE_CLIENT_ID:}
     # Client secret for Google OAuth 2.0 application.
     client-secret: ${GOOGLE_CLIENT_SECRET:}
+    # Connect timeout for outbound calls to Google's /token endpoint.
+    connect-timeout: 5s
+    # Read timeout for outbound calls to Google's /token endpoint.
+    response-timeout: 15s
     # Enforce redirect_uri allowlist validation in both /authorize and /token.
     enforce-redirect-allowlist: true
     # Explicit redirect_uri allowlist for known clients.

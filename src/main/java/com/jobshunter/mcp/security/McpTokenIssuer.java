@@ -2,10 +2,12 @@ package com.jobshunter.mcp.security;
 
 import java.time.Instant;
 import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+@Slf4j
 @Service
 public class McpTokenIssuer {
   private final McpAuthorizationServerProperties properties;
@@ -27,6 +29,10 @@ public class McpTokenIssuer {
         "scope", stringClaim(upstreamIdentityToken, "scope"),
         "token_use", properties.mcpAccessTokenUse()
     );
+    log.debug(
+        "Issuing MCP access token: subject={}, audience={}, expiresAt={}",
+        subject, properties.mcpAudience(), expiresAt
+    );
     return jwtSigningService.signToken(subject, properties.mcpAudience(), expiresAt, claims);
   }
 
@@ -37,6 +43,10 @@ public class McpTokenIssuer {
         "email", stringClaim(authenticatedMcpToken, "email"),
         "scope", stringClaim(authenticatedMcpToken, "scope"),
         "token_use", properties.jobshunterDelegatedTokenUse()
+    );
+    log.debug(
+        "Issuing delegated Jobshunter token: subject={}, audience={}, expiresAt={}",
+        subject, properties.jobshunterAudience(), expiresAt
     );
     return jwtSigningService.signToken(subject, properties.jobshunterAudience(), expiresAt, claims);
   }

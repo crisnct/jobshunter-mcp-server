@@ -9,6 +9,8 @@ import com.jobshunter.mcp.security.DelegatedTokenResolver;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
+import java.util.function.Supplier;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.security.core.Authentication;
@@ -17,6 +19,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+@Slf4j
 @Service
 @Validated
 public class JobSearchTool {
@@ -62,14 +65,11 @@ public class JobSearchTool {
       @NotEmpty List<@Valid SearchConfiguration> searchConfigurations
   ) {
     validateSearchRequest(searchConfigurations);
-    try {
+    log.debug("search_jobs invoked: configurations={}", searchConfigurations.size());
+    return callJobshunter(() -> {
       String userToken = resolveUserToken("search_jobs");
       return jobshunterClient.searchJobs(searchConfigurations, userToken);
-    } catch (JobshunterApiException ex) {
-      throw ex;
-    } catch (Exception ex) {
-      throw new JobshunterApiException("Jobshunter returned an unexpected error.", ex);
-    }
+    });
   }
 
   @Tool(name = "get_user_info", description = """
@@ -104,12 +104,20 @@ public class JobSearchTool {
       - The tool resolves a delegated bearer token and forwards it to Jobshunter internal API.
       """)
   public UserInfoResponse getUserInfo() {
-    try {
+    log.debug("get_user_info invoked");
+    return callJobshunter(() -> {
       String userToken = resolveUserToken("get_user_info");
       return jobshunterClient.getUserInfo(userToken);
+    });
+  }
+
+  private <T> T callJobshunter(Supplier<T> call) {
+    try {
+      return call.get();
     } catch (JobshunterApiException ex) {
       throw ex;
     } catch (Exception ex) {
+      log.warn("Unexpected error while calling Jobshunter.", ex);
       throw new JobshunterApiException("Jobshunter returned an unexpected error.", ex);
     }
   }

@@ -1,7 +1,10 @@
 package com.jobshunter.mcp.config;
 
+import com.jobshunter.mcp.security.McpOAuthProperties;
 import java.io.InputStream;
+import java.net.http.HttpClient;
 import java.security.KeyStore;
+import java.time.Duration;
 import javax.net.ssl.SSLContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,14 +23,28 @@ public class RestClientConfig {
         .build();
   }
 
+  @Bean
+  RestClient googleRestClient(McpOAuthProperties properties) {
+    return RestClient.builder()
+        .requestFactory(timeoutRequestFactory(
+            properties.connectTimeout(), properties.responseTimeout(), defaultSslContext()))
+        .build();
+  }
+
   private ClientHttpRequestFactory jobshunterRequestFactory(JobshunterProperties properties) {
-    java.net.http.HttpClient httpClient = java.net.http.HttpClient.newBuilder()
-        .connectTimeout(properties.connectTimeout())
-        .sslContext(buildSslContext(properties))
+    return timeoutRequestFactory(
+        properties.connectTimeout(), properties.responseTimeout(), buildSslContext(properties));
+  }
+
+  private ClientHttpRequestFactory timeoutRequestFactory(
+      Duration connectTimeout, Duration responseTimeout, SSLContext sslContext) {
+    HttpClient httpClient = HttpClient.newBuilder()
+        .connectTimeout(connectTimeout)
+        .sslContext(sslContext)
         .build();
 
     JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
-    requestFactory.setReadTimeout(properties.responseTimeout());
+    requestFactory.setReadTimeout(responseTimeout);
     return requestFactory;
   }
 

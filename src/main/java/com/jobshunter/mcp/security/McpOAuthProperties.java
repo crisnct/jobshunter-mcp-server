@@ -1,6 +1,8 @@
 package com.jobshunter.mcp.security;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.time.Duration;
 import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.DefaultValue;
@@ -23,6 +25,8 @@ public record McpOAuthProperties(
     @DefaultValue("true") boolean rejectUnknownAuthorizeParameters,
     @DefaultValue("true") boolean rejectUnknownTokenParameters,
     List<String> additionalAuthorizeParameters,
-    List<String> additionalTokenParameters
+    List<String> additionalTokenParameters,
+    @NotNull @DefaultValue("5s") Duration connectTimeout,
+    @NotNull @DefaultValue("15s") Duration responseTimeout
 ) {
 }

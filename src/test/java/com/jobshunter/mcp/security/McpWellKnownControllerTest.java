@@ -32,7 +32,9 @@ class McpWellKnownControllerTest {
         true,
         true,
         List.of(),
-        List.of("audience", "resource"));
+        List.of("audience", "resource"),
+        Duration.ofSeconds(5),
+        Duration.ofSeconds(15));
     McpAuthorizationServerProperties authorizationServerProperties = new McpAuthorizationServerProperties(
         "https://mcp.local/",
         "mcp-api",

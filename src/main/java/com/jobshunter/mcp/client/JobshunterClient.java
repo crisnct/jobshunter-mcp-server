@@ -7,6 +7,8 @@ import com.jobshunter.mcp.dto.UserInfoResponse;
 import com.jobshunter.mcp.exception.JobshunterApiException;
 import java.net.http.HttpTimeoutException;
 import java.util.List;
+import java.util.function.Supplier;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,7 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
+@Slf4j
 @Component
 public class JobshunterClient {
   private final RestClient restClient;
@@ -31,8 +34,9 @@ public class JobshunterClient {
 
   public SearchJobsResponse searchJobs(List<SearchConfiguration> configurations, String userToken) {
     validateUserToken(userToken);
+    log.debug("Calling Jobshunter search_jobs: path={}, configurations={}", searchJobsPath, configurations.size());
 
-    try {
+    return execute("Job search", () -> {
       SearchJobsResponse response = restClient.post()
           .uri(searchJobsPath)
           .contentType(MediaType.APPLICATION_JSON)
@@ -45,26 +49,14 @@ public class JobshunterClient {
         throw new JobshunterApiException("Jobshunter returned an empty response.");
       }
       return response;
-    } catch (RestClientResponseException ex) {
-      throw mapStatusCode(ex.getStatusCode().value(), ex);
-    } catch (ResourceAccessException ex) {
-      Throwable rootCause = rootCause(ex);
-      if (isTimeout(ex)) {
-        throw new JobshunterApiException("Job search timed out.", ex);
-      }
-      if (isLikelyProtocolMismatch(rootCause)) {
-        throw new JobshunterApiException(
-            "Jobshunter endpoint closed connection. Check JOBSHUNTER_BASE_URL protocol (https expected on port 8443/443).",
-            ex);
-      }
-      throw new JobshunterApiException("Jobshunter endpoint is not reachable. "+ex.getMessage(), ex);
-    }
+    });
   }
 
   public UserInfoResponse getUserInfo(String userToken) {
     validateUserToken(userToken);
+    log.debug("Calling Jobshunter user info: path={}", userInfoPath);
 
-    try {
+    return execute("User info request", () -> {
       UserInfoResponse response = restClient.get()
           .uri(userInfoPath)
           .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
@@ -74,18 +66,28 @@ public class JobshunterClient {
         throw new JobshunterApiException("Jobshunter returned an empty user response.");
       }
       return response;
+    });
+  }
+
+  private <T> T execute(String operationLabel, Supplier<T> call) {
+    try {
+      return call.get();
     } catch (RestClientResponseException ex) {
+      log.warn("{} failed: status={}, message={}", operationLabel, ex.getStatusCode().value(), ex.getMessage());
       throw mapStatusCode(ex.getStatusCode().value(), ex);
     } catch (ResourceAccessException ex) {
       Throwable rootCause = rootCause(ex);
       if (isTimeout(ex)) {
-        throw new JobshunterApiException("User info request timed out.", ex);
+        log.warn("{} timed out: {}", operationLabel, ex.getMessage());
+        throw new JobshunterApiException(operationLabel + " timed out.", ex);
       }
       if (isLikelyProtocolMismatch(rootCause)) {
+        log.warn("{} failed due to likely protocol mismatch: {}", operationLabel, ex.getMessage());
         throw new JobshunterApiException(
             "Jobshunter endpoint closed connection. Check JOBSHUNTER_BASE_URL protocol (https expected on port 8443/443).",
             ex);
       }
+      log.warn("{} failed, Jobshunter endpoint unreachable: {}", operationLabel, ex.getMessage());
       throw new JobshunterApiException("Jobshunter endpoint is not reachable. " + ex.getMessage(), ex);
     }
   }
