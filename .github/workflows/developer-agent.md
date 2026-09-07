@@ -15,6 +15,10 @@ if: >-
   startsWith(github.event.pull_request.title, '[AI] '))
 concurrency:
   job-discriminator: ${{ github.event.issue.number || github.event.pull_request.number || github.run_id }}
+engine:
+  id: claude
+  env:
+    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 permissions:
   contents: read
   issues: read

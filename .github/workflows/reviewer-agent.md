@@ -7,6 +7,10 @@ on:
     types: [opened, synchronize, reopened, ready_for_review]
     draft: false
 if: startsWith(github.event.pull_request.title, '[AI] ')
+engine:
+  id: claude
+  env:
+    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 permissions:
   contents: read
   issues: read
