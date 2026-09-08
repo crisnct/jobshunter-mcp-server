@@ -4,6 +4,7 @@ import com.jobshunter.mcp.client.JobshunterClient;
 import com.jobshunter.mcp.dto.SearchConfiguration;
 import com.jobshunter.mcp.dto.SearchJobsResponse;
 import com.jobshunter.mcp.dto.UserInfoResponse;
+import com.jobshunter.mcp.dto.UserProfileResponse;
 import com.jobshunter.mcp.exception.JobshunterApiException;
 import com.jobshunter.mcp.security.DelegatedTokenResolver;
 import jakarta.validation.Valid;
@@ -73,24 +74,22 @@ public class JobSearchTool {
   }
 
   @Tool(name = "get_user_info", description = """
-      Return full profile details for the authenticated Jobshunter user.
+      Return a job-search-safe subset of profile details for the authenticated Jobshunter user.
 
       This tool performs a delegated call to Jobshunter internal endpoint /api/internal/me
-      and returns user metadata used by search orchestration and personalization.
+      and returns user metadata used by search orchestration and personalization. Secrets and
+      authorization-sensitive fields (verification token, phone number, security roles, and
+      stored prompts) are never included in the response.
 
       Response fields:
       - username: unique username used in Jobshunter.
       - email: primary user email.
-      - phoneNumber: phone number stored in profile.
       - notifyWhatsapp: whether WhatsApp notifications are enabled.
       - notifyEmail: whether email notifications are enabled.
       - emailVerified: whether the user email is verified.
-      - verificationToken: current verification token, if any.
       - cvFilename: uploaded CV file name; empty or null when missing.
       - notifiedAt: ISO-8601 timestamp of last notification event.
-      - prompts: list of user prompts/preferences used by search flows.
       - createdAt: ISO-8601 account creation timestamp.
-      - roles: security roles assigned to the user.
       - city: profile city.
       - country: profile country.
       - jobDomain: profile job domain/category.
@@ -103,11 +102,12 @@ public class JobSearchTool {
       - Requires a valid MCP bearer token already authenticated on /mcp.
       - The tool resolves a delegated bearer token and forwards it to Jobshunter internal API.
       """)
-  public UserInfoResponse getUserInfo() {
+  public UserProfileResponse getUserInfo() {
     log.debug("get_user_info invoked");
     return callJobshunter(() -> {
       String userToken = resolveUserToken("get_user_info");
-      return jobshunterClient.getUserInfo(userToken);
+      UserInfoResponse userInfo = jobshunterClient.getUserInfo(userToken);
+      return UserProfileResponse.fromUserInfo(userInfo);
     });
   }
 

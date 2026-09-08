@@ -11,6 +11,7 @@ import com.jobshunter.mcp.dto.SearchConfiguration;
 import com.jobshunter.mcp.dto.SearchJobResult;
 import com.jobshunter.mcp.dto.SearchJobsResponse;
 import com.jobshunter.mcp.dto.UserInfoResponse;
+import com.jobshunter.mcp.dto.UserProfileResponse;
 import com.jobshunter.mcp.exception.JobshunterApiException;
 import com.jobshunter.mcp.security.DelegatedTokenResolver;
 import java.time.Instant;
@@ -106,19 +107,19 @@ class JobSearchToolTest {
     );
     SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
     when(delegatedTokenResolver.resolveDelegatedToken(jwt)).thenReturn("delegated-token");
-    UserInfoResponse expected = new UserInfoResponse(
+    UserInfoResponse clientResponse = new UserInfoResponse(
         "user@example.com",
         "user@example.com",
         "0700000000",
         false,
         true,
         true,
-        null,
+        "secret-verification-token",
         "cv.pdf",
         null,
-        List.of(),
+        List.of("Looking for backend roles"),
         "2026-09-01T00:00:00Z",
-        List.of("USER"),
+        List.of("ADMIN"),
         "Cluj",
         "RO",
         "Software",
@@ -127,10 +128,27 @@ class JobSearchToolTest {
         "NO",
         List.of("FULL_TIME")
     );
-    when(jobshunterClient.getUserInfo("delegated-token")).thenReturn(expected);
+    when(jobshunterClient.getUserInfo("delegated-token")).thenReturn(clientResponse);
 
-    UserInfoResponse actual = jobSearchTool.getUserInfo();
+    UserProfileResponse actual = jobSearchTool.getUserInfo();
 
+    UserProfileResponse expected = new UserProfileResponse(
+        "user@example.com",
+        "user@example.com",
+        false,
+        true,
+        true,
+        "cv.pdf",
+        null,
+        "2026-09-01T00:00:00Z",
+        "Cluj",
+        "RO",
+        "Software",
+        List.of("Java Developer"),
+        List.of("REMOTE"),
+        "NO",
+        List.of("FULL_TIME")
+    );
     assertEquals(expected, actual);
     verify(jobshunterClient).getUserInfo("delegated-token");
   }

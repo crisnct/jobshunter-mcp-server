@@ -185,16 +185,18 @@ components:
           description: Deduplicated list of synchronous search results.
           items:
             $ref: '#/components/schemas/SearchJobResult'
-    UserInfoResponse:
+    UserProfileResponse:
       type: object
+      description: |
+        Job-search-safe subset of the Jobshunter user profile. Deliberately excludes
+        the verification token, phone number, security roles, and stored prompts, since
+        MCP tool responses are visible to the model and often logged.
       required:
         - username
         - email
         - notifyWhatsapp
         - notifyEmail
         - emailVerified
-        - prompts
-        - roles
         - jobRoles
         - jobTypes
         - contractTypes
@@ -206,10 +208,6 @@ components:
           type: string
           format: email
           description: Primary user email.
-        phoneNumber:
-          type: string
-          nullable: true
-          description: Phone number from user profile.
         notifyWhatsapp:
           type: boolean
           description: Whether WhatsApp notifications are enabled.
@@ -219,10 +217,6 @@ components:
         emailVerified:
           type: boolean
           description: Whether user email is verified.
-        verificationToken:
-          type: string
-          nullable: true
-          description: Current verification token, if any.
         cvFilename:
           type: string
           nullable: true
@@ -231,20 +225,10 @@ components:
           type: string
           nullable: true
           description: ISO-8601 timestamp of latest notification.
-        prompts:
-          type: array
-          items:
-            type: string
-          description: User prompts/preferences used by search.
         createdAt:
           type: string
           nullable: true
           description: ISO-8601 account creation timestamp.
-        roles:
-          type: array
-          items:
-            type: string
-          description: Security roles assigned to the user.
         city:
           type: string
           nullable: true

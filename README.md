@@ -138,7 +138,7 @@ Runs synchronous job search for the authenticated user.
 
 ### `get_user_info`
 
-Returns the authenticated user's Jobshunter profile (email, preferences, roles, location, job metadata, and more).
+Returns a job-search-safe subset of the authenticated user's Jobshunter profile (email, notification preferences, location, job metadata, and more). Secrets and authorization-sensitive fields — verification token, phone number, security roles, and stored prompts — are never returned.
 
 > [!TIP]
 > Full request/response schema examples are in [`src/main/resources/openapi.yaml`](src/main/resources/openapi.yaml).
