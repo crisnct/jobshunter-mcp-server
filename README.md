@@ -1,7 +1,7 @@
 # JobsHunter MCP Server
 
 ![Java](https://img.shields.io/badge/Java-25-orange)
-![SpringBoot](https://img.shields.io/badge/Spring_Boot-4.0.0-6DB33F)
+![SpringBoot](https://img.shields.io/badge/Spring_Boot-4.1.1-6DB33F)
 ![MCP](https://img.shields.io/badge/MCP-Streamable_HTTP-1f6feb)
 ![Auth](https://img.shields.io/badge/OAuth2-PKCE_S256-8a2be2)
 ![License](https://img.shields.io/badge/License-BSL_1.1-lightgrey)
@@ -271,14 +271,20 @@ Run default test suite:
 mvn test
 ```
 
-Run an integration test class explicitly:
+Run the full build, which also executes integration tests:
 
 ```bash
-mvn test -Dtest=McpSecurityFilterChainIT
+mvn verify
 ```
 
 > [!NOTE]
-> Maven Surefire defaults include `*Test` classes. `*IT` classes may need explicit execution unless build plugins are adjusted.
+> Maven Surefire runs `*Test` classes during the `test` phase. `*IT` classes are run automatically by the Failsafe plugin during `mvn verify` (bound to the `integration-test`/`verify` goals) — no explicit execution is needed.
+
+Run a single integration test class explicitly:
+
+```bash
+mvn verify -Dit.test=McpSecurityFilterChainIT
+```
 
 ---
 
