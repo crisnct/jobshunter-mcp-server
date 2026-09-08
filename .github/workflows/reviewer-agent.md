@@ -6,6 +6,8 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     draft: false
+  bots:
+     - "jobshunter-dev-agent-crisnct[bot]"  
 if: startsWith(github.event.pull_request.title, '[AI] ')
 engine:
   id: claude
