@@ -6,7 +6,6 @@ on:
   label_command:
     name: "ai:ready"
     events: [issues]
-    strategy: decentralized
   pull_request_review:
     types: [submitted]
 if: >-
