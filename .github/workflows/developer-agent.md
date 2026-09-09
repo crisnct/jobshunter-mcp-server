@@ -96,9 +96,13 @@ State lives in the `ai:*` label set: `ai:ready`, `ai:in_progress`, `ai:wait_for_
 
 ## Implement
 
-1. Remove `ai:ready` and add `ai:in_progress` on the issue.
-2. Read the issue/comments and only relevant project instructions, code, and tests; extract scope, criteria, constraints, and expected tests.
-3. If an open `[AI]` PR already covers the issue, emit `noop` with its number and stop.
+Every numbered exit below (`noop`, blocked, done) carries its own mandatory label transition — never call `noop`, `add_comment`, or `create_pull_request` without first (in the same turn) calling the `add_labels`/`remove_labels` pair listed for that exact case. Do not defer the label change to "step 1" and assume it already happened.
+
+1. Search for an open `[AI]` PR already covering the issue (branch `ai/issue-<issue-number>-*` or body containing `Closes #<issue-number>`). If one exists:
+   - Read its current `ai:*` label. Remove `ai:ready` from the issue and add whatever `ai:*` label the PR currently carries (or `ai:to_review` if the PR predates this label scheme and carries none) to the issue, so issue and PR match.
+   - Emit `noop` with the PR number and stop.
+2. Otherwise, remove `ai:ready` and add `ai:in_progress` on the issue — you are now actively working on it.
+3. Read the issue/comments and only relevant project instructions, code, and tests; extract scope, criteria, constraints, and expected tests.
 4. Do not invent API, persistence, OAuth, authorization, token, or security decisions. If ambiguity blocks safe implementation:
    - Commit whatever safe partial progress exists (may be none).
    - Emit one `create_pull_request` on branch `ai/issue-<issue-number>-<short-purpose>`, labeled `ai:wait_for_feedback`, with the open questions in the body and `Closes #<issue-number>`.
@@ -121,9 +125,11 @@ Triggered when a human comments on an issue or PR that currently carries `ai:wai
 
 ## Fix findings
 
-1. Remove `ai:needs_work` and add `ai:in_progress` on the pull request and its linked issue.
-2. Read the latest `AI Reviewer Verdict` review, inline comments, PR, linked issue, prior AI verdicts, and current diff.
-3. If the reviewed SHA is stale (the verdict's commit differs from the current head for reasons other than your own pending fix), emit `noop` and stop.
+Every numbered exit below carries its own mandatory label transition — never call `noop`, `add_comment`, or `push_to_pull_request_branch` without first (in the same turn) calling the `add_labels`/`remove_labels` pair for that exact case.
+
+1. Read the latest `AI Reviewer Verdict` review, inline comments, PR, linked issue, prior AI verdicts, and current diff.
+2. If the reviewed SHA is stale (the verdict's commit differs from the current head for reasons other than your own pending fix), emit `noop` and stop. Leave `ai:needs_work` untouched — nothing was actually done.
+3. Remove `ai:needs_work` and add `ai:in_progress` on the pull request and its linked issue — you are now actively working on it.
 4. Fix every `MANDATORY` finding; skip optional suggestions unless needed for correctness and scope. If mandatory findings conflict or need human judgment:
    - Emit `add_comment` on the PR with concise questions.
    - Remove `ai:in_progress`, add `ai:wait_for_feedback` (PR + issue).
