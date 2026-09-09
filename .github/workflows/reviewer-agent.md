@@ -80,7 +80,7 @@ Every safe-output call in this workflow uses `target: "*"`, so `pull_request_num
 
 ## Labels
 
-Only pick up pull requests labeled `ai:to_review` (enforced by the trigger, or found by the schedule sweep above). When you publish your verdict, replace `ai:to_review` with `ai:done` (approved) or `ai:needs_work` (changes requested) on **both** the pull request and its linked issue — find the issue number from `Closes #<n>` (or `Fixes #`/`Resolves #`) in the PR body, and call `remove_labels`/`add_labels` once per `item_number` (PR, then issue).
+Only pick up pull requests labeled `ai:to_review` (enforced by the trigger, or found by the schedule sweep above). When you publish your verdict, replace `ai:to_review` with `ai:done` (approved) or `ai:needs_work` (changes requested) on **both** the pull request and its linked issue — find the issue number from `Closes #<n>` (or `Fixes #`/`Resolves #`) in the PR body, and call `remove_labels`/`add_labels` once per `item_number` (PR, then issue). Emit these label calls **in the same turn** as `submit_pull_request_review`, never as a separate follow-up turn — a rate-limit hit right after the review is submitted would otherwise leave the review posted but the item stuck on `ai:to_review` forever.
 
 ## Process
 
@@ -101,8 +101,7 @@ Keep context small: this review must fit comfortably in one pass. Every turn res
 3. Run it as a single blocking command that redirects to a file, then extract only what you need, e.g. `mvn -B verify > /tmp/verify.log 2>&1; grep -E "BUILD (SUCCESS|FAILURE)|Tests run:|ERROR\]" /tmp/verify.log`. Never write a polling loop (sleep + repeated tail/grep) waiting for it to finish — the command already blocks until done. Do not paste the raw build log into context — capture only the final result line, failing test names/assertions, and new warnings tied to the diff, including any Spring Boot startup/console output that lands in the same file from `@SpringBootTest` tests. Treat environmental failures as uncertainty, not defects.
 4. Apply only the criteria below that the diff's own files plausibly touch; skip the rest without investigating them. Refetch the PR before submission; if SHA changed, emit `noop` and stop.
 5. Comment inline only on changed lines when location helps (`pull_request_number` = the resolved PR number); reuse finding IDs in the verdict.
-6. Emit exactly one `submit_pull_request_review` for the reviewed SHA, with `pull_request_number` set to the resolved PR number.
-7. Remove `ai:to_review` and add `ai:done` (if `APPROVE`) or `ai:needs_work` (if `REQUEST_CHANGES`) on the PR (`item_number` = the resolved PR number) and its linked issue.
+6. In the **same turn**, emit all of: exactly one `submit_pull_request_review` for the reviewed SHA (`pull_request_number` = the resolved PR number), plus the label transition — remove `ai:to_review` and add `ai:done` (if `APPROVE`) or `ai:needs_work` (if `REQUEST_CHANGES`) — on both the PR (`item_number` = the resolved PR number) and its linked issue. Never split the review submission and the label calls across separate turns: if a rate limit or transient error hits between them, the review ends up posted but the item stays stuck on `ai:to_review` forever, since nothing re-triggers this workflow to finish the label flip.
 
 ## Review criteria
 
