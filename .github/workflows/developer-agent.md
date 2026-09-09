@@ -28,7 +28,7 @@ if: >-
 concurrency:
   group: gh-aw-${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number || github.run_id }}-${{ github.event.label.name || github.event.comment.id || github.run_id }}
   cancel-in-progress: false
-max-turns: 35
+max-turns: 100
 max-ai-credits: 300
 engine:
   id: claude
