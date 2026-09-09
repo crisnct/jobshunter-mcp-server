@@ -38,6 +38,7 @@ tools:
     mode: gh-proxy
     toolsets: [repos, issues, pull_requests]
 safe-outputs:
+  threat-detection: false
   github-app:
     client-id: ${{ vars.AI_REVIEWER_APP_CLIENT_ID }}
     private-key: ${{ secrets.AI_REVIEWER_APP_PRIVATE_KEY }}
@@ -45,23 +46,19 @@ safe-outputs:
     max: 10
     side: "RIGHT"
     target: "*"
-    threat-detection: false
   submit-pull-request-review:
     max: 1
     allowed-events: [APPROVE, REQUEST_CHANGES]
     supersede-older-reviews: true
     target: "*"
-    threat-detection: false
   add-labels:
     allowed: [ai:done, ai:needs_work]
     target: "*"
     create-if-missing: true
-    threat-detection: false
     max: 3
   remove-labels:
     allowed: [ai:to_review]
     target: "*"
-    threat-detection: false
     max: 3
   noop:
 ---

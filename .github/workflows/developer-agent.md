@@ -49,6 +49,7 @@ tools:
     mode: gh-proxy
     toolsets: [repos, issues, pull_requests]
 safe-outputs:
+  threat-detection: false
   github-app:
     client-id: ${{ vars.AI_DEVELOPER_APP_CLIENT_ID }}
     private-key: ${{ secrets.AI_DEVELOPER_APP_PRIVATE_KEY }}
@@ -56,7 +57,6 @@ safe-outputs:
     title-prefix: "[AI] "
     draft: false
     fallback-as-issue: false
-    threat-detection: false
     allowed-files: &implementation-files
       - "src/**"
       - "pom.xml"
@@ -66,23 +66,19 @@ safe-outputs:
       - "docker-compose.yml"
   push-to-pull-request-branch:
     required-title-prefix: "[AI] "
-    threat-detection: false
     target: "*"
     allowed-files: *implementation-files
   add-comment:
     max: 1
     target: "*"
-    threat-detection: false
   add-labels:
     allowed: [ai:in_progress, ai:wait_for_feedback, ai:to_review]
     target: "*"
     create-if-missing: true
-    threat-detection: false
     max: 3
   remove-labels:
     allowed: [ai:ready, ai:in_progress, ai:wait_for_feedback, ai:needs_work]
     target: "*"
-    threat-detection: false
     max: 3
   noop:
 ---
