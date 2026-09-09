@@ -56,10 +56,12 @@ safe-outputs:
     allowed: [ai:done, ai:needs_work]
     target: "*"
     create-if-missing: true
+    threat-detection: false
     max: 3
   remove-labels:
     allowed: [ai:to_review]
     target: "*"
+    threat-detection: false
     max: 3
   noop:
 ---

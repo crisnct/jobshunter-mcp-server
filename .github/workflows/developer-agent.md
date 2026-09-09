@@ -77,10 +77,12 @@ safe-outputs:
     allowed: [ai:in_progress, ai:wait_for_feedback, ai:to_review]
     target: "*"
     create-if-missing: true
+    threat-detection: false
     max: 3
   remove-labels:
     allowed: [ai:ready, ai:in_progress, ai:wait_for_feedback, ai:needs_work]
     target: "*"
+    threat-detection: false
     max: 3
   noop:
 ---
