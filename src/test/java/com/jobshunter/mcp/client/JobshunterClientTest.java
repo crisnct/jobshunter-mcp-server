@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.headerDoesNotExist;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
@@ -13,7 +14,9 @@ import com.jobshunter.mcp.config.JobshunterProperties;
 import com.jobshunter.mcp.dto.SearchConfiguration;
 import com.jobshunter.mcp.dto.SearchJobsResponse;
 import com.jobshunter.mcp.dto.UserInfoResponse;
+import com.jobshunter.mcp.exception.ErrorCode;
 import com.jobshunter.mcp.exception.JobshunterApiException;
+import com.jobshunter.mcp.logging.RequestContext;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
@@ -21,10 +24,12 @@ import java.net.URI;
 import java.nio.channels.ClosedChannelException;
 import java.time.Duration;
 import java.util.List;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.slf4j.MDC;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatusCode;
@@ -49,6 +54,11 @@ class JobshunterClientTest {
     RestClient restClient = builder.build();
 
     jobshunterClient = new JobshunterClient(restClient, propertiesWithBaseUrl(BASE_URL));
+  }
+
+  @AfterEach
+  void clearMdc() {
+    MDC.clear();
   }
 
   private static JobshunterProperties propertiesWithBaseUrl(String baseUrl) {
@@ -119,15 +129,15 @@ class JobshunterClientTest {
 
   @ParameterizedTest(name = "status {0} maps to \"{1}\"")
   @CsvSource({
-      "400, Invalid search configuration.",
-      "401, Jobshunter authentication failed.",
-      "403, Jobshunter authorization failed.",
-      "404, Jobshunter endpoint unavailable.",
-      "409, Jobshunter request failed with status 409.",
-      "500, Jobshunter returned an unexpected error.",
-      "503, Jobshunter returned an unexpected error."
+      "400, Invalid search configuration., VALIDATION",
+      "401, Jobshunter authentication failed., AUTH_FAILED",
+      "403, Jobshunter authorization failed., AUTH_FAILED",
+      "404, Jobshunter endpoint unavailable., UPSTREAM_UNAVAILABLE",
+      "409, Jobshunter request failed with status 409., VALIDATION",
+      "500, Jobshunter returned an unexpected error., UPSTREAM_UNAVAILABLE",
+      "503, Jobshunter returned an unexpected error., UPSTREAM_UNAVAILABLE"
   })
-  void shouldMapErrorStatusCodesToExpectedMessages(int statusCode, String expectedMessage) {
+  void shouldMapErrorStatusCodesToExpectedMessages(int statusCode, String expectedMessage, ErrorCode expectedErrorCode) {
     mockServer.expect(requestTo(BASE_URL + "/api/internal/search_jobs"))
         .andExpect(method(HttpMethod.POST))
         .andRespond(withStatus(HttpStatusCode.valueOf(statusCode)));
@@ -137,7 +147,8 @@ class JobshunterClientTest {
         "user-id-token"
     ))
         .isInstanceOf(JobshunterApiException.class)
-        .hasMessage(expectedMessage);
+        .hasMessage(expectedMessage)
+        .satisfies(ex -> assertThat(((JobshunterApiException) ex).getErrorCode()).isEqualTo(expectedErrorCode));
 
     mockServer.verify();
   }
@@ -151,7 +162,8 @@ class JobshunterClientTest {
         "user-id-token"
     ))
         .isInstanceOf(JobshunterApiException.class)
-        .hasMessage("Job search timed out.");
+        .hasMessage("Job search timed out.")
+        .satisfies(ex -> assertThat(((JobshunterApiException) ex).getErrorCode()).isEqualTo(ErrorCode.TIMEOUT));
   }
 
   @Test
@@ -165,7 +177,8 @@ class JobshunterClientTest {
     ))
         .isInstanceOf(JobshunterApiException.class)
         .hasMessageContaining("Jobshunter endpoint closed connection")
-        .hasMessageContaining("JOBSHUNTER_BASE_URL protocol");
+        .hasMessageContaining("JOBSHUNTER_BASE_URL protocol")
+        .satisfies(ex -> assertThat(((JobshunterApiException) ex).getErrorCode()).isEqualTo(ErrorCode.UPSTREAM_UNAVAILABLE));
   }
 
   @Test
@@ -177,7 +190,8 @@ class JobshunterClientTest {
         "user-id-token"
     ))
         .isInstanceOf(JobshunterApiException.class)
-        .hasMessageStartingWith("Jobshunter endpoint is not reachable.");
+        .hasMessageStartingWith("Jobshunter endpoint is not reachable.")
+        .satisfies(ex -> assertThat(((JobshunterApiException) ex).getErrorCode()).isEqualTo(ErrorCode.UPSTREAM_UNAVAILABLE));
   }
 
   @Test
@@ -191,7 +205,8 @@ class JobshunterClientTest {
         "user-id-token"
     ))
         .isInstanceOf(JobshunterApiException.class)
-        .hasMessage("Jobshunter returned an empty response.");
+        .hasMessage("Jobshunter returned an empty response.")
+        .satisfies(ex -> assertThat(((JobshunterApiException) ex).getErrorCode()).isEqualTo(ErrorCode.UPSTREAM_UNAVAILABLE));
 
     mockServer.verify();
   }
@@ -204,7 +219,8 @@ class JobshunterClientTest {
 
     assertThatThrownBy(() -> jobshunterClient.getUserInfo("user-id-token"))
         .isInstanceOf(JobshunterApiException.class)
-        .hasMessage("Jobshunter returned an empty user response.");
+        .hasMessage("Jobshunter returned an empty user response.")
+        .satisfies(ex -> assertThat(((JobshunterApiException) ex).getErrorCode()).isEqualTo(ErrorCode.UPSTREAM_UNAVAILABLE));
 
     mockServer.verify();
   }
@@ -219,7 +235,78 @@ class JobshunterClientTest {
         ""
     ))
         .isInstanceOf(JobshunterApiException.class)
-        .hasMessage("Authenticated user token is missing.");
+        .hasMessage("Authenticated user token is missing.")
+        .satisfies(ex -> assertThat(((JobshunterApiException) ex).getErrorCode()).isEqualTo(ErrorCode.AUTH_FAILED));
+  }
+
+  @Test
+  void shouldForwardRequestIdHeaderWhenPresentInMdc() {
+    MDC.put(RequestContext.REQUEST_ID_MDC_KEY, "test-request-id");
+
+    mockServer.expect(requestTo(BASE_URL + "/api/internal/me"))
+        .andExpect(method(HttpMethod.GET))
+        .andExpect(header(RequestContext.REQUEST_ID_HEADER, "test-request-id"))
+        .andRespond(withSuccess("""
+            {
+              "username":"user@example.com",
+              "email":"user@example.com",
+              "phoneNumber":"0700000000",
+              "notifyWhatsapp":false,
+              "notifyEmail":true,
+              "emailVerified":true,
+              "verificationToken":null,
+              "cvFilename":"cv.pdf",
+              "notifiedAt":null,
+              "prompts":[],
+              "createdAt":"2026-09-01T00:00:00Z",
+              "roles":["USER"],
+              "city":"Cluj",
+              "country":"RO",
+              "jobDomain":"Software",
+              "jobRoles":["Java Developer"],
+              "jobTypes":["REMOTE"],
+              "relocation":"NO",
+              "contractTypes":["FULL_TIME"]
+            }
+            """, MediaType.APPLICATION_JSON));
+
+    jobshunterClient.getUserInfo("user-id-token");
+
+    mockServer.verify();
+  }
+
+  @Test
+  void shouldNotSetRequestIdHeaderWhenAbsentFromMdc() {
+    mockServer.expect(requestTo(BASE_URL + "/api/internal/me"))
+        .andExpect(method(HttpMethod.GET))
+        .andExpect(headerDoesNotExist(RequestContext.REQUEST_ID_HEADER))
+        .andRespond(withSuccess("""
+            {
+              "username":"user@example.com",
+              "email":"user@example.com",
+              "phoneNumber":"0700000000",
+              "notifyWhatsapp":false,
+              "notifyEmail":true,
+              "emailVerified":true,
+              "verificationToken":null,
+              "cvFilename":"cv.pdf",
+              "notifiedAt":null,
+              "prompts":[],
+              "createdAt":"2026-09-01T00:00:00Z",
+              "roles":["USER"],
+              "city":"Cluj",
+              "country":"RO",
+              "jobDomain":"Software",
+              "jobRoles":["Java Developer"],
+              "jobTypes":["REMOTE"],
+              "relocation":"NO",
+              "contractTypes":["FULL_TIME"]
+            }
+            """, MediaType.APPLICATION_JSON));
+
+    jobshunterClient.getUserInfo("user-id-token");
+
+    mockServer.verify();
   }
 
   @Test
