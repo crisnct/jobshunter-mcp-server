@@ -71,9 +71,11 @@ Only pick up pull requests labeled `ai:to_review` (enforced by the trigger). Whe
 
 ## Process
 
-1. Record PR number/head SHA. Read the PR, linked issue/criteria, full diff, relevant code/tests, prior AI reviews, and checks.
-2. Review changed behavior only; inspect surrounding code only to prove impact.
-3. Run `mvn -B verify`; treat environmental failures as uncertainty, not defects.
+Keep context small: this review must fit comfortably in one pass. Never read a whole file, module, or the wider codebase "for context" — read only the changed hunks plus the minimum extra (a called method's signature, a referenced class) needed to check one specific claim, and only when the diff alone leaves real doubt.
+
+1. Record PR number/head SHA. Read the PR description, linked issue/criteria, and the diff (changed files/hunks only). Fetch prior AI reviews and checks; skim, don't re-read them in full if already summarized in an earlier verdict.
+2. Review changed behavior only; open surrounding code file-by-file, only the specific file and only to prove a specific impact — never a broad or repo-wide exploration.
+3. Run `mvn -B verify`. Do not paste the raw build log into context — capture only the final result line (BUILD SUCCESS/FAILURE), failing test names/assertions, and new warnings tied to the diff. Treat environmental failures as uncertainty, not defects.
 4. Apply every criterion below. Refetch the PR before submission; if SHA changed, emit `noop` and stop.
 5. Comment inline only on changed lines when location helps; reuse finding IDs in the verdict.
 6. Emit exactly one `submit_pull_request_review` for the reviewed SHA.
