@@ -23,7 +23,7 @@ if: >-
    github.event.comment.user.type != 'Bot' &&
    contains(github.event.issue.labels.*.name, 'ai:wait_for_feedback'))
 concurrency:
-  group: gh-aw-ai-agents
+  group: gh-aw-${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number || github.run_id }}-${{ github.event.label.name || github.event.comment.id || github.run_id }}
   cancel-in-progress: false
 max-turns: 35
 max-ai-credits: 300

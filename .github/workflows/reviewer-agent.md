@@ -12,7 +12,7 @@ if: >-
   startsWith(github.event.pull_request.title, '[AI] ') &&
   github.event.pull_request.user.login == 'jobshunter-dev-agent-crisnct[bot]'
 concurrency:
-  group: gh-aw-ai-agents
+  group: gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}-${{ github.event.label.name || github.run_id }}
   cancel-in-progress: false
 max-turns: 10
 max-ai-credits: 100
