@@ -14,9 +14,12 @@ on:
     names: [ai:needs_work]
   issue_comment:
     types: [created]
+  schedule:
+    - cron: "*/15 * * * *"
   bots:
     - "jobshunter-review-agent-crisnct[bot]"
 if: >-
+  github.event_name == 'schedule' ||
   github.event_name == 'issues' ||
   github.event_name == 'pull_request' ||
   (github.event_name == 'issue_comment' &&
@@ -64,9 +67,11 @@ safe-outputs:
   push-to-pull-request-branch:
     required-title-prefix: "[AI] "
     threat-detection: false
+    target: "*"
     allowed-files: *implementation-files
   add-comment:
     max: 1
+    target: "*"
     threat-detection: false
   add-labels:
     allowed: [ai:in_progress, ai:wait_for_feedback, ai:to_review]
@@ -105,9 +110,16 @@ Keep context small — every turn resends the entire conversation so far, so cum
 
 ## Route
 
-- `issues` event (label `ai:ready` just added): go to **Implement**.
-- `pull_request` event (label `ai:needs_work` just added): go to **Fix findings**.
-- `issue_comment` event (a human replied while the item was `ai:wait_for_feedback`): go to **Resume**.
+- `issues` event (label `ai:ready` just added): go to **Implement**, using that issue.
+- `pull_request` event (label `ai:needs_work` just added): go to **Fix findings**, using that PR.
+- `issue_comment` event (a human replied while the item was `ai:wait_for_feedback`): go to **Resume**, using that issue/PR.
+- `schedule` event (safety-net sweep, runs every 15 minutes): the event carries no issue/PR — a labeling or comment event can occasionally get lost (e.g. cancelled by GitHub superseding it when another event landed at the same moment). Check, in this order, and act on the **first** match only (the next scheduled run picks up anything else):
+  1. The oldest open issue labeled `ai:ready` → **Implement**.
+  2. The oldest open `[AI] `-titled PR by this bot labeled `ai:needs_work` → **Fix findings**.
+  3. The oldest open issue or PR labeled `ai:wait_for_feedback` whose most recent comment is from a human (not a bot) and postdates your own last comment there → **Resume**.
+  If none of the three match anything, emit `noop` and stop.
+
+Every safe-output in this workflow (`create_pull_request` excepted, since it always creates something new) uses `target: "*"`, so `item_number`/`pull_request_number` is **required on every `add_comment`, `push_to_pull_request_branch`, `add_labels`, and `remove_labels` call, always** — there is no implicit "triggering item" to fall back on, whether the run started from a real event or from the schedule sweep above.
 
 ## Implement
 
