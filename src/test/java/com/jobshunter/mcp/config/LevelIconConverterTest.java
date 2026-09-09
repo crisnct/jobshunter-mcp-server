@@ -38,6 +38,17 @@ class LevelIconConverterTest {
     assertThat(distinctIcons).isEqualTo(5);
   }
 
+  @ParameterizedTest
+  @CsvSource({
+      "OFF, •",
+      "ALL, •"
+  })
+  void convertReturnsDefaultIconForUnmappedLevel(String levelName, String expectedIcon) {
+    ILoggingEvent event = eventWithLevel(Level.toLevel(levelName));
+
+    assertThat(converter.convert(event)).isEqualTo(expectedIcon);
+  }
+
   private static ILoggingEvent eventWithLevel(Level level) {
     ILoggingEvent event = Mockito.mock(ILoggingEvent.class);
     Mockito.when(event.getLevel()).thenReturn(level);
