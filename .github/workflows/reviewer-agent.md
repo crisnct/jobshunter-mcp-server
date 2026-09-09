@@ -41,10 +41,12 @@ safe-outputs:
   create-pull-request-review-comment:
     max: 10
     side: "RIGHT"
+    threat-detection: false
   submit-pull-request-review:
     max: 1
     allowed-events: [APPROVE, REQUEST_CHANGES]
     supersede-older-reviews: true
+    threat-detection: false
   add-labels:
     allowed: [ai:done, ai:needs_work]
     target: "*"

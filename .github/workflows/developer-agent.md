@@ -53,6 +53,7 @@ safe-outputs:
     title-prefix: "[AI] "
     draft: false
     fallback-as-issue: false
+    threat-detection: false
     allowed-files: &implementation-files
       - "src/**"
       - "pom.xml"
@@ -62,9 +63,11 @@ safe-outputs:
       - "docker-compose.yml"
   push-to-pull-request-branch:
     required-title-prefix: "[AI] "
+    threat-detection: false
     allowed-files: *implementation-files
   add-comment:
     max: 1
+    threat-detection: false
   add-labels:
     allowed: [ai:in_progress, ai:wait_for_feedback, ai:to_review]
     target: "*"
