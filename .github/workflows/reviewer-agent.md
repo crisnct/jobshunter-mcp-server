@@ -71,12 +71,17 @@ Only pick up pull requests labeled `ai:to_review` (enforced by the trigger). Whe
 
 ## Process
 
-Keep context small: this review must fit comfortably in one pass. Never read a whole file, module, or the wider codebase "for context" — read only the changed hunks plus the minimum extra (a called method's signature, a referenced class) needed to check one specific claim, and only when the diff alone leaves real doubt.
+Keep context small: this review must fit comfortably in one pass. Hard rules, not suggestions:
 
-1. Record PR number/head SHA. Read the PR description, linked issue/criteria, and the diff (changed files/hunks only). Fetch prior AI reviews and checks; skim, don't re-read them in full if already summarized in an earlier verdict.
+- Fetch each piece of information **once**, with **one** command. If a command's output looks unexpected, fix your command or move on — never retry the same data through 2-3 different commands "just in case" (e.g. never call `gh pr diff`, `gh pr diff --patch`, and `gh api .../pulls/N` for the same diff; pick one, e.g. `gh api repos/<owner>/<repo>/pulls/<n>/files --jq '...'`, and stick with it for the whole review).
+- Never inspect the contents of a third-party dependency (extracting/reading a `.jar`, a library's source, a vendored default config) to "double check" a framework's behavior. Trust well-known framework behavior (e.g. Spring Boot's own default logging pattern) unless the diff itself contradicts it.
+- Only investigate a **Review criteria** item if the diff's own files plausibly touch it. A criterion you cannot connect to a changed line (auth, tracing, persistence, etc. on a diff that touches none of that) is simply not applicable — do not go searching the rest of the repo to confirm its absence or irrelevance.
+- Never read a whole file, module, or the wider codebase "for context" — read only the changed hunks plus the minimum extra (a called method's signature, a referenced class) needed to check one specific claim, and only when the diff alone leaves real doubt.
+
+1. Record PR number/head SHA. Read the PR description, linked issue/criteria, and the diff (changed files/hunks only, one fetch). Fetch prior AI reviews and checks; skim, don't re-read them in full if already summarized in an earlier verdict.
 2. Review changed behavior only; open surrounding code file-by-file, only the specific file and only to prove a specific impact — never a broad or repo-wide exploration.
 3. Run it as a single blocking command that redirects to a file, then extract only what you need, e.g. `mvn -B verify > /tmp/verify.log 2>&1; grep -E "BUILD (SUCCESS|FAILURE)|Tests run:|ERROR\]" /tmp/verify.log`. Never write a polling loop (sleep + repeated tail/grep) waiting for it to finish — the command already blocks until done. Do not paste the raw build log into context — capture only the final result line, failing test names/assertions, and new warnings tied to the diff. Treat environmental failures as uncertainty, not defects.
-4. Apply every criterion below. Refetch the PR before submission; if SHA changed, emit `noop` and stop.
+4. Apply only the criteria below that the diff's own files plausibly touch; skip the rest without investigating them. Refetch the PR before submission; if SHA changed, emit `noop` and stop.
 5. Comment inline only on changed lines when location helps; reuse finding IDs in the verdict.
 6. Emit exactly one `submit_pull_request_review` for the reviewed SHA.
 7. Remove `ai:to_review` and add `ai:done` (if `APPROVE`) or `ai:needs_work` (if `REQUEST_CHANGES`) on the PR and its linked issue.
