@@ -17,8 +17,8 @@ public class LevelIconConverter extends ClassicConverter {
       case Level.ERROR_INT -> "✖";
       case Level.WARN_INT -> "⚠";
       case Level.INFO_INT -> "ℹ";
-      case Level.DEBUG_INT -> "🐛";
-      case Level.TRACE_INT -> "🔍";
+      case Level.DEBUG_INT -> "⚙";
+      case Level.TRACE_INT -> "»";
       default -> "•";
     };
   }

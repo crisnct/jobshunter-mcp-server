@@ -19,8 +19,8 @@ class LevelIconConverterTest {
       "ERROR, ✖",
       "WARN, ⚠",
       "INFO, ℹ",
-      "DEBUG, 🐛",
-      "TRACE, 🔍"
+      "DEBUG, ⚙",
+      "TRACE, »"
   })
   void convertReturnsDistinctIconPerLevel(String levelName, String expectedIcon) {
     ILoggingEvent event = eventWithLevel(Level.toLevel(levelName));
