@@ -26,7 +26,7 @@ concurrency:
   group: gh-aw-ai-agents
   cancel-in-progress: false
 max-turns: 35
-max-ai-credits: 400
+max-ai-credits: 300
 engine:
   id: claude
   env:
