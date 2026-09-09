@@ -1,6 +1,6 @@
 ---
 name: AI Developer Agent
-description: Implements approved GitHub issues and fixes mandatory AI review findings
+description: Act as Senior Java Developer and implements approved GitHub issues and fixes mandatory AI review findings
 intent: >-
   Drive an issue/PR through the ai:* label state machine: ai:ready -> ai:in_progress ->
   (ai:wait_for_feedback <-> ai:in_progress)* -> ai:to_review, and resume from ai:needs_work

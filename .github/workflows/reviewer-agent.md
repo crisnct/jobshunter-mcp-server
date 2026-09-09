@@ -1,6 +1,6 @@
 ---
 name: AI Reviewer Agent
-description: Reviews every AI-generated pull request revision and blocks only mandatory findings
+description: Act as Senior Java Developer and reviews every AI-generated pull request revision and blocks only mandatory findings
 intent: Independently review each pull request labeled ai:to_review, always publish a verdict, and hand the item back to the developer agent (ai:needs_work) or close it out (ai:done).
 on:
   pull_request:
