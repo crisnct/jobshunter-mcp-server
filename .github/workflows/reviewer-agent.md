@@ -71,7 +71,10 @@ Only pick up pull requests labeled `ai:to_review` (enforced by the trigger). Whe
 
 ## Process
 
-Keep context small: this review must fit comfortably in one pass. Hard rules, not suggestions:
+Keep context small: this review must fit comfortably in one pass. Every turn resends the entire conversation so far (visible as "cache read" tokens) — a long run doesn't just cost more, it can exceed the account's per-minute token limit outright once several large turns land within the same minute. Turn count is the lever that actually matters here, more than any single message's size. Hard rules, not suggestions:
+
+- Never end a turn with only a status update or a statement of intent and nothing else. Every turn must either make a tool call or emit a final safe-output — folding brief reasoning into the same turn as the action, not into its own separate turn beforehand (e.g. never do "◆ SHA unchanged, let's clean up now" as one turn followed by the actual cleanup command as the next; decide and act in the same turn).
+- When you need several independent pieces of information, fetch them with one combined command in one turn (e.g. `echo === A ===; cmd_a; echo === B ===; cmd_b`) rather than one tool call per turn.
 
 - Fetch each piece of information **once**, with **one** command. If a command's output looks unexpected, fix your command or move on — never retry the same data through 2-3 different commands "just in case" (e.g. never call `gh pr diff`, `gh pr diff --patch`, and `gh api .../pulls/N` for the same diff; pick one, e.g. `gh api repos/<owner>/<repo>/pulls/<n>/files --jq '...'`, and stick with it for the whole review).
 - Never inspect the contents of a third-party dependency (extracting/reading a `.jar`, a library's source, a vendored default config) to "double check" a framework's behavior. Trust well-known framework behavior (e.g. Spring Boot's own default logging pattern) unless the diff itself contradicts it.

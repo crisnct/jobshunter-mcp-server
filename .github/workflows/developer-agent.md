@@ -91,8 +91,10 @@ State lives in the `ai:*` label set: `ai:ready`, `ai:in_progress`, `ai:wait_for_
 
 ## Context discipline
 
-Keep context small — cumulative conversation size across many turns is what triggers Anthropic rate limits, not just single big reads. Hard rules:
+Keep context small — every turn resends the entire conversation so far, so cumulative conversation size across many turns is what triggers Anthropic rate limits, not just single big reads. Turn count matters more than any single message's size. Hard rules:
 
+- Never end a turn with only a status update or statement of intent and nothing else. Every turn must either make a tool call or emit a final safe-output — fold brief reasoning into the same turn as the action, not into its own separate turn beforehand.
+- When you need several independent pieces of information, fetch them with one combined command in one turn (e.g. `echo === A ===; cmd_a; echo === B ===; cmd_b`) rather than one tool call per turn.
 - Fetch each piece of GitHub metadata (issue, PR, diff, reviews, comments) **once**, with **one** command. If a command's output isn't what you expected, fix that command or move on — never retry the same data through 2-3 different commands "just in case" (e.g. don't call `gh pr diff`, `gh pr diff --patch`, and `gh api .../pulls/N` for the same PR; pick one and stick with it for the whole run).
 - Reading existing code to learn conventions before implementing is expected and fine — but stay near the affected package/feature; don't sweep unrelated modules "for context."
 - Never inspect the contents of a third-party dependency (extracting/reading a `.jar`, a library's source) to double-check framework behavior. Trust well-known framework behavior unless something you're seeing directly contradicts it.
