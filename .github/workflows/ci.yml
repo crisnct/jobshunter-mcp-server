@@ -3,8 +3,18 @@ name: CI
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - ".github/workflows/*.md"
+      - ".github/dependabot.yml"
+      - "README.md"
+      - "LICENSE"
   pull_request:
     branches: [main]
+    paths-ignore:
+      - ".github/workflows/*.md"
+      - ".github/dependabot.yml"
+      - "README.md"
+      - "LICENSE"
 
 jobs:
   build-and-test:
