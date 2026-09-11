@@ -2,6 +2,7 @@ package com.jobshunter.mcp.security;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jobshunter.mcp.exception.ErrorCode;
 import com.jobshunter.mcp.exception.JobshunterApiException;
 import java.net.URI;
 import java.util.LinkedHashMap;
@@ -184,7 +185,8 @@ public class McpOAuthController {
     Map<String, Object> googleResponse = parseJsonObject(googleResponseBody);
     String idToken = stringValue(googleResponse.get("id_token"));
     if (!StringUtils.hasText(idToken)) {
-      throw new JobshunterApiException("Google token response does not contain id_token required for MCP_INTERNAL_AS.");
+      throw new JobshunterApiException(
+          ErrorCode.AUTH_FAILED, "Google token response does not contain id_token required for MCP_INTERNAL_AS.");
     }
 
     var googleIdentity = googleIdTokenValidator.validateAndDecode(idToken);
@@ -205,7 +207,7 @@ public class McpOAuthController {
       return objectMapper.readValue(payload, new TypeReference<>() {
       });
     } catch (Exception ex) {
-      throw new JobshunterApiException("Failed to parse OAuth token response.", ex);
+      throw new JobshunterApiException(ErrorCode.UPSTREAM_UNAVAILABLE, "Failed to parse OAuth token response.", ex);
     }
   }
 
@@ -213,7 +215,7 @@ public class McpOAuthController {
     try {
       return objectMapper.writeValueAsString(map);
     } catch (Exception ex) {
-      throw new JobshunterApiException("Failed to serialize MCP token response.", ex);
+      throw new JobshunterApiException(ErrorCode.UNKNOWN, "Failed to serialize MCP token response.", ex);
     }
   }
 

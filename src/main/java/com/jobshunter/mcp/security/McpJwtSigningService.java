@@ -10,6 +10,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
+import com.jobshunter.mcp.exception.ErrorCode;
 import com.jobshunter.mcp.exception.JobshunterApiException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -68,7 +69,7 @@ public class McpJwtSigningService {
       signedJwt.sign(signer);
       return signedJwt.serialize();
     } catch (JOSEException ex) {
-      throw new JobshunterApiException("Failed to issue MCP JWT token.", ex);
+      throw new JobshunterApiException(ErrorCode.UNKNOWN, "Failed to issue MCP JWT token.", ex);
     }
   }
 
