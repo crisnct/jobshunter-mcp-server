@@ -50,7 +50,7 @@ sequenceDiagram
         Google-->>McpServer: id_token, refresh_token optional
         McpServer->>McpServer: strip refresh_token, validate Google id_token
         McpServer->>McpServer: mint MCP access JWT (token_use mcp_access)
-        McpServer-->>McpClient: access_token, expires_in, id_token
+        McpServer-->>McpClient: access_token, expires_in
     end
 
     McpClient->>McpServer: POST /mcp initialize with Bearer token
@@ -80,7 +80,7 @@ Alignment with current code:
 - `token_endpoint_auth_methods_supported=["none"]` describes client authentication requirements at local `/token`, not the MCP-to-Google exchange.
 - `OAuthRequestValidator` enforces the request contract before any upstream call: required/single-valued parameters, `response_type=code`, `code_challenge_method=S256` on `/authorize`, and `grant_type=authorization_code` on `/token`; unknown parameters are rejected by default (`mcp.oauth.reject-unknown-authorize-parameters` / `-token-parameters`).
 - `redirect_uri` must match `mcp.oauth.allowed-redirect-uris`, or a loopback URI (`http://localhost` / `127.0.0.1` plus `mcp.oauth.allowed-loopback-redirect-paths`) when `mcp.oauth.allow-loopback-redirect-uris=true`; enforcement is toggled by `mcp.oauth.enforce-redirect-allowlist` and validated at startup.
-- `/token` performs a confidential server-side exchange against Google using configured client credentials, then strips any `refresh_token` before responding — only `access_token`, `token_type`, `expires_in`, `scope`, and `id_token` are returned to the MCP client.
+- `/token` performs a confidential server-side exchange against Google using configured client credentials, then strips any `refresh_token` and the Google `id_token` before responding — only `access_token`, `token_type`, `expires_in`, and `scope` are returned to the MCP client.
 - Jobshunter token is minted by MCP during tool execution and is never exposed to MCP clients.
 - No `required-scope` gate is applied on `/mcp`.
 - Delegated token `token_use` is configurable via `mcp.authorization-server.jobshunter-delegated-token-use`.

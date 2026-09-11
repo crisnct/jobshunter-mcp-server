@@ -195,7 +195,6 @@ public class McpOAuthController {
     response.put("token_type", "Bearer");
     response.put("expires_in", authorizationServerProperties.mcpAccessTokenTtl().toSeconds());
     response.put("scope", stringValueOrDefault(googleResponse.get("scope"), oauthProperties.scope()));
-    response.put("id_token", idToken);
 
     return toJson(response);
   }
