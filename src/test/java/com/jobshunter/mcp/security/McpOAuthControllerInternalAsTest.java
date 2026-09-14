@@ -94,7 +94,7 @@ class McpOAuthControllerInternalAsTest {
     String responseBody = response.getBody();
 
     assertTrue(responseBody.contains("\"access_token\""));
-    assertTrue(responseBody.contains("\"id_token\":\"google-id-token\""));
+    assertFalse(responseBody.contains("id_token"));
     assertFalse(responseBody.contains("refresh_token"));
     assertTrue(responseBody.contains("\"token_type\":\"Bearer\""));
 
