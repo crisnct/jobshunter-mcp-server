@@ -4,7 +4,9 @@ import com.jobshunter.mcp.config.JobshunterProperties;
 import com.jobshunter.mcp.dto.SearchConfiguration;
 import com.jobshunter.mcp.dto.SearchJobsResponse;
 import com.jobshunter.mcp.dto.UserInfoResponse;
+import com.jobshunter.mcp.exception.ErrorCode;
 import com.jobshunter.mcp.exception.JobshunterApiException;
+import com.jobshunter.mcp.logging.RequestContext;
 import java.net.http.HttpTimeoutException;
 import java.util.List;
 import java.util.function.Supplier;
@@ -41,12 +43,13 @@ public class JobshunterClient {
           .uri(searchJobsPath)
           .contentType(MediaType.APPLICATION_JSON)
           .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .headers(this::forwardRequestId)
           .body(configurations)
           .retrieve()
           .body(SearchJobsResponse.class);
 
       if (response == null) {
-        throw new JobshunterApiException("Jobshunter returned an empty response.");
+        throw new JobshunterApiException(ErrorCode.UPSTREAM_UNAVAILABLE, "Jobshunter returned an empty response.");
       }
       return response;
     });
@@ -60,55 +63,69 @@ public class JobshunterClient {
       UserInfoResponse response = restClient.get()
           .uri(userInfoPath)
           .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .headers(this::forwardRequestId)
           .retrieve()
           .body(UserInfoResponse.class);
       if (response == null) {
-        throw new JobshunterApiException("Jobshunter returned an empty user response.");
+        throw new JobshunterApiException(ErrorCode.UPSTREAM_UNAVAILABLE, "Jobshunter returned an empty user response.");
       }
       return response;
     });
+  }
+
+  private void forwardRequestId(HttpHeaders headers) {
+    String requestId = RequestContext.currentRequestId();
+    if (StringUtils.hasText(requestId)) {
+      headers.set(RequestContext.REQUEST_ID_HEADER, requestId);
+    }
   }
 
   private <T> T execute(String operationLabel, Supplier<T> call) {
     try {
       return call.get();
     } catch (RestClientResponseException ex) {
-      log.warn("{} failed: status={}, message={}", operationLabel, ex.getStatusCode().value(), ex.getMessage());
+      log.warn("{} failed: requestId={}, status={}, message={}",
+          operationLabel, RequestContext.currentRequestId(), ex.getStatusCode().value(), ex.getMessage());
       throw mapStatusCode(ex.getStatusCode().value(), ex);
     } catch (ResourceAccessException ex) {
       Throwable rootCause = rootCause(ex);
       if (isTimeout(ex)) {
-        log.warn("{} timed out: {}", operationLabel, ex.getMessage());
-        throw new JobshunterApiException(operationLabel + " timed out.", ex);
+        log.warn("{} timed out: requestId={}, message={}", operationLabel, RequestContext.currentRequestId(), ex.getMessage());
+        throw new JobshunterApiException(ErrorCode.TIMEOUT, operationLabel + " timed out.", ex);
       }
       if (isLikelyProtocolMismatch(rootCause)) {
-        log.warn("{} failed due to likely protocol mismatch: {}", operationLabel, ex.getMessage());
+        log.warn("{} failed due to likely protocol mismatch: requestId={}, message={}",
+            operationLabel, RequestContext.currentRequestId(), ex.getMessage());
         throw new JobshunterApiException(
+            ErrorCode.UPSTREAM_UNAVAILABLE,
             "Jobshunter endpoint closed connection. Check JOBSHUNTER_BASE_URL protocol (https expected on port 8443/443).",
             ex);
       }
-      log.warn("{} failed, Jobshunter endpoint unreachable: {}", operationLabel, ex.getMessage());
-      throw new JobshunterApiException("Jobshunter endpoint is not reachable. " + ex.getMessage(), ex);
+      log.warn("{} failed, Jobshunter endpoint unreachable: requestId={}, message={}",
+          operationLabel, RequestContext.currentRequestId(), ex.getMessage());
+      throw new JobshunterApiException(
+          ErrorCode.UPSTREAM_UNAVAILABLE, "Jobshunter endpoint is not reachable. " + ex.getMessage(), ex);
     }
   }
 
   private void validateUserToken(String userToken) {
     if (!StringUtils.hasText(userToken)) {
-      throw new JobshunterApiException("Authenticated user token is missing.");
+      throw new JobshunterApiException(ErrorCode.AUTH_FAILED, "Authenticated user token is missing.");
     }
   }
 
   private JobshunterApiException mapStatusCode(int statusCode, Exception ex) {
     return switch (statusCode) {
-      case 400 -> new JobshunterApiException("Invalid search configuration.", ex);
-      case 401 -> new JobshunterApiException("Jobshunter authentication failed.", ex);
-      case 403 -> new JobshunterApiException("Jobshunter authorization failed.", ex);
-      case 404 -> new JobshunterApiException("Jobshunter endpoint unavailable.", ex);
+      case 400 -> new JobshunterApiException(ErrorCode.VALIDATION, "Invalid search configuration.", ex);
+      case 401 -> new JobshunterApiException(ErrorCode.AUTH_FAILED, "Jobshunter authentication failed.", ex);
+      case 403 -> new JobshunterApiException(ErrorCode.AUTH_FAILED, "Jobshunter authorization failed.", ex);
+      case 404 -> new JobshunterApiException(ErrorCode.UPSTREAM_UNAVAILABLE, "Jobshunter endpoint unavailable.", ex);
       default -> {
         if (statusCode >= 500) {
-          yield new JobshunterApiException("Jobshunter returned an unexpected error.", ex);
+          yield new JobshunterApiException(ErrorCode.UPSTREAM_UNAVAILABLE, "Jobshunter returned an unexpected error.", ex);
         }
-        yield new JobshunterApiException("Jobshunter request failed with status " + statusCode + ".", ex);
+        yield new JobshunterApiException(
+            ErrorCode.VALIDATION, "Jobshunter request failed with status " + statusCode + ".", ex);
       }
     };
   }

@@ -1,5 +1,6 @@
 package com.jobshunter.mcp.tool;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
@@ -11,7 +12,9 @@ import com.jobshunter.mcp.dto.SearchConfiguration;
 import com.jobshunter.mcp.dto.SearchJobResult;
 import com.jobshunter.mcp.dto.SearchJobsResponse;
 import com.jobshunter.mcp.dto.UserInfoResponse;
+import com.jobshunter.mcp.exception.ErrorCode;
 import com.jobshunter.mcp.exception.JobshunterApiException;
+import com.jobshunter.mcp.logging.RequestContext;
 import com.jobshunter.mcp.security.DelegatedTokenResolver;
 import java.time.Instant;
 import java.util.List;
@@ -22,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.MDC;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -41,6 +45,7 @@ class JobSearchToolTest {
   @AfterEach
   void clearSecurityContext() {
     SecurityContextHolder.clearContext();
+    MDC.clear();
   }
 
   @Test
@@ -63,12 +68,16 @@ class JobSearchToolTest {
     SearchJobsResponse expected = new SearchJobsResponse(List.of(
         new SearchJobResult("https://example.com/job-1", "SERP")
     ));
-    when(jobshunterClient.searchJobs(request, "delegated-token")).thenReturn(expected);
+    when(jobshunterClient.searchJobs(request, "delegated-token")).thenAnswer(invocation -> {
+      assertThat(MDC.get(RequestContext.REQUEST_ID_MDC_KEY)).isNotBlank();
+      return expected;
+    });
 
     SearchJobsResponse actual = jobSearchTool.searchJobs(request);
 
     assertEquals(expected, actual);
     verify(jobshunterClient).searchJobs(request, "delegated-token");
+    assertThat(MDC.get(RequestContext.REQUEST_ID_MDC_KEY)).isNull();
   }
 
   @Test
@@ -82,6 +91,7 @@ class JobSearchToolTest {
         "Invalid search configuration: at least one of searchCompanies or searchWithUserPrompts must be true.",
         ex.getMessage()
     );
+    assertEquals(ErrorCode.VALIDATION, ex.getErrorCode());
     verifyNoInteractions(jobshunterClient);
   }
 
@@ -93,6 +103,7 @@ class JobSearchToolTest {
 
     JobshunterApiException ex = assertThrows(JobshunterApiException.class, () -> jobSearchTool.searchJobs(request));
     assertEquals("Authenticated MCP token is required to call search_jobs.", ex.getMessage());
+    assertEquals(ErrorCode.AUTH_FAILED, ex.getErrorCode());
   }
 
   @Test
@@ -139,5 +150,25 @@ class JobSearchToolTest {
   void shouldRejectUserInfoRequestWhenGoogleTokenIsMissingFromContext() {
     JobshunterApiException ex = assertThrows(JobshunterApiException.class, () -> jobSearchTool.getUserInfo());
     assertEquals("Authenticated MCP token is required to call get_user_info.", ex.getMessage());
+    assertEquals(ErrorCode.AUTH_FAILED, ex.getErrorCode());
+  }
+
+  @Test
+  void shouldWrapUnexpectedExceptionsAsUnknownAndClearMdc() {
+    Jwt jwt = new Jwt(
+        "google-user-token",
+        Instant.now(),
+        Instant.now().plusSeconds(300),
+        Map.of("alg", "none"),
+        Map.of("sub", "user1", "scope", "profile email")
+    );
+    SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
+    when(delegatedTokenResolver.resolveDelegatedToken(jwt)).thenReturn("delegated-token");
+    when(jobshunterClient.getUserInfo("delegated-token")).thenThrow(new IllegalStateException("boom"));
+
+    JobshunterApiException ex = assertThrows(JobshunterApiException.class, () -> jobSearchTool.getUserInfo());
+    assertEquals("Jobshunter returned an unexpected error.", ex.getMessage());
+    assertEquals(ErrorCode.UNKNOWN, ex.getErrorCode());
+    assertThat(MDC.get(RequestContext.REQUEST_ID_MDC_KEY)).isNull();
   }
 }

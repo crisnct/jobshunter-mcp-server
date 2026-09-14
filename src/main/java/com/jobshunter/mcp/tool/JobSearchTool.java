@@ -4,13 +4,16 @@ import com.jobshunter.mcp.client.JobshunterClient;
 import com.jobshunter.mcp.dto.SearchConfiguration;
 import com.jobshunter.mcp.dto.SearchJobsResponse;
 import com.jobshunter.mcp.dto.UserInfoResponse;
+import com.jobshunter.mcp.exception.ErrorCode;
 import com.jobshunter.mcp.exception.JobshunterApiException;
+import com.jobshunter.mcp.logging.RequestContext;
 import com.jobshunter.mcp.security.DelegatedTokenResolver;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.security.core.Authentication;
@@ -112,20 +115,26 @@ public class JobSearchTool {
   }
 
   private <T> T callJobshunter(Supplier<T> call) {
+    String requestId = RequestContext.newRequestId();
+    MDC.put(RequestContext.REQUEST_ID_MDC_KEY, requestId);
     try {
+      log.info("tools/call started: requestId={}", requestId);
       return call.get();
     } catch (JobshunterApiException ex) {
       throw ex;
     } catch (Exception ex) {
-      log.warn("Unexpected error while calling Jobshunter.", ex);
-      throw new JobshunterApiException("Jobshunter returned an unexpected error.", ex);
+      log.warn("Unexpected error while calling Jobshunter: requestId={}", requestId, ex);
+      throw new JobshunterApiException(ErrorCode.UNKNOWN, "Jobshunter returned an unexpected error.", ex);
+    } finally {
+      MDC.remove(RequestContext.REQUEST_ID_MDC_KEY);
     }
   }
 
   private String resolveUserToken(String toolName) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (!(authentication instanceof JwtAuthenticationToken jwtAuthenticationToken)) {
-      throw new JobshunterApiException("Authenticated MCP token is required to call " + toolName + ".");
+      throw new JobshunterApiException(
+          ErrorCode.AUTH_FAILED, "Authenticated MCP token is required to call " + toolName + ".");
     }
     return delegatedTokenResolver.resolveDelegatedToken(jwtAuthenticationToken.getToken());
   }
@@ -134,6 +143,7 @@ public class JobSearchTool {
     for (SearchConfiguration configuration : searchConfigurations) {
       if (!configuration.searchCompanies() && !configuration.searchWithUserPrompts()) {
         throw new JobshunterApiException(
+            ErrorCode.VALIDATION,
             "Invalid search configuration: at least one of searchCompanies or searchWithUserPrompts must be true.");
       }
     }
