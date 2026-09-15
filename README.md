@@ -41,7 +41,9 @@ The project is designed for clear security boundaries: MCP authenticates clients
 - `⚡` Exposes MCP endpoint `POST /mcp` using Spring AI MCP Server (`STREAMABLE`, `SYNC`).
 - Provides two MCP tools for the authenticated user journey:
   - `🔎 search_jobs`: synchronous job search orchestration.
-  - `👤 get_user_info`: profile retrieval from Jobshunter internal API.
+  - `👤 get_user_info`: profile retrieval from Jobshunter internal API. Defaults to the raw
+    structured profile; pass `outputFormat: "table"` to get it back as a table via MCP sampling
+    (falls back to a local formatter if the client doesn't support it).
 - `🔐` Brokers OAuth with Google and mints MCP-owned JWTs for `/mcp`.
 - `↔️` Calls Jobshunter with a delegated JWT (`aud` scoped for internal API), not with the MCP client token.
 
@@ -139,6 +141,19 @@ Runs synchronous job search for the authenticated user.
 ### `get_user_info`
 
 Returns the authenticated user's Jobshunter profile (email, preferences, roles, location, job metadata, and more).
+
+- Input: `outputFormat` (optional, default `"raw"`).
+  - `"raw"`: the full structured `UserInfoResponse` — the shape to ask for when the result feeds
+    further programmatic logic.
+  - `"table"`: the same profile rewritten as a table for a person to read, via **MCP sampling**
+    (`sampling/createMessage`) — this server asks the connected MCP client to run the rewrite
+    through the client's own LLM. If the client doesn't declare the sampling capability, or the
+    call fails/times out, the tool transparently falls back to a deterministic, locally-built
+    table. It never fails solely because sampling is unavailable; the `verificationToken` is
+    never rendered in that local fallback table.
+- Kept as a single tool with a parameter (rather than a second tool) specifically to avoid
+  tool-selection ambiguity: with two similarly-described tools, the calling LLM would sometimes
+  pick the wrong one for a given phrasing. A parameter on one tool is a more reliable signal.
 
 > [!TIP]
 > Full request/response schema examples are in [`src/main/resources/openapi.yaml`](src/main/resources/openapi.yaml).

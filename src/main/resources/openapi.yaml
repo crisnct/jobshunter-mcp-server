@@ -72,7 +72,7 @@ paths:
                           searchCompanies: false
                           searchWithUserPrompts: true
               getUserInfoCall:
-                summary: Call get_user_info tool
+                summary: Call get_user_info tool (raw structured profile, the default)
                 value:
                   jsonrpc: "2.0"
                   id: "4"
@@ -80,6 +80,16 @@ paths:
                   params:
                     name: "get_user_info"
                     arguments: {}
+              getUserInfoTableCall:
+                summary: Call get_user_info tool asking for a human-readable table
+                value:
+                  jsonrpc: "2.0"
+                  id: "5"
+                  method: "tools/call"
+                  params:
+                    name: "get_user_info"
+                    arguments:
+                      outputFormat: "table"
       responses:
         '200':
           description: JSON-RPC response payload (result or error encoded by MCP transport).
@@ -186,6 +196,11 @@ components:
           items:
             $ref: '#/components/schemas/SearchJobResult'
     UserInfoResponse:
+      description: |
+        Shape returned by `get_user_info` when called with `outputFormat` omitted or set to
+        `"raw"` (the default). When called with `outputFormat: "table"` the tool instead returns
+        a single plain-text/markdown table string (not this schema) - a table has no fixed JSON
+        shape to document here.
       type: object
       required:
         - username
