@@ -2,7 +2,8 @@ package com.jobshunter.mcp.client;
 
 import com.jobshunter.mcp.config.JobshunterProperties;
 import com.jobshunter.mcp.dto.SearchConfiguration;
-import com.jobshunter.mcp.dto.SearchJobsResponse;
+import com.jobshunter.mcp.dto.SearchJobSnapshot;
+import com.jobshunter.mcp.dto.SearchJobsHandle;
 import com.jobshunter.mcp.dto.UserInfoResponse;
 import com.jobshunter.mcp.exception.ErrorCode;
 import com.jobshunter.mcp.exception.JobshunterApiException;
@@ -24,35 +25,66 @@ import org.springframework.web.client.RestClientResponseException;
 public class JobshunterClient {
   private final RestClient restClient;
   private final String searchJobsPath;
+  private final String searchJobStatusPath;
   private final String userInfoPath;
   private final String baseUrl;
 
   public JobshunterClient(RestClient jobshunterRestClient, JobshunterProperties properties) {
     this.restClient = jobshunterRestClient;
     this.searchJobsPath = properties.searchJobsPath();
+    this.searchJobStatusPath = properties.searchJobStatusPath();
     this.userInfoPath = properties.userInfoPath();
     this.baseUrl = properties.baseUrl();
   }
 
-  public SearchJobsResponse searchJobs(List<SearchConfiguration> configurations, String userToken) {
+  /**
+   * Registers a search with Jobshunter and returns immediately with a handle; the search
+   * itself keeps running server-side and is tracked via {@link #getSearchSnapshot}.
+   */
+  public SearchJobsHandle startSearch(List<SearchConfiguration> configurations, String userToken) {
     validateUserToken(userToken);
-    log.debug("Calling Jobshunter search_jobs: path={}, configurations={}", searchJobsPath, configurations.size());
+    log.debug("Calling Jobshunter start search: path={}, configurations={}", searchJobsPath, configurations.size());
 
-    return execute("Job search", () -> {
-      SearchJobsResponse response = restClient.post()
+    return execute("Search start", () -> {
+      StartSearchResponse response = restClient.post()
           .uri(searchJobsPath)
           .contentType(MediaType.APPLICATION_JSON)
           .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
           .headers(this::forwardRequestId)
           .body(configurations)
           .retrieve()
-          .body(SearchJobsResponse.class);
+          .body(StartSearchResponse.class);
+
+      if (response == null || !StringUtils.hasText(response.searchId())) {
+        throw new JobshunterApiException(ErrorCode.UPSTREAM_UNAVAILABLE, "Jobshunter did not return a searchId.");
+      }
+      return new SearchJobsHandle(response.searchId(), configurations.size());
+    });
+  }
+
+  /**
+   * Fetches the current status snapshot for a search started with {@link #startSearch}.
+   */
+  public SearchJobSnapshot getSearchSnapshot(String searchId, String userToken) {
+    validateUserToken(userToken);
+    log.debug("Calling Jobshunter search snapshot: searchId={}", searchId);
+
+    return execute("Search snapshot", () -> {
+      SearchJobSnapshot response = restClient.get()
+          .uri(searchJobStatusPath, searchId)
+          .header(HttpHeaders.AUTHORIZATION, "Bearer " + userToken)
+          .headers(this::forwardRequestId)
+          .retrieve()
+          .body(SearchJobSnapshot.class);
 
       if (response == null) {
-        throw new JobshunterApiException(ErrorCode.UPSTREAM_UNAVAILABLE, "Jobshunter returned an empty response.");
+        throw new JobshunterApiException(ErrorCode.UPSTREAM_UNAVAILABLE, "Jobshunter returned an empty search snapshot.");
       }
       return response;
     });
+  }
+
+  private record StartSearchResponse(String searchId) {
   }
 
   public UserInfoResponse getUserInfo(String userToken) {

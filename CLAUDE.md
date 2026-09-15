@@ -107,13 +107,23 @@ unauthenticated:
 
 ### Adding a new MCP tool
 
-New tools follow the `JobSearchTool` pattern: a `@Service` with `@Tool`-annotated methods (Spring AI), registered via
-a `MethodToolCallbackProvider` bean in `McpToolConfiguration` (add the new tool object to `.toolObjects(...)`).
+Most tools follow the `JobSearchTool` pattern: a `@Service` with `@Tool`-annotated methods (Spring AI), registered
+via a `MethodToolCallbackProvider` bean in `McpToolConfiguration` (add the new tool object to `.toolObjects(...)`).
 Inside the method, resolve the delegated token the same way (`SecurityContextHolder` → `JwtAuthenticationToken` →
 `DelegatedTokenResolver`) rather than reusing the caller's MCP token against Jobshunter.
 
+A tool that needs to send MCP progress notifications (`notifications/progress`) — e.g. `SearchJobsTool`'s
+`wait_for_search` — instead uses `@McpTool`/`@McpToolParam` (`org.springframework.ai.mcp.annotation`) with an
+`McpSyncRequestContext` (`org.springframework.ai.mcp.annotation.context`) method parameter and calls
+`context.progress(...)`. These are auto-scanned by `spring-ai-mcp-annotations`' autoconfiguration (`@McpTool`
+methods on any Spring bean become tool specifications automatically) and merged with the `@Tool`-based tools into
+the same `McpSyncServer` — no registration in `McpToolConfiguration` needed. Reach for this only when a tool
+genuinely needs the request/exchange context (progress, sampling, elicitation) that plain `@Tool` methods can't get
+via `ToolContext`/`McpToolUtils.getMcpExchange` alone. A class exposing `@McpTool` methods must have exactly one
+constructor Spring can resolve unambiguously (use `@Value` with a default for any non-bean parameter, e.g. a poll
+interval) — multiple constructors without `@Autowired` fail bean creation with "No default constructor found".
+
 ## Reference
 
-- Full request/response schemas: `src/main/resources/openapi.yaml`.
 - Config keys and defaults: `src/main/resources/application.yml` (heavily commented — read the comments before
   changing a value, they explain the security rationale for TTLs/audiences being kept separate).

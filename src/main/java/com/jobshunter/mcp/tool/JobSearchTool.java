@@ -4,8 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jobshunter.mcp.client.JobshunterClient;
-import com.jobshunter.mcp.dto.SearchConfiguration;
-import com.jobshunter.mcp.dto.SearchJobsResponse;
 import com.jobshunter.mcp.dto.UserInfoResponse;
 import com.jobshunter.mcp.exception.ErrorCode;
 import com.jobshunter.mcp.exception.JobshunterApiException;
@@ -13,12 +11,9 @@ import com.jobshunter.mcp.logging.RequestContext;
 import com.jobshunter.mcp.security.DelegatedTokenResolver;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
 import io.modelcontextprotocol.spec.McpSchema;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -49,46 +44,6 @@ public class JobSearchTool {
     this.jobshunterClient = jobshunterClient;
     this.delegatedTokenResolver = delegatedTokenResolver;
     this.objectMapper = objectMapper;
-  }
-
-  @Tool(name = "search_jobs", description = """
-      Run a synchronous job search in Jobshunter for the authenticated user.
-
-      Input:
-      - searchConfigurations: list of provider/model configurations.
-      - provider: AI provider name configured in Jobshunter (example: GROK, SERP, GEMINI, GPT).
-      - model: exact model identifier for the selected provider.
-      - searchCompanies: when true, search by company-based heuristics.
-      - searchWithUserPrompts: when true, search using the user's stored prompts/preferences.
-      - Validation rule: at least one of searchCompanies or searchWithUserPrompts must be true.
-
-      Response:
-      - jobsFound: deduplicated list of job matches.
-      - jobsFound[].url: canonical URL of the found job posting.
-      - jobsFound[].source: source platform/provider where the job was found.
-
-      Authentication:
-      - Requires a valid MCP bearer token already authenticated on /mcp.
-      - The tool resolves a delegated bearer token and forwards it to Jobshunter internal API.
-      """)
-  public SearchJobsResponse searchJobs(
-      @ToolParam(description = """
-          Array of search configuration objects.
-          Each object contains:
-          - provider (string, required): provider key configured in Jobshunter.
-          - model (string, required): model key for the provider.
-          - searchCompanies (boolean): include company-oriented search strategy.
-          - searchWithUserPrompts (boolean): include user-prompt-oriented strategy.
-          Constraint: at least one boolean must be true.
-          """)
-      @NotEmpty List<@Valid SearchConfiguration> searchConfigurations
-  ) {
-    validateSearchRequest(searchConfigurations);
-    log.debug("search_jobs invoked: configurations={}", searchConfigurations.size());
-    return callJobshunter(() -> {
-      String userToken = resolveUserToken("search_jobs");
-      return jobshunterClient.searchJobs(searchConfigurations, userToken);
-    });
   }
 
   @Tool(name = "get_user_info", description = """
@@ -170,16 +125,6 @@ public class JobSearchTool {
           ErrorCode.AUTH_FAILED, "Authenticated MCP token is required to call " + toolName + ".");
     }
     return delegatedTokenResolver.resolveDelegatedToken(jwtAuthenticationToken.getToken());
-  }
-
-  private void validateSearchRequest(List<SearchConfiguration> searchConfigurations) {
-    for (SearchConfiguration configuration : searchConfigurations) {
-      if (!configuration.searchCompanies() && !configuration.searchWithUserPrompts()) {
-        throw new JobshunterApiException(
-            ErrorCode.VALIDATION,
-            "Invalid search configuration: at least one of searchCompanies or searchWithUserPrompts must be true.");
-      }
-    }
   }
 
   /**

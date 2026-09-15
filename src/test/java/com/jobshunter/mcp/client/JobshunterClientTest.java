@@ -12,7 +12,9 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import com.jobshunter.mcp.config.JobshunterProperties;
 import com.jobshunter.mcp.dto.SearchConfiguration;
-import com.jobshunter.mcp.dto.SearchJobsResponse;
+import com.jobshunter.mcp.dto.SearchJobSnapshot;
+import com.jobshunter.mcp.dto.SearchJobsHandle;
+import com.jobshunter.mcp.dto.SearchStepEvent;
 import com.jobshunter.mcp.dto.UserInfoResponse;
 import com.jobshunter.mcp.exception.ErrorCode;
 import com.jobshunter.mcp.exception.JobshunterApiException;
@@ -65,6 +67,7 @@ class JobshunterClientTest {
     return new JobshunterProperties(
         baseUrl,
         "/api/internal/search_jobs",
+        "/api/internal/search_jobs/{searchId}",
         "/api/internal/me",
         Duration.ofSeconds(5),
         Duration.ofMinutes(5),
@@ -91,7 +94,7 @@ class JobshunterClientTest {
   }
 
   @Test
-  void shouldPostConfigurationsAndMapSearchJobsResponse() {
+  void shouldPostConfigurationsAndMapStartSearchResponse() {
     String requestJson = """
         [
           {
@@ -105,9 +108,7 @@ class JobshunterClientTest {
 
     String responseJson = """
         {
-          "jobsFound":[
-            {"url":"https://example.com/job-1","source":"SERP"}
-          ]
+          "searchId":"search-123"
         }
         """;
 
@@ -117,13 +118,52 @@ class JobshunterClientTest {
         .andExpect(content().json(requestJson, true))
         .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
 
-    SearchJobsResponse response = jobshunterClient.searchJobs(
+    SearchJobsHandle handle = jobshunterClient.startSearch(
         List.of(new SearchConfiguration("GROK", "grok-4-1-fast-non-reasoning", false, true)),
         "user-id-token"
     );
 
-    assertThat(response.jobsFound()).hasSize(1);
-    assertThat(response.jobsFound().getFirst().url()).isEqualTo("https://example.com/job-1");
+    assertThat(handle.searchId()).isEqualTo("search-123");
+    assertThat(handle.configurationsSubmitted()).isEqualTo(1);
+    mockServer.verify();
+  }
+
+  @Test
+  void shouldGetSearchSnapshotFromStatusEndpoint() {
+    String responseJson = """
+        {
+          "searchId":"search-123",
+          "status":"DONE",
+          "events":[{"message":"Checked Acme Corp"}],
+          "result":{"jobsFound":[{"url":"https://example.com/job-1","source":"SERP"}]},
+          "errorMessage":null
+        }
+        """;
+
+    mockServer.expect(requestTo(BASE_URL + "/api/internal/search_jobs/search-123"))
+        .andExpect(method(HttpMethod.GET))
+        .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer user-id-token"))
+        .andRespond(withSuccess(responseJson, MediaType.APPLICATION_JSON));
+
+    SearchJobSnapshot snapshot = jobshunterClient.getSearchSnapshot("search-123", "user-id-token");
+
+    assertThat(snapshot.done()).isTrue();
+    assertThat(snapshot.events()).extracting(SearchStepEvent::message).containsExactly("Checked Acme Corp");
+    assertThat(snapshot.result().jobsFound()).hasSize(1);
+    mockServer.verify();
+  }
+
+  @Test
+  void shouldThrowWhenSearchSnapshotResponseBodyIsEmpty() {
+    mockServer.expect(requestTo(BASE_URL + "/api/internal/search_jobs/search-123"))
+        .andExpect(method(HttpMethod.GET))
+        .andRespond(withSuccess());
+
+    assertThatThrownBy(() -> jobshunterClient.getSearchSnapshot("search-123", "user-id-token"))
+        .isInstanceOf(JobshunterApiException.class)
+        .hasMessage("Jobshunter returned an empty search snapshot.")
+        .satisfies(ex -> assertThat(((JobshunterApiException) ex).getErrorCode()).isEqualTo(ErrorCode.UPSTREAM_UNAVAILABLE));
+
     mockServer.verify();
   }
 
@@ -142,7 +182,7 @@ class JobshunterClientTest {
         .andExpect(method(HttpMethod.POST))
         .andRespond(withStatus(HttpStatusCode.valueOf(statusCode)));
 
-    assertThatThrownBy(() -> jobshunterClient.searchJobs(
+    assertThatThrownBy(() -> jobshunterClient.startSearch(
         List.of(new SearchConfiguration("GROK", "grok-4-1-fast-non-reasoning", false, true)),
         "user-id-token"
     ))
@@ -157,12 +197,12 @@ class JobshunterClientTest {
   void shouldMapTimeoutToTimedOutMessage() {
     JobshunterClient client = clientThatFailsWith(new SocketTimeoutException("Read timed out"), BASE_URL);
 
-    assertThatThrownBy(() -> client.searchJobs(
+    assertThatThrownBy(() -> client.startSearch(
         List.of(new SearchConfiguration("GROK", "grok-4-1-fast-non-reasoning", false, true)),
         "user-id-token"
     ))
         .isInstanceOf(JobshunterApiException.class)
-        .hasMessage("Job search timed out.")
+        .hasMessage("Search start timed out.")
         .satisfies(ex -> assertThat(((JobshunterApiException) ex).getErrorCode()).isEqualTo(ErrorCode.TIMEOUT));
   }
 
@@ -171,7 +211,7 @@ class JobshunterClientTest {
     String httpBaseUrl = "http://localhost:8443";
     JobshunterClient client = clientThatFailsWith(new ClosedChannelException(), httpBaseUrl);
 
-    assertThatThrownBy(() -> client.searchJobs(
+    assertThatThrownBy(() -> client.startSearch(
         List.of(new SearchConfiguration("GROK", "grok-4-1-fast-non-reasoning", false, true)),
         "user-id-token"
     ))
@@ -185,7 +225,7 @@ class JobshunterClientTest {
   void shouldMapOtherConnectionFailureToUnreachableMessage() {
     JobshunterClient client = clientThatFailsWith(new ConnectException("Connection refused"), BASE_URL);
 
-    assertThatThrownBy(() -> client.searchJobs(
+    assertThatThrownBy(() -> client.startSearch(
         List.of(new SearchConfiguration("GROK", "grok-4-1-fast-non-reasoning", false, true)),
         "user-id-token"
     ))
@@ -195,17 +235,17 @@ class JobshunterClientTest {
   }
 
   @Test
-  void shouldThrowWhenSearchJobsResponseBodyIsEmpty() {
+  void shouldThrowWhenStartSearchResponseBodyIsEmpty() {
     mockServer.expect(requestTo(BASE_URL + "/api/internal/search_jobs"))
         .andExpect(method(HttpMethod.POST))
         .andRespond(withSuccess());
 
-    assertThatThrownBy(() -> jobshunterClient.searchJobs(
+    assertThatThrownBy(() -> jobshunterClient.startSearch(
         List.of(new SearchConfiguration("GROK", "grok-4-1-fast-non-reasoning", false, true)),
         "user-id-token"
     ))
         .isInstanceOf(JobshunterApiException.class)
-        .hasMessage("Jobshunter returned an empty response.")
+        .hasMessage("Jobshunter did not return a searchId.")
         .satisfies(ex -> assertThat(((JobshunterApiException) ex).getErrorCode()).isEqualTo(ErrorCode.UPSTREAM_UNAVAILABLE));
 
     mockServer.verify();
@@ -230,7 +270,7 @@ class JobshunterClientTest {
     RestClient restClient = RestClient.builder().baseUrl(BASE_URL).build();
     JobshunterClient client = new JobshunterClient(restClient, propertiesWithBaseUrl(BASE_URL));
 
-    assertThatThrownBy(() -> client.searchJobs(
+    assertThatThrownBy(() -> client.startSearch(
         List.of(new SearchConfiguration("GROK", "grok-4-1-fast-non-reasoning", false, true)),
         ""
     ))

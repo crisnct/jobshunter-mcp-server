@@ -1,12 +1,8 @@
 # JobsHunter MCP Server
 
-![Java](https://img.shields.io/badge/Java-25-orange)
-![SpringBoot](https://img.shields.io/badge/Spring_Boot-4.1.1-6DB33F)
-![MCP](https://img.shields.io/badge/MCP-Streamable_HTTP-1f6feb)
-![Auth](https://img.shields.io/badge/OAuth2-PKCE_S256-8a2be2)
-![License](https://img.shields.io/badge/License-BSL_1.1-lightgrey)
+![Java](https://img.shields.io/badge/Java-25-orange) ![SpringBoot](https://img.shields.io/badge/Spring_Boot-4.1.1-6DB33F) ![MCP](https://img.shields.io/badge/MCP-Streamable_HTTP-1f6feb) ![Auth](https://img.shields.io/badge/OAuth2-PKCE_S256-8a2be2) ![License](https://img.shields.io/badge/License-BSL_1.1-lightgrey)
 
-Spring Boot MCP server that exposes two tools for authenticated users: `search_jobs` and `get_user_info`.
+Spring Boot MCP server that exposes three tools for authenticated users: `search_jobs`, `wait_for_search`, and `get_user_info`.
 
 The project is designed for clear security boundaries: MCP authenticates clients on `/mcp`, then mints a short-lived delegated token for internal Jobshunter API calls.
 
@@ -16,21 +12,21 @@ The project is designed for clear security boundaries: MCP authenticates clients
 
 ## Table of contents
 
-- [Overview](#-overview)
-- [Quick start](#-quick-start)
-- [Connect an MCP client](#-connect-an-mcp-client)
-- [Tools](#-tools)
-- [Architecture](#-architecture)
-- [Authentication model](#-authentication-model)
-- [Endpoints](#-endpoints)
-- [Security policy](#-security-policy)
-- [Configuration reference](#-configuration-reference)
-- [Docker deployment](#-docker-deployment)
-- [Testing](#-testing)
-- [Troubleshooting](#-troubleshooting)
-- [Jobshunter trust configuration](#-jobshunter-trust-configuration)
-- [Related docs](#-related-docs)
-- [License](#-license)
+-   [Overview](#-overview)
+-   [Quick start](#-quick-start)
+-   [Connect an MCP client](#-connect-an-mcp-client)
+-   [Tools](#-tools)
+-   [Architecture](#-architecture)
+-   [Authentication model](#-authentication-model)
+-   [Endpoints](#-endpoints)
+-   [Security policy](#-security-policy)
+-   [Configuration reference](#-configuration-reference)
+-   [Docker deployment](#-docker-deployment)
+-   [Testing](#-testing)
+-   [Troubleshooting](#-troubleshooting)
+-   [Jobshunter trust configuration](#-jobshunter-trust-configuration)
+-   [Related docs](#-related-docs)
+-   [License](#-license)
 
 ---
 
@@ -38,20 +34,19 @@ The project is designed for clear security boundaries: MCP authenticates clients
 
 ### What this server does
 
-- `⚡` Exposes MCP endpoint `POST /mcp` using Spring AI MCP Server (`STREAMABLE`, `SYNC`).
-- Provides two MCP tools for the authenticated user journey:
-  - `🔎 search_jobs`: synchronous job search orchestration.
-  - `👤 get_user_info`: profile retrieval from Jobshunter internal API. Defaults to the raw
-    structured profile; pass `outputFormat: "table"` to get it back as a table via MCP sampling
-    (falls back to a local formatter if the client doesn't support it).
-- `🔐` Brokers OAuth with Google and mints MCP-owned JWTs for `/mcp`.
-- `↔️` Calls Jobshunter with a delegated JWT (`aud` scoped for internal API), not with the MCP client token.
+-   `⚡` Exposes MCP endpoint `POST /mcp` using Spring AI MCP Server (`STREAMABLE`, `SYNC`).
+-   Provides three MCP tools for the authenticated user journey:
+    -   `🔎 search_jobs`: starts a job search and returns immediately with a `searchId`.
+    -   `⏳ wait_for_search`: one long wait for a search started with `search_jobs`. Hunt messages stream live via `notifications/progress` (and `notifications/message` if the client has no progress token) until the search finishes.
+    -   `👤 get_user_info`: profile retrieval from Jobshunter internal API. Defaults to the raw structured profile; pass `outputFormat: "table"` to get it back as a table via MCP sampling (falls back to a local formatter if the client doesn't support it).
+-   `🔐` Brokers OAuth with Google and mints MCP-owned JWTs for `/mcp`.
+-   `↔️` Calls Jobshunter with a delegated JWT (`aud` scoped for internal API), not with the MCP client token.
 
 ### Runtime stack
 
-- Java 25
-- Spring Boot 4
-- Spring AI MCP Server (WebMVC, Streamable HTTP)
+-   Java 25
+-   Spring Boot 4
+-   Spring AI MCP Server (WebMVC, Streamable HTTP)
 
 ---
 
@@ -59,10 +54,10 @@ The project is designed for clear security boundaries: MCP authenticates clients
 
 ### 1) Prerequisites
 
-- `☕` Java 25
-- `🛠️` Maven
-- `🔑` Google OAuth app credentials
-- `🌐` Reachable Jobshunter backend URL
+-   `☕` Java 25
+-   `🛠️` Maven
+-   `🔑` Google OAuth app credentials
+-   `🌐` Reachable Jobshunter backend URL
 
 ### 2) Configure environment
 
@@ -80,8 +75,7 @@ JOBSHUNTER_BASE_URL=https://your-jobshunter.example
 JOBSHUNTER_TRUST_STORE_PASSWORD=your-trust-store-password
 ```
 
-> [!IMPORTANT]
-> `.env` is a local convention. Spring does not auto-load it by default. Export these variables in your shell or IDE run configuration before starting the app.
+> [!IMPORTANT] `.env` is a local convention. Spring does not auto-load it by default. Export these variables in your shell or IDE run configuration before starting the app.
 
 ### 3) Run locally
 
@@ -105,21 +99,36 @@ curl http://localhost:8081/.well-known/jwks.json
 
 Use MCP server URL:
 
-- `http://localhost:8081/mcp` (local run)
-- `http://localhost:9002/mcp` (docker-compose host port)
+-   `http://localhost:8081/mcp` (local run)
+-   `http://localhost:9002/mcp` (docker-compose host port)
 
 Supported preconfigured OAuth callback URIs:
 
-| Client | Redirect URI |
-|---|---|
-| Local native loopback | `http://127.0.0.1:8787/callback` |
-| Postman | `https://oauth.pstmn.io/v1/callback` |
-| Claude | `https://claude.ai/api/mcp/auth_callback` |
-| Cursor Agents | `https://www.cursor.com/agents/mcp/oauth/callback` |
-| OpenAI Chat | `https://chat.openai.com/aip/g-43199b6ccac3d0a13b65c79a21c8cc2010aee226/oauth/callback` |
+Client
 
-> [!NOTE]
-> `MCP_AS_ISSUER` must be the canonical public URL used by clients. Discovery and token validation depend on this exact issuer value.
+Redirect URI
+
+Local native loopback
+
+`http://127.0.0.1:8787/callback`
+
+Postman
+
+`https://oauth.pstmn.io/v1/callback`
+
+Claude
+
+`https://claude.ai/api/mcp/auth_callback`
+
+Cursor Agents
+
+`https://www.cursor.com/agents/mcp/oauth/callback`
+
+OpenAI Chat
+
+`https://chat.openai.com/aip/g-43199b6ccac3d0a13b65c79a21c8cc2010aee226/oauth/callback`
+
+> [!NOTE] `MCP_AS_ISSUER` must be the canonical public URL used by clients. Discovery and token validation depend on this exact issuer value.
 
 ---
 
@@ -127,36 +136,40 @@ Supported preconfigured OAuth callback URIs:
 
 ### `search_jobs`
 
-Runs synchronous job search for the authenticated user.
+Starts a job search for the authenticated user and returns immediately with a handle — it does not wait for results.
 
-- Input: `searchConfigurations[]`
-- Each configuration includes:
-  - `provider` (string)
-  - `model` (string)
-  - `searchCompanies` (boolean)
-  - `searchWithUserPrompts` (boolean)
-- Validation: at least one of `searchCompanies` or `searchWithUserPrompts` must be `true`
-- Output: `jobsFound[]` with `url` and `source`
+-   Input: `searchConfigurations[]`
+-   Each configuration includes:
+    -   `provider` (string)
+    -   `model` (string)
+    -   `searchCompanies` (boolean)
+    -   `searchWithUserPrompts` (boolean)
+-   Validation: at least one of `searchCompanies` or `searchWithUserPrompts` must be `true`
+-   Output: `searchId` and `configurationsSubmitted` — pass `searchId` to `wait_for_search`
+
+### `wait_for_search`
+
+One long wait for a search started with `search_jobs`. Stays open up to `maxWaitSeconds` (clamped to 240s) until the search finishes. Each newly observed hunt message is pushed immediately as:
+
+-   MCP `notifications/progress` when the `tools/call` included a progress token
+-   MCP `notifications/message` (info) otherwise — no progress token required
+
+The final tool result is still **plain text** with the full `Hunt progress` list, status, and jobs.
+
+-   Input: `searchId`, `maxWaitSeconds` (use 120-240)
+-   Output (plain text): all `Hunt progress` lines, `status`, `jobsFound` (only when `DONE`), `errorMessage` (only when `FAILED`), `searchId` (present for `IN_PROGRESS`/`FAILED`)
+-   Call again only if `status` is still `IN_PROGRESS` after the wait window elapsed.
 
 ### `get_user_info`
 
 Returns the authenticated user's Jobshunter profile (email, preferences, roles, location, job metadata, and more).
 
-- Input: `outputFormat` (optional, default `"raw"`).
-  - `"raw"`: the full structured `UserInfoResponse` — the shape to ask for when the result feeds
-    further programmatic logic.
-  - `"table"`: the same profile rewritten as a table for a person to read, via **MCP sampling**
-    (`sampling/createMessage`) — this server asks the connected MCP client to run the rewrite
-    through the client's own LLM. If the client doesn't declare the sampling capability, or the
-    call fails/times out, the tool transparently falls back to a deterministic, locally-built
-    table. It never fails solely because sampling is unavailable; the `verificationToken` is
-    never rendered in that local fallback table.
-- Kept as a single tool with a parameter (rather than a second tool) specifically to avoid
-  tool-selection ambiguity: with two similarly-described tools, the calling LLM would sometimes
-  pick the wrong one for a given phrasing. A parameter on one tool is a more reliable signal.
+-   Input: `outputFormat` (optional, default `"raw"`).
+    -   `"raw"`: the full structured `UserInfoResponse` — the shape to ask for when the result feeds further programmatic logic.
+    -   `"table"`: the same profile rewritten as a table for a person to read, via **MCP sampling** (`sampling/createMessage`) — this server asks the connected MCP client to run the rewrite through the client's own LLM. If the client doesn't declare the sampling capability, or the call fails/times out, the tool transparently falls back to a deterministic, locally-built table. It never fails solely because sampling is unavailable; the `verificationToken` is never rendered in that local fallback table.
+-   Kept as a single tool with a parameter (rather than a second tool) specifically to avoid tool-selection ambiguity: with two similarly-described tools, the calling LLM would sometimes pick the wrong one for a given phrasing. A parameter on one tool is a more reliable signal.
 
-> [!TIP]
-> Full request/response schema examples are in [`src/main/resources/openapi.yaml`](src/main/resources/openapi.yaml).
+> [!TIP] Full request/response schema examples are in [`src/main/resources/openapi.yaml`](src/main/resources/openapi.yaml).
 
 ---
 
@@ -164,16 +177,16 @@ Returns the authenticated user's Jobshunter profile (email, preferences, roles, 
 
 Two curated architecture walkthroughs are available:
 
-- Auth + initialization flow: [`architecture/MCP_Server_Authentication_Initialization_Flow.md`](architecture/MCP_Server_Authentication_Initialization_Flow.md)
-- Tool invocation flow: [`architecture/MCP_Tool_Invocation_Flow.md`](architecture/MCP_Tool_Invocation_Flow.md)
+-   Auth + initialization flow: [`architecture/MCP_Server_Authentication_Initialization_Flow.md`](architecture/MCP_Server_Authentication_Initialization_Flow.md)
+-   Tool invocation flow: [`architecture/MCP_Tool_Invocation_Flow.md`](architecture/MCP_Tool_Invocation_Flow.md)
 
 High-level sequence:
 
-1. Client discovers OAuth metadata and JWKS from MCP.
-2. Client authenticates through `/authorize` and `/token` (Google-backed broker flow).
-3. MCP mints access token for `/mcp`.
-4. Tool call reaches `search_jobs` or `get_user_info`.
-5. MCP mints delegated Jobshunter token and calls internal Jobshunter API.
+1.  Client discovers OAuth metadata and JWKS from MCP.
+2.  Client authenticates through `/authorize` and `/token` (Google-backed broker flow).
+3.  MCP mints access token for `/mcp`.
+4.  Tool call reaches `search_jobs`, `wait_for_search`, or `get_user_info`.
+5.  MCP mints delegated Jobshunter token and calls internal Jobshunter API.
 
 ---
 
@@ -181,14 +194,14 @@ High-level sequence:
 
 This implementation is **internal-AS only**.
 
-- MCP access token (for `/mcp`):
-  - `aud=<MCP_AS_MCP_AUDIENCE>`
-  - `token_use=mcp_access`
-  - default TTL: `15m`
-- Delegated Jobshunter token (used server-to-server by MCP):
-  - `aud=<MCP_AS_JOBSHUNTER_AUDIENCE>`
-  - `token_use=jobshunter_delegated`
-  - default TTL: `5m`
+-   MCP access token (for `/mcp`):
+    -   `aud=<MCP_AS_MCP_AUDIENCE>`
+    -   `token_use=mcp_access`
+    -   default TTL: `15m`
+-   Delegated Jobshunter token (used server-to-server by MCP):
+    -   `aud=<MCP_AS_JOBSHUNTER_AUDIENCE>`
+    -   `token_use=jobshunter_delegated`
+    -   default TTL: `5m`
 
 Google `id_token` is used as identity proof during OAuth exchange; it is not reused as MCP access token.
 
@@ -196,27 +209,74 @@ Google `id_token` is used as identity proof during OAuth exchange; it is not reu
 
 ## Endpoints
 
-| Method | Path | Auth required | Purpose |
-|---|---|---|---|
-| `POST` | `/mcp` | Yes (MCP JWT) | MCP JSON-RPC endpoint (`initialize`, `tools/list`, `tools/call`) |
-| `GET` | `/.well-known/oauth-protected-resource` | No | OAuth protected resource metadata |
-| `GET` | `/.well-known/oauth-authorization-server` | No | OAuth authorization server metadata |
-| `GET` | `/.well-known/jwks.json` | No | MCP JWKS for token verification |
-| `GET` | `/authorize` | No | OAuth authorize bridge with strict validation |
-| `POST` | `/token` | No | OAuth code exchange + MCP token issuance |
+Method
+
+Path
+
+Auth required
+
+Purpose
+
+`POST`
+
+`/mcp`
+
+Yes (MCP JWT)
+
+MCP JSON-RPC endpoint (`initialize`, `tools/list`, `tools/call`)
+
+`GET`
+
+`/.well-known/oauth-protected-resource`
+
+No
+
+OAuth protected resource metadata
+
+`GET`
+
+`/.well-known/oauth-authorization-server`
+
+No
+
+OAuth authorization server metadata
+
+`GET`
+
+`/.well-known/jwks.json`
+
+No
+
+MCP JWKS for token verification
+
+`GET`
+
+`/authorize`
+
+No
+
+OAuth authorize bridge with strict validation
+
+`POST`
+
+`/token`
+
+No
+
+OAuth code exchange + MCP token issuance
 
 ---
 
 ## Security policy
 
-- Public endpoints are explicitly allowlisted:
-  - `GET /.well-known/oauth-protected-resource`
-  - `GET /.well-known/oauth-authorization-server`
-  - `GET /.well-known/jwks.json`
-  - `GET /authorize`
-  - `POST /token`
-- `/mcp` requires a valid MCP JWT; missing or invalid token returns `401`.
-- Non-allowlisted endpoints are denied by default (`403`).
+-   Public endpoints are explicitly allowlisted:
+    -   `GET /.well-known/oauth-protected-resource`
+    -   `GET /.well-known/oauth-authorization-server`
+    -   `GET /.well-known/jwks.json`
+    -   `GET /authorize`
+    -   `POST /token`
+-   `/mcp` requires a valid MCP JWT; missing or invalid token returns `401`.
+-   Non-allowlisted endpoints are denied by default (`403`).
 
 ---
 
@@ -224,43 +284,132 @@ Google `id_token` is used as identity proof during OAuth exchange; it is not reu
 
 ### Core required variables
 
-| Variable | Required | Description |
-|---|---|---|
-| `GOOGLE_CLIENT_ID` | Yes | Google OAuth client id |
-| `GOOGLE_CLIENT_SECRET` | Yes | Google OAuth client secret |
-| `MCP_AS_ISSUER` | Yes | Canonical public issuer URL for discovery and JWT `iss` |
-| `MCP_AS_MCP_AUDIENCE` | Yes | Audience accepted on `/mcp` |
-| `MCP_AS_JOBSHUNTER_AUDIENCE` | Yes | Audience expected by Jobshunter for delegated token |
-| `JOBSHUNTER_BASE_URL` | Yes | Base URL of Jobshunter internal API |
-| `JOBSHUNTER_TRUST_STORE_PASSWORD` | Yes | Trust-store password when trust store is configured |
+Variable
+
+Required
+
+Description
+
+`GOOGLE_CLIENT_ID`
+
+Yes
+
+Google OAuth client id
+
+`GOOGLE_CLIENT_SECRET`
+
+Yes
+
+Google OAuth client secret
+
+`MCP_AS_ISSUER`
+
+Yes
+
+Canonical public issuer URL for discovery and JWT `iss`
+
+`MCP_AS_MCP_AUDIENCE`
+
+Yes
+
+Audience accepted on `/mcp`
+
+`MCP_AS_JOBSHUNTER_AUDIENCE`
+
+Yes
+
+Audience expected by Jobshunter for delegated token
+
+`JOBSHUNTER_BASE_URL`
+
+Yes
+
+Base URL of Jobshunter internal API
+
+`JOBSHUNTER_TRUST_STORE_PASSWORD`
+
+Yes
+
+Trust-store password when trust store is configured
 
 ### Optional / defaulted variables
 
-| Variable | Default | Description |
-|---|---|---|
-| `MCP_AS_SIGNING_KEY_PEM` | empty | PKCS#8 RSA private key; if empty, ephemeral key generated at startup |
-| `MCP_AS_KEY_ID` | `mcp-key-1` | JWT `kid` exposed in JWKS |
-| `MCP_OAUTH_ADDITIONAL_AUTHORIZE_PARAM_1` | empty | Optional extra allowlisted `/authorize` parameter |
+Variable
+
+Default
+
+Description
+
+`MCP_AS_SIGNING_KEY_PEM`
+
+empty
+
+PKCS#8 RSA private key; if empty, ephemeral key generated at startup
+
+`MCP_AS_KEY_ID`
+
+`mcp-key-1`
+
+JWT `kid` exposed in JWKS
+
+`MCP_OAUTH_ADDITIONAL_AUTHORIZE_PARAM_1`
+
+empty
+
+Optional extra allowlisted `/authorize` parameter
 
 ### Fixed runtime defaults from config
 
-| Setting | Value |
-|---|---|
-| MCP protocol | `STREAMABLE` |
-| MCP server type | `SYNC` |
-| MCP request timeout | `5m` |
-| MCP access token TTL | `15m` |
-| Delegated token TTL | `5m` |
-| Jobshunter connect timeout | `5s` |
-| Jobshunter response timeout | `25m` |
-| Jobshunter trust store | `classpath:ngrok-truststore.p12` |
+Setting
+
+Value
+
+MCP protocol
+
+`STREAMABLE`
+
+MCP server type
+
+`SYNC`
+
+MCP request timeout
+
+`5m`
+
+MCP access token TTL
+
+`15m`
+
+Delegated token TTL
+
+`5m`
+
+Jobshunter connect timeout
+
+`5s`
+
+Jobshunter response timeout
+
+`25m`
+
+Jobshunter trust store
+
+`classpath:ngrok-truststore.p12`
+
+`wait_for_search` poll interval
+
+`1s` (`jobshunter.search.poll-interval`)
+
+`wait_for_search` max wait per call
+
+`240s` (server-clamped; live progress is pushed during this window)
 
 ### OAuth hardening highlights
 
-- Enforced redirect allowlist on `/authorize` and `/token`
-- Strict unknown-parameter rejection for authorize/token requests
-- Optional loopback redirects with restricted callback paths
-- Discovery metadata built from configured issuer, not request headers
+-   Enforced redirect allowlist on `/authorize` and `/token`
+-   Strict unknown-parameter rejection for authorize/token requests
+-   Optional loopback redirects with restricted callback paths
+-   Discovery metadata built from configured issuer, not request headers
 
 ---
 
@@ -273,8 +422,7 @@ docker network create jobshunter-net
 docker compose up --build
 ```
 
-> [!WARNING]
-> In docker-compose, `MCP_AS_SIGNING_KEY_PEM` is required (fail-fast). For production-like stability, always use a persistent signing key to avoid token/JWKS rotation on restart.
+> [!WARNING] In docker-compose, `MCP_AS_SIGNING_KEY_PEM` is required (fail-fast). For production-like stability, always use a persistent signing key to avoid token/JWKS rotation on restart.
 
 ---
 
@@ -292,8 +440,7 @@ Run the full build, which also executes integration tests:
 mvn verify
 ```
 
-> [!NOTE]
-> Maven Surefire runs `*Test` classes during the `test` phase. `*IT` classes are run automatically by the Failsafe plugin during `mvn verify` (bound to the `integration-test`/`verify` goals) — no explicit execution is needed.
+> [!NOTE] Maven Surefire runs `*Test` classes during the `test` phase. `*IT` classes are run automatically by the Failsafe plugin during `mvn verify` (bound to the `integration-test`/`verify` goals) — no explicit execution is needed.
 
 Run a single integration test class explicitly:
 
@@ -307,27 +454,32 @@ mvn verify -Dit.test=McpSecurityFilterChainIT
 
 ### Common startup failures
 
-- Missing required env vars (`@ConfigurationProperties` validation fails fast)
-- `JOBSHUNTER_TRUST_STORE_PASSWORD` missing while trust store is configured
-- Invalid PEM format for `MCP_AS_SIGNING_KEY_PEM`
+-   Missing required env vars (`@ConfigurationProperties` validation fails fast)
+-   `JOBSHUNTER_TRUST_STORE_PASSWORD` missing while trust store is configured
+-   Invalid PEM format for `MCP_AS_SIGNING_KEY_PEM`
 
 ### `401` on `/mcp`
 
-- Access token issuer (`iss`) mismatch against `MCP_AS_ISSUER`
-- Access token audience mismatch against `MCP_AS_MCP_AUDIENCE`
-- Invalid or missing `token_use` claim (`mcp_access`)
+-   Access token issuer (`iss`) mismatch against `MCP_AS_ISSUER`
+-   Access token audience mismatch against `MCP_AS_MCP_AUDIENCE`
+-   Invalid or missing `token_use` claim (`mcp_access`)
 
 ### OAuth errors (`/authorize` or `/token`)
 
-- `redirect_uri` not in allowlist
-- Missing PKCE parameters (`code_challenge_method=S256`)
-- Unknown request parameters rejected by strict validation
+-   `redirect_uri` not in allowlist
+-   Missing PKCE parameters (`code_challenge_method=S256`)
+-   Unknown request parameters rejected by strict validation
+
+### `wait_for_search` timing out or getting cut off by the MCP client
+
+-   `SearchJobsTool.MAX_SAFE_WAIT_SECONDS` (currently `240`) is kept under the MCP `request-timeout` of `5m`. Hunt messages are pushed live during the wait; this ceiling only bounds the final return.
+-   Live updates use `notifications/progress` when the `tools/call` included a progress token, and `notifications/message` (info) otherwise. Clients that support neither still get the final plain-text `Hunt progress` list when the call returns.
 
 ### Jobshunter call failures
 
-- `JOBSHUNTER_BASE_URL` unreachable
-- TLS trust-store issues (`ngrok-truststore.p12` / password mismatch)
-- Jobshunter side not configured to trust MCP delegated tokens
+-   `JOBSHUNTER_BASE_URL` unreachable
+-   TLS trust-store issues (`ngrok-truststore.p12` / password mismatch)
+-   Jobshunter side not configured to trust MCP delegated tokens
 
 ---
 
@@ -335,21 +487,21 @@ mvn verify -Dit.test=McpSecurityFilterChainIT
 
 Configure Jobshunter to validate delegated JWTs issued by MCP:
 
-- `DELEGATED_AUTH_ISSUER_URI=<MCP_AS_ISSUER>`
-- `DELEGATED_AUTH_AUDIENCE=<MCP_AS_JOBSHUNTER_AUDIENCE>`
-- `DELEGATED_AUTH_JWKS_URI=<MCP_AS_ISSUER>/.well-known/jwks.json`
+-   `DELEGATED_AUTH_ISSUER_URI=<MCP_AS_ISSUER>`
+-   `DELEGATED_AUTH_AUDIENCE=<MCP_AS_JOBSHUNTER_AUDIENCE>`
+-   `DELEGATED_AUTH_JWKS_URI=<MCP_AS_ISSUER>/.well-known/jwks.json`
 
 ---
 
 ## Related docs
 
-- OpenAPI contract: [`src/main/resources/openapi.yaml`](src/main/resources/openapi.yaml)
-- Auth flow doc: [`architecture/MCP_Server_Authentication_Initialization_Flow.md`](architecture/MCP_Server_Authentication_Initialization_Flow.md)
-- Tool flow doc: [`architecture/MCP_Tool_Invocation_Flow.md`](architecture/MCP_Tool_Invocation_Flow.md)
+-   OpenAPI contract: [`src/main/resources/openapi.yaml`](src/main/resources/openapi.yaml)
+-   Auth flow doc: [`architecture/MCP_Server_Authentication_Initialization_Flow.md`](architecture/MCP_Server_Authentication_Initialization_Flow.md)
+-   Tool flow doc: [`architecture/MCP_Tool_Invocation_Flow.md`](architecture/MCP_Tool_Invocation_Flow.md)
 
 ---
 
 ## License
 
-- Main license text: [`LICENSE`](LICENSE)
-- Romanian summary: [`LICENSE.ro.md`](LICENSE.ro.md)
+-   Main license text: [`LICENSE`](LICENSE)
+-   Romanian summary: [`LICENSE.ro.md`](LICENSE.ro.md)

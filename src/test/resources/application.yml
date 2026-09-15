@@ -8,6 +8,7 @@ spring:
         type: SYNC
         request-timeout: 5m
         capabilities:
+          logging: true
           tool: true
           resource: false
           prompt: false
@@ -34,6 +35,7 @@ jobshunter:
   connect-timeout: 1s
   response-timeout: 5s
   search-jobs-path: /api/internal/search_jobs
+  search-job-status-path: /api/internal/search_jobs/{searchId}
   user-info-path: /api/internal/me
   ssl:
     trust-store: ~

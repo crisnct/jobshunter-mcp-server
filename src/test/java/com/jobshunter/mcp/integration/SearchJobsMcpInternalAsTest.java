@@ -58,6 +58,7 @@ class SearchJobsMcpInternalAsTest {
   static void overrideProperties(DynamicPropertyRegistry registry) {
     registry.add("jobshunter.base-url", () -> mockJobshunter.url("/").toString().replaceAll("/$", ""));
     registry.add("jobshunter.search-jobs-path", () -> "/api/internal/search_jobs");
+    registry.add("jobshunter.search-job-status-path", () -> "/api/internal/search_jobs/{searchId}");
     registry.add("spring.ai.mcp.server.streamable-http.mcp-endpoint", () -> "/mcp");
     registry.add("mcp.authorization-server.issuer", () -> "https://mcp.local");
     registry.add("mcp.authorization-server.mcp-audience", () -> "mcp-api");
@@ -85,7 +86,7 @@ class SearchJobsMcpInternalAsTest {
     mockJobshunter.enqueue(new MockResponse()
         .setHeader("Content-Type", "application/json")
         .setBody("""
-            {"jobsFound":[{"url":"https://example.com/job-1","source":"SERP"}]}
+            {"searchId":"search-abc"}
             """));
 
     ResponseEntity<String> initializeResponseEntity = postJsonRpcWithResponse(mcpClient, MCP_ACCESS_TOKEN, null, "initialize", "1", Map.of(
@@ -108,7 +109,7 @@ class SearchJobsMcpInternalAsTest {
             )
         )
     ));
-    assertTrue(toolCallResponse.contains("https://example.com/job-1"));
+    assertTrue(toolCallResponse.contains("search-abc"));
 
     RecordedRequest searchRequest = mockJobshunter.takeRequest(2, TimeUnit.SECONDS);
     String delegatedToken = searchRequest.getHeader(HttpHeaders.AUTHORIZATION).replace("Bearer ", "");
@@ -118,6 +119,29 @@ class SearchJobsMcpInternalAsTest {
     assertEquals("https://mcp.local", delegatedJwt.getJWTClaimsSet().getIssuer());
     assertEquals(List.of("jobshunter-api"), delegatedJwt.getJWTClaimsSet().getAudience());
     assertEquals("jobshunter_delegated", delegatedJwt.getJWTClaimsSet().getStringClaim("token_use"));
+
+    mockJobshunter.enqueue(new MockResponse()
+        .setHeader("Content-Type", "application/json")
+        .setBody("""
+            {"searchId":"search-abc","status":"DONE",
+             "events":[{"message":"Processing started"},{"message":"Starting hunt orchestration"}],
+             "result":{"jobsFound":[{"url":"https://example.com/job-1","source":"SERP"}]},"errorMessage":null}
+            """));
+
+    String waitResponse = postJsonRpc(mcpClient, MCP_ACCESS_TOKEN, sessionId, "tools/call", "4", Map.of(
+        "name", "wait_for_search",
+        "arguments", Map.of("searchId", "search-abc", "maxWaitSeconds", 5)
+    ));
+    assertTrue(waitResponse.contains("https://example.com/job-1"));
+    assertTrue(waitResponse.contains("Hunt progress:"), waitResponse);
+    assertTrue(waitResponse.contains("Processing started"), waitResponse);
+    assertTrue(waitResponse.contains("Starting hunt orchestration"), waitResponse);
+
+    RecordedRequest waitRequest = mockJobshunter.takeRequest(2, TimeUnit.SECONDS);
+    String waitDelegatedToken = waitRequest.getHeader(HttpHeaders.AUTHORIZATION).replace("Bearer ", "");
+    assertNotEquals(MCP_ACCESS_TOKEN, waitDelegatedToken);
+    assertEquals("jobshunter_delegated",
+        SignedJWT.parse(waitDelegatedToken).getJWTClaimsSet().getStringClaim("token_use"));
   }
 
   private String postJsonRpc(

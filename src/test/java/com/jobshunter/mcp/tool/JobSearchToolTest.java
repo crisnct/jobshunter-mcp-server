@@ -10,9 +10,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.jobshunter.mcp.client.JobshunterClient;
-import com.jobshunter.mcp.dto.SearchConfiguration;
-import com.jobshunter.mcp.dto.SearchJobResult;
-import com.jobshunter.mcp.dto.SearchJobsResponse;
 import com.jobshunter.mcp.dto.UserInfoResponse;
 import com.jobshunter.mcp.exception.ErrorCode;
 import com.jobshunter.mcp.exception.JobshunterApiException;
@@ -60,64 +57,6 @@ class JobSearchToolTest {
   void clearSecurityContext() {
     SecurityContextHolder.clearContext();
     MDC.clear();
-  }
-
-  @Test
-  void shouldDelegateToClientAndReturnResponse() {
-    Jwt jwt = new Jwt(
-        "google-user-token",
-        Instant.now(),
-        Instant.now().plusSeconds(300),
-        Map.of("alg", "none"),
-        Map.of("sub", "user1", "scope", "profile email")
-    );
-    SecurityContextHolder.getContext().setAuthentication(new JwtAuthenticationToken(jwt));
-    when(delegatedTokenResolver.resolveDelegatedToken(jwt)).thenReturn("delegated-token");
-
-    List<SearchConfiguration> request = List.of(
-        new SearchConfiguration("GROK", "grok-4-1-fast-non-reasoning", false, true),
-        new SearchConfiguration("SERP", "google_jobs", false, true)
-    );
-
-    SearchJobsResponse expected = new SearchJobsResponse(List.of(
-        new SearchJobResult("https://example.com/job-1", "SERP")
-    ));
-    when(jobshunterClient.searchJobs(request, "delegated-token")).thenAnswer(invocation -> {
-      assertThat(MDC.get(RequestContext.REQUEST_ID_MDC_KEY)).isNotBlank();
-      return expected;
-    });
-
-    SearchJobsResponse actual = jobSearchTool.searchJobs(request);
-
-    assertEquals(expected, actual);
-    verify(jobshunterClient).searchJobs(request, "delegated-token");
-    assertThat(MDC.get(RequestContext.REQUEST_ID_MDC_KEY)).isNull();
-  }
-
-  @Test
-  void shouldRejectInvalidSearchConfiguration() {
-    List<SearchConfiguration> request = List.of(
-        new SearchConfiguration("GROK", "grok-4-1-fast-non-reasoning", false, false)
-    );
-
-    JobshunterApiException ex = assertThrows(JobshunterApiException.class, () -> jobSearchTool.searchJobs(request));
-    assertEquals(
-        "Invalid search configuration: at least one of searchCompanies or searchWithUserPrompts must be true.",
-        ex.getMessage()
-    );
-    assertEquals(ErrorCode.VALIDATION, ex.getErrorCode());
-    verifyNoInteractions(jobshunterClient);
-  }
-
-  @Test
-  void shouldRejectRequestWhenGoogleTokenIsMissingFromContext() {
-    List<SearchConfiguration> request = List.of(
-        new SearchConfiguration("GROK", "grok-4-1-fast-non-reasoning", false, true)
-    );
-
-    JobshunterApiException ex = assertThrows(JobshunterApiException.class, () -> jobSearchTool.searchJobs(request));
-    assertEquals("Authenticated MCP token is required to call search_jobs.", ex.getMessage());
-    assertEquals(ErrorCode.AUTH_FAILED, ex.getErrorCode());
   }
 
   @Test

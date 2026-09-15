@@ -3,6 +3,11 @@ server:
   forward-headers-strategy: framework
 
 spring:
+  threads:
+    virtual:
+      # Makes wait_for_search's poll-loop Thread.sleep cheap (a virtual thread parks instead
+      # of blocking a platform thread) instead of tying up a bounded platform-thread pool.
+      enabled: true
   ai:
     mcp:
       server:
@@ -12,6 +17,7 @@ spring:
         type: SYNC
         request-timeout: 5m
         capabilities:
+          logging: true
           tool: true
           resource: false
           prompt: false
@@ -93,7 +99,13 @@ jobshunter:
   connect-timeout: 5s
   response-timeout: 25m
   search-jobs-path: /api/internal/search_jobs
+  search-job-status-path: /api/internal/search_jobs/{searchId}
   user-info-path: /api/internal/me
+  search:
+    # How often wait_for_search GETs the Jobshunter snapshot while the tool call is still open.
+    # New hunt messages are pushed as MCP progress/logging notifications after each poll.
+    # Cheap on a virtual thread; 1s is the max delay from emit() to the client seeing it.
+    poll-interval: 1s
   ssl:
     trust-store: classpath:ngrok-truststore.p12
     trust-store-password: ${JOBSHUNTER_TRUST_STORE_PASSWORD:}
