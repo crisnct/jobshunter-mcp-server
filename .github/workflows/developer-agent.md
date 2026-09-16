@@ -99,6 +99,7 @@ Read this section before your first tool call. These rules override any instinct
 5. **Budget your turns.** Target well under 20 turns total for **Implement**/**Resume**/**Fix findings**. If you're past that with no commit or PR yet, stop whatever you're investigating immediately and ship the smallest change that satisfies the acceptance criteria — an imperfect but working solution beats a run that times out with nothing delivered.
 6. **Fetch each fact once, with one command.** Never re-run the same lookup through two or three different commands "just to be sure," never poll or sleep-and-retry, never re-read a file already visible earlier in this conversation.
 7. **Never dump a large log or file into context.** Redirect command output to a file and extract only the specific lines you need with `grep`/`tail`/`awk`.
+8. **Only stage files inside `src/**`, `pom.xml`, `README.md`, `architecture/**`, `Dockerfile`, `docker-compose.yml`.** Everything else — `CLAUDE.md`, `.github/**`, anything at the repo root not on this list — is rejected by the safe-outputs validator, and a single out-of-scope file causes the **entire** `create_pull_request`/`push_to_pull_request_branch` to be discarded, not just that file, wasting the whole run. Before every commit, run `git status --porcelain` (or `git diff --staged --name-only`) and confirm every listed path matches this allow-list; `git restore --staged <file>` anything that doesn't, including any file you edited for your own convenience (e.g. project instructions) rather than the task itself.
 
 ## Safety
 
@@ -182,6 +183,6 @@ Every numbered exit below carries its own mandatory label transition — never c
 
 ## Constraints
 
-- Change only task-related allowed files; never modify `.github/`, merge, or close the PR.
+- Change only task-related allowed files (`src/**`, `pom.xml`, `README.md`, `architecture/**`, `Dockerfile`, `docker-compose.yml`); never modify `.github/`, `CLAUDE.md`, or any other file outside that list — the safe-outputs validator rejects the entire PR/push over a single out-of-scope file, not just that file. Never merge or close the PR.
 - Use only declared network access. Claim tests passed only after successful execution.
 - Every state transition above must update both the label(s) removed and added; never leave two `ai:*` state labels (as opposed to informational labels) on the same item.
