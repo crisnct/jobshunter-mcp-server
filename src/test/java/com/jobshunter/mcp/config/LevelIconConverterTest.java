@@ -7,25 +7,29 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 class LevelIconConverterTest {
 
   private final LevelIconConverter converter = new LevelIconConverter();
+  private static final String ESC = String.valueOf((char) 27);
 
-  @ParameterizedTest
-  @CsvSource({
-      "ERROR, ✖",
-      "WARN, ⚠",
-      "INFO, ℹ",
-      "DEBUG, ⚙",
-      "TRACE, »"
-  })
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("iconTestCases")
   void convertReturnsDistinctIconPerLevel(String levelName, String expectedIcon) {
     ILoggingEvent event = eventWithLevel(Level.toLevel(levelName));
-
     assertThat(converter.convert(event)).isEqualTo(expectedIcon);
+  }
+
+  private static Stream<org.junit.jupiter.params.provider.Arguments> iconTestCases() {
+    return Stream.of(
+        org.junit.jupiter.params.provider.Arguments.of("ERROR", ESC + "[31m✖" + ESC + "[0m"),
+        org.junit.jupiter.params.provider.Arguments.of("WARN", ESC + "[33m⚠" + ESC + "[0m"),
+        org.junit.jupiter.params.provider.Arguments.of("INFO", ESC + "[34mℹ" + ESC + "[0m"),
+        org.junit.jupiter.params.provider.Arguments.of("DEBUG", "⚙"),
+        org.junit.jupiter.params.provider.Arguments.of("TRACE", "»")
+    );
   }
 
   @Test
@@ -39,7 +43,7 @@ class LevelIconConverterTest {
   }
 
   @ParameterizedTest
-  @CsvSource({
+  @org.junit.jupiter.params.provider.CsvSource({
       "OFF, •",
       "ALL, •"
   })
