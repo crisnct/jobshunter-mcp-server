@@ -40,7 +40,7 @@ runtimes:
   java:
     version: "25"
 network:
-  allowed: [defaults, github, java]
+  allowed: [defaults, github, java, api.anthropic.com]
 tools:
   cli-proxy: true
   github:
