@@ -14,19 +14,16 @@ on:
     names: [ai:needs_work]
   issue_comment:
     types: [created]
-  schedule:
-    - cron: "*/15 * * * *"
   bots:
     - "jobshunter-review-agent-crisnct[bot]"
 if: >-
-  github.event_name == 'schedule' ||
   github.event_name == 'issues' ||
   github.event_name == 'pull_request' ||
   (github.event_name == 'issue_comment' &&
    github.event.comment.user.type != 'Bot' &&
    contains(github.event.issue.labels.*.name, 'ai:wait_for_feedback'))
 concurrency:
-  group: gh-aw-${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number || 'schedule' }}-${{ github.event.label.name || github.event.comment.id || 'sweep' }}
+  group: gh-aw-${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number }}-${{ github.event.label.name || github.event.comment.id }}
   cancel-in-progress: false
 max-turns: 100
 max-ai-credits: 300
@@ -116,17 +113,18 @@ Keep context small — every turn resends the entire conversation so far, so cum
 - When a single file needs several changes, make them in one `MultiEdit` call instead of multiple separate `Edit` calls — each `Edit` is its own turn. For a file under ~150 lines that needs substantial changes, prefer rewriting it whole with `Write` over several `Edit`/`MultiEdit` calls.
 - Do not spawn a research subagent (the `Task`/`Agent` tool) for a normal-sized task. Its tool calls draw on the same Anthropic account's per-minute token budget as your own turns, so it adds to rate-limit risk rather than avoiding it, and you still have to `Read` every file yourself before editing it regardless of what a subagent already saw. Do inline research (batched `Grep`/`Read`/`Bash` calls) instead; reserve a subagent for a task where inline research would otherwise clearly take more than ~10 of your own turns.
 - Target finishing **Implement**/**Fix findings**/**Resume** in well under 20 turns. If you notice you are past that with no PR/commit yet, stop exploring and move straight to the smallest change that satisfies the acceptance criteria.
+
 ## Route
+
+This workflow runs only on real-time triggers — no scheduled sweep, no polling, no auto-retry of a run that failed or was cancelled. Each event below maps to exactly one flow, using the issue/PR the event itself carries:
 
 - `issues` event (label `ai:ready` just added): go to **Implement**, using that issue.
 - `pull_request` event (label `ai:needs_work` just added): go to **Fix findings**, using that PR.
 - `issue_comment` event (a human replied while the item was `ai:wait_for_feedback`): go to **Resume**, using that issue/PR.
-- `schedule` event (safety-net sweep, runs every 15 minutes): the event carries no issue/PR, and its concurrency group (`...-schedule-sweep`) is separate from a real-time trigger's (`...-<number>-<label>`), so a sweep run can execute **at the same time** as a real-time run instead of queuing behind it — never treat "no other run is visible" as proof one isn't already in flight. A labeling or comment event can occasionally get lost (e.g. cancelled by GitHub superseding it when another event landed at the same moment), but that is rare; do not treat this sweep as a fast path. To avoid double-processing something a real-time run just picked up or is about to, only act on state that has held its current label for **more than 15 minutes** (one full sweep interval) — check the item's timeline/events for the most recent `labeled` event with that label name and compare its timestamp to now. Fresh state (≤15 minutes old) almost certainly already has a real-time run handling it; skip it and let the next sweep re-check. Check, in this order, and act on the **first** match only (the next scheduled run picks up anything else):
-    1. The oldest open issue labeled `ai:ready` for more than 15 minutes → **Implement**.
-    2. The oldest open `[AI] `-titled PR by this bot labeled `ai:needs_work` for more than 15 minutes → **Fix findings**.
-    3. The oldest open issue or PR labeled `ai:wait_for_feedback` whose most recent comment is from a human (not a bot), postdates your own last comment there, and is more than 15 minutes old → **Resume**.
-       If none of the three match anything, emit `noop` and stop.
-       Every safe-output in this workflow (`create_pull_request` excepted, since it always creates something new) uses `target: "*"`, so `item_number`/`pull_request_number` is **required on every `add_comment`, `push_to_pull_request_branch`, `add_labels`, and `remove_labels` call, always** — there is no implicit "triggering item" to fall back on, whether the run started from a real event or from the schedule sweep above.
+
+If a run fails or is cancelled partway through, nothing re-triggers it automatically — the item is left on whatever `ai:*` label it had when the run stopped, and a human re-applies the appropriate label (or re-runs the workflow manually) to resume it. Do not build in any waiting/polling/re-checking behavior of your own on the assumption a later pass will catch what this run missed.
+
+Every safe-output in this workflow (`create_pull_request` excepted, since it always creates something new) uses `target: "*"`, so `item_number`/`pull_request_number` is **required on every `add_comment`, `push_to_pull_request_branch`, `add_labels`, and `remove_labels` call, always** — there is no implicit "triggering item" to fall back on.
 
 ## Implement
 
@@ -146,6 +144,7 @@ Every numbered exit below (`noop`, blocked, done) carries its own mandatory labe
 6. Run `mvn -B verify`; never weaken checks. Inspect the final diff for unrelated files, secrets, sensitive config, debug output, or binaries.
 7. Commit on `ai/issue-<issue-number>-<short-purpose>` and emit one `create_pull_request`. Summarize the change, criteria, exact verification result, risks, and `Closes #<issue-number>`. (Do not try to label this PR yourself — see the note above this list; it is born with `ai:to_review`.)
 8. Remove `ai:in_progress` and add `ai:to_review` on the issue via an explicit `add_labels`/`remove_labels` call — never assume the issue side happened automatically just because the PR's did.
+
 ## Resume
 
 Triggered when a human comments on an issue or PR that currently carries `ai:wait_for_feedback`.
@@ -155,6 +154,7 @@ Triggered when a human comments on an issue or PR that currently carries `ai:wai
 3. Continue the implementation from where it stopped, following steps 4-6 of **Implement**.
 4. If still blocked by a new question, emit `add_comment` on the PR with the follow-up questions, remove `ai:in_progress`, add `ai:wait_for_feedback` (issue + PR), emit `noop`, and stop.
 5. If finished, commit, emit one `push_to_pull_request_branch`, remove `ai:in_progress`, add `ai:to_review` (issue + PR — `push_to_pull_request_branch` cannot carry labels, so both calls are mandatory here), and `add_comment` summarizing the change and exact verification result.
+
 ## Fix findings
 
 Every numbered exit below carries its own mandatory label transition — never call `noop`, `add_comment`, or `push_to_pull_request_branch` without first (in the same turn) calling the `add_labels`/`remove_labels` pair for that exact case.
@@ -170,9 +170,9 @@ Every numbered exit below carries its own mandatory label transition — never c
 6. Add regression tests, run `mvn -B verify`, and inspect the final diff. Report environmental failures honestly.
 7. Commit, emit one `push_to_pull_request_branch`, then `add_comment` listing resolved IDs and the exact test result.
 8. Remove `ai:in_progress`, add `ai:to_review` (PR + issue — `push_to_pull_request_branch` cannot carry labels, so both calls are mandatory here).
+
 ## Constraints
 
 - Change only task-related allowed files; never modify `.github/`, merge, or close the PR.
 - Use only declared network access. Claim tests passed only after successful execution.
 - Every state transition above must update both the label(s) removed and added; never leave two `ai:*` state labels (as opposed to informational labels) on the same item.
- 
