@@ -13,10 +13,10 @@ import org.mockito.Mockito;
 class LevelIconConverterTest {
 
   private final LevelIconConverter converter = new LevelIconConverter();
-  private static final String ANSI_RESET = "[0m";
-  private static final String ANSI_RED = "[31m";
-  private static final String ANSI_YELLOW = "[33m";
-  private static final String ANSI_BLUE = "[34m";
+  private static final String ANSI_RESET = "\033[0m";
+  private static final String ANSI_RED = "\033[31m";
+  private static final String ANSI_YELLOW = "\033[33m";
+  private static final String ANSI_BLUE = "\033[34m";
 
   @ParameterizedTest
   @CsvSource({

@@ -11,10 +11,10 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
  */
 public class LevelIconConverter extends ClassicConverter {
 
-  private static final String ANSI_RESET = "[0m";
-  private static final String ANSI_RED = "[31m";
-  private static final String ANSI_YELLOW = "[33m";
-  private static final String ANSI_BLUE = "[34m";
+  private static final String ANSI_RESET = "\033[0m";
+  private static final String ANSI_RED = "\033[31m";
+  private static final String ANSI_YELLOW = "\033[33m";
+  private static final String ANSI_BLUE = "\033[34m";
 
   @Override
   public String convert(ILoggingEvent event) {
