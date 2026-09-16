@@ -21,6 +21,7 @@ max-turns: 35
 max-ai-credits: 200
 engine:
   id: claude
+  model: claude-sonnet-4-6
   env:
     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 permissions:

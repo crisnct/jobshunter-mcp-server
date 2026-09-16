@@ -32,6 +32,7 @@ max-turns: 100
 max-ai-credits: 300
 engine:
   id: claude
+  model: claude-haiku-4-5-20251001
   env:
     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 permissions:
