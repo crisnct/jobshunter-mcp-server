@@ -19,7 +19,7 @@ max-ai-credits: 200
 engine:
   id: codex
   version: "0.116.0"
-  model: grok-4.3
+  model: grok-4-1-fast-reasoning
   env:
     OPENAI_API_KEY: ${{ secrets.X_API_KEY }}
     OPENAI_BASE_URL: "https://api.x.ai/v1"
