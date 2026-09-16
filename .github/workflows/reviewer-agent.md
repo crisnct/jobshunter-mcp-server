@@ -122,5 +122,14 @@ The only working path is `run_shell_command` invoking the `safeoutputs` CLI:
    e.g. `echo '{"body":"...","event":"APPROVE"}' | safeoutputs submit_pull_request_review .`
 3. Never substitute a local file (e.g. `review_summary.md`) for a real safe-output. A file that was not published through `safeoutputs` is invisible to the PR author and to GitHub — writing one and stopping is equivalent to doing nothing.
 4. If a `safeoutputs` invocation errors, read the error and correct the shell command, then retry. Do not abandon the attempt after one or two failures and end the run without a published verdict.
+5. Submitting the review is **not** the end of the run. The label swap is a separate, mandatory `safeoutputs` call — it does not happen automatically and does not follow from the review being submitted. Immediately after `submit_pull_request_review` succeeds, make two more `run_shell_command` calls:
+   ```
+   echo '{"labels":["ai:done"]}' | safeoutputs add_labels .
+   ```
+   (use `ai:needs_work` instead of `ai:done` when the verdict is REQUEST_CHANGES), then:
+   ```
+   echo '{"labels":["ai:to_review"]}' | safeoutputs remove_labels .
+   ```
+   Confirm both commands exit successfully before you stop. Verify the exact field name (`labels` vs. something else) with `safeoutputs add_labels --help` if you are not certain — do not skip the label swap because you are unsure of the payload shape.
 
-A run is only complete once you have actually executed `safeoutputs submit_pull_request_review` (and any `add-labels`/`remove-labels` state change) through `run_shell_command`. Producing the correct verdict in your own reasoning is not sufficient — it must reach the PR.
+A run is only complete once you have actually executed, through `run_shell_command`, **all three** of: `safeoutputs submit_pull_request_review`, `safeoutputs add_labels` (ai:done or ai:needs_work), and `safeoutputs remove_labels` (ai:to_review). A review that was posted but left the PR still labeled `ai:to_review` is an unfinished run, not a successful one — the developer agent will never pick it back up.
