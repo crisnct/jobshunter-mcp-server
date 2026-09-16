@@ -18,6 +18,7 @@ max-turns: 50
 max-ai-credits: 200
 engine:
   id: gemini
+  version: "0.43.0"
   model: gemini-2.5-pro
   args: ["--approval-mode", "yolo"]
   env:
