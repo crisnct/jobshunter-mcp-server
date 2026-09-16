@@ -7,16 +7,22 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 /**
  * Logback pattern converter that renders a distinct Unicode glyph per log severity level,
  * registered as the {@code %levelIcon} conversion word in logback-spring.xml.
+ * Color codes: RED for ERROR, YELLOW for WARN, BLUE for INFO, and default for others.
  */
 public class LevelIconConverter extends ClassicConverter {
+
+  private static final String ANSI_RESET = "[0m";
+  private static final String ANSI_RED = "[31m";
+  private static final String ANSI_YELLOW = "[33m";
+  private static final String ANSI_BLUE = "[34m";
 
   @Override
   public String convert(ILoggingEvent event) {
     Level level = event.getLevel();
     return switch (level.toInt()) {
-      case Level.ERROR_INT -> "✖";
-      case Level.WARN_INT -> "⚠";
-      case Level.INFO_INT -> "ℹ";
+      case Level.ERROR_INT -> ANSI_RED + "✖" + ANSI_RESET;
+      case Level.WARN_INT -> ANSI_YELLOW + "⚠" + ANSI_RESET;
+      case Level.INFO_INT -> ANSI_BLUE + "ℹ" + ANSI_RESET;
       case Level.DEBUG_INT -> "⚙";
       case Level.TRACE_INT -> "»";
       default -> "•";
