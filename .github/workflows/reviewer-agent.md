@@ -20,7 +20,6 @@ engine:
   id: codex
   version: "0.116.0"
   model: grok-4.3
-  args: ["-c", "model_reasoning_effort=\"xhigh\""]
   env:
     OPENAI_API_KEY: ${{ secrets.X_API_KEY }}
     OPENAI_BASE_URL: "https://api.x.ai/v1"
