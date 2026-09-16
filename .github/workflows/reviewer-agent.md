@@ -14,7 +14,7 @@ if: >-
 concurrency:
   group: gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number }}-${{ github.event.label.name }}
   cancel-in-progress: false
-max-turns: 50
+max-turns: 30
 max-ai-credits: 200
 engine:
   id: gemini

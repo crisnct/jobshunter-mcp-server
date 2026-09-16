@@ -25,7 +25,7 @@ if: >-
 concurrency:
    group: gh-aw-${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number }}-${{ github.event.label.name || github.event.comment.id }}
    cancel-in-progress: false
-max-turns: 200
+max-turns: 40
 max-ai-credits: 200
 engine:
    id: gemini
@@ -117,6 +117,7 @@ Keep context small — every turn resends the entire conversation so far, so cum
 
 - When you need several independent pieces of information, fetch them with one combined command in one turn (e.g. `echo === A ===; cmd_a; echo === B ===; cmd_b`) rather than one tool call per turn.
 - Reading existing code to learn conventions before implementing is expected and fine — but stay near the affected package/feature; don't sweep unrelated modules "for context."
+- While iterating, run only the targeted test class you're working on (`mvn -B test -Dtest=ClassName`), never the full `mvn -B verify` — a full verify starts a complete Spring Boot context for every `@SpringBootTest`/integration test and is far slower. Reserve exactly one full `mvn -B verify` for right before your final commit, as the last check.
 - Whenever you run `mvn -B verify` (or any build/test command), run it as a single blocking command that redirects to a file, then extract only what you need, e.g. `mvn -B verify > /tmp/verify.log 2>&1; grep -E "BUILD (SUCCESS|FAILURE)|Tests run:|ERROR\]" /tmp/verify.log`. Never write a polling loop (sleep + repeated tail/grep) waiting for it to finish — the command already blocks until done. Never paste the raw build log into context — capture only the final result line, failing test names/assertions, and warnings relevant to your change. This includes any Spring Boot startup/console output produced by `@SpringBootTest` tests: it lands in the same redirected file and must be filtered out the same way, never `cat`-ed.
 - Never fetch a full CI/Actions job log into context (`get_job_logs`, `gh run view --log`, `gh api .../actions/jobs/<id>/logs`, etc.) — a single job log can be tens of thousands of lines. Check the PR's check-run/status summary first; only if it doesn't explain a failure, fetch that job's log through a command that filters to the failing lines, and read only that filtered result.
 - Read every file you expect to need exactly once. If you already know which files you'll have to open, issue those `Read` calls together as multiple tool calls in the same turn rather than one file per turn.
