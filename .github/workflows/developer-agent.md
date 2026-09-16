@@ -42,7 +42,7 @@ runtimes:
    java:
       version: "25"
 network:
-   allowed: [defaults, github, java, generativelanguage.googleapis.com]
+   allowed: [defaults, github, java, generativelanguage.googleapis.com, play.googleapis.com]
 tools:
    cli-proxy: true
    github:
@@ -499,3 +499,19 @@ state synchronized
 noop emitted
 ```
 Never allow the workflow invocation limit to terminate the run before one of these outcomes is emitted.
+---
+
+# 17. Publishing outputs — mandatory mechanism, read before your first output
+This engine (Gemini, CLI-mounted) does **not** expose `create_pull_request`, `push_to_pull_request_branch`, `add_comment`, `add_labels`, `remove_labels`, or `noop` as native callable functions, whatever any other instruction in this prompt implies. Calling one of them directly fails with `Tool "X" not found. Did you mean one of: run_shell_command, grep_search, list_directory?`. That failure is silent to everyone but you: your token has `contents: read` only, so you cannot push code or move an `ai:*` label with plain `git`/API calls either way — the *only* way any of your work (code, comments, label transitions) reaches the repository is through this mechanism.
+
+The only working path is `run_shell_command` invoking the `safeoutputs` CLI:
+1. Before your first safe-output call in this run, execute `run_shell_command` with `safeoutputs --help` to confirm the exact subcommand names and JSON payload shape. Do not guess field names from memory.
+2. Invoke a tool by piping a single-line JSON payload to it, in this form:
+   ```
+   echo '<json-payload>' | safeoutputs <tool-name> .
+   ```
+   e.g. `echo '{"labels":["ai:to_review"]}' | safeoutputs add_labels .`
+3. This applies to every delivery step in this prompt worded as "change issue/PR state", "add a PR comment", "create the PR", or "push through the configured safe-output mechanism" — each one is a `safeoutputs` call via `run_shell_command`, never a direct tool call and never a raw `git push`.
+4. If a `safeoutputs` invocation errors, read the error and correct the shell command, then retry. Do not abandon the attempt after one or two failures and end the run silently — a run that finishes without the corresponding `safeoutputs` call did not actually do the work, regardless of what local state (commits, edited files) you produced.
+
+A run is only complete once every required state transition and delivery in the flow you executed (Implement / Fix findings / Resume) has actually gone through `safeoutputs` via `run_shell_command`.
