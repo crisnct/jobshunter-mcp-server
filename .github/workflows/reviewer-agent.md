@@ -18,6 +18,7 @@ max-turns: 50
 max-ai-credits: 200
 engine:
   id: codex
+  version: "0.116.0"
   model: grok-4.3
   args: ["-c", "model_reasoning_effort=\"xhigh\""]
   env:
@@ -34,6 +35,9 @@ network:
   allowed: [defaults, github, java, api.x.ai]
 tools:
   cli-proxy: true
+  github:
+    mode: gh-proxy
+    toolsets: [repos, issues, pull_requests]
 safe-outputs:
   threat-detection: false
   github-app:
