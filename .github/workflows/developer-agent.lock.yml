@@ -1,5 +1,5 @@
-# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"6a2e55fc8f29605ce81baf1dea2a448d5c8118342141a2d0d30f0beed02d026e","body_hash":"b658c3f07e7f950f8e480004cf1f19d0f977107a4008350f9c5b97a775863d8d","compiler_version":"v0.88.7","strict":true,"agent_id":"claude","agent_model":"claude-haiku-4-5-20251001","engine_versions":{"claude":"2.1.247"}}
-# gh-aw-manifest: {"version":1,"secrets":["AI_DEVELOPER_APP_PRIVATE_KEY","ANTHROPIC_API_KEY","COPILOT_GITHUB_TOKEN","GH_AW_CI_TRIGGER_TOKEN","GH_AW_DEFAULT_OTLP_HEADERS","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN"],"actions":[{"repo":"actions/cache/restore","sha":"55cc8345863c7cc4c66a329aec7e433d2d1c52a9","version":"v6.1.0"},{"repo":"actions/cache/save","sha":"55cc8345863c7cc4c66a329aec7e433d2d1c52a9","version":"v6.1.0"},{"repo":"actions/checkout","sha":"3d3c42e5aac5ba805825da76410c181273ba90b1","version":"v7.0.1"},{"repo":"actions/create-github-app-token","sha":"bcd2ba49218906704ab6c1aa796996da409d3eb1","version":"v3.2.0"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-java","sha":"dd06d9cba3e5552c54d9f8ea23572deb30010f7c","version":"v6.0.0"},{"repo":"actions/setup-node","sha":"820762786026740c76f36085b0efc47a31fe5020","version":"v7.0.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"5e508589e03a7757a7e05b26e834292f5445bfb6","version":"v0.88.7"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.28.14","digest":"sha256:f7df036c86575527b61f3f7df91c4412349a12b2a74988d929eafa2999230c98","pinned_image":"ghcr.io/github/gh-aw-firewall/agent:0.28.14@sha256:f7df036c86575527b61f3f7df91c4412349a12b2a74988d929eafa2999230c98"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.28.14","digest":"sha256:6f95e2234dd9bd6333a8ff28ccea7ecf0204acd4a09108723844dbd2bf6268c5","pinned_image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.28.14@sha256:6f95e2234dd9bd6333a8ff28ccea7ecf0204acd4a09108723844dbd2bf6268c5"},{"image":"ghcr.io/github/gh-aw-firewall/cli-proxy:0.28.14","digest":"sha256:3a379c5e96e29499c815e9dd2a71334d01c326a9b73991c76544fda9cae35c34","pinned_image":"ghcr.io/github/gh-aw-firewall/cli-proxy:0.28.14@sha256:3a379c5e96e29499c815e9dd2a71334d01c326a9b73991c76544fda9cae35c34"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.28.14","digest":"sha256:2ce8df3abf3e9b76e9c0cf5863da41f1ab3f89b20ad14b988806ab89e7bf2cd5","pinned_image":"ghcr.io/github/gh-aw-firewall/squid:0.28.14@sha256:2ce8df3abf3e9b76e9c0cf5863da41f1ab3f89b20ad14b988806ab89e7bf2cd5"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.4.18","digest":"sha256:85b940556a8faa4e1fdbef124bfd75f2c4ebd855a10b88a1c3b6f3e97f6f1a53","pinned_image":"ghcr.io/github/gh-aw-mcpg:v0.4.18@sha256:85b940556a8faa4e1fdbef124bfd75f2c4ebd855a10b88a1c3b6f3e97f6f1a53"},{"image":"ghcr.io/github/gh-aw-node","digest":"sha256:0daa8971fa4732b647150cb6524a6b0804b68d5d24f6f58b5dd1af23bd63fb23","pinned_image":"ghcr.io/github/gh-aw-node@sha256:0daa8971fa4732b647150cb6524a6b0804b68d5d24f6f58b5dd1af23bd63fb23"},{"image":"ghcr.io/github/github-mcp-server:v1.11.0","digest":"sha256:fbec75de11c255213fa08d80fb166abe73d851fff631c51c0079872967720699","pinned_image":"ghcr.io/github/github-mcp-server:v1.11.0@sha256:fbec75de11c255213fa08d80fb166abe73d851fff631c51c0079872967720699"}],"has_pull_request":true,"mcp_servers":[{"name":"safeoutputs","tools":["add_comment","add_labels","create_pull_request","missing_data","missing_tool","noop","push_to_pull_request_branch","remove_labels"]}]}
+# gh-aw-metadata: {"schema_version":"v4","frontmatter_hash":"760621356ef8ff6c86055704156a6c77e168d1a1f59cb84dfe64dcfb2eae2e15","body_hash":"2ec895bf1ede35832f5cc45fb5fbd147ea52e087a4e737da50845ea55135d2e8","compiler_version":"v0.88.7","strict":true,"agent_id":"codex","agent_model":"grok-4.3","engine_versions":{"codex":"0.150.1"}}
+# gh-aw-manifest: {"version":1,"secrets":["AI_DEVELOPER_APP_PRIVATE_KEY","CODEX_API_KEY","COPILOT_GITHUB_TOKEN","GH_AW_CI_TRIGGER_TOKEN","GH_AW_DEFAULT_OTLP_HEADERS","GH_AW_GITHUB_MCP_SERVER_TOKEN","GH_AW_GITHUB_TOKEN","GITHUB_TOKEN","OPENAI_API_KEY","X_API_KEY"],"actions":[{"repo":"actions/cache/restore","sha":"55cc8345863c7cc4c66a329aec7e433d2d1c52a9","version":"v6.1.0"},{"repo":"actions/cache/save","sha":"55cc8345863c7cc4c66a329aec7e433d2d1c52a9","version":"v6.1.0"},{"repo":"actions/checkout","sha":"3d3c42e5aac5ba805825da76410c181273ba90b1","version":"v7.0.1"},{"repo":"actions/create-github-app-token","sha":"bcd2ba49218906704ab6c1aa796996da409d3eb1","version":"v3.2.0"},{"repo":"actions/download-artifact","sha":"3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c","version":"v8.0.1"},{"repo":"actions/github-script","sha":"3a2844b7e9c422d3c10d287c895573f7108da1b3","version":"v9.0.0"},{"repo":"actions/setup-java","sha":"dd06d9cba3e5552c54d9f8ea23572deb30010f7c","version":"v6.0.0"},{"repo":"actions/setup-node","sha":"820762786026740c76f36085b0efc47a31fe5020","version":"v7.0.0"},{"repo":"actions/upload-artifact","sha":"043fb46d1a93c77aae656e7c1c64a875d1fc6a0a","version":"v7.0.1"},{"repo":"github/gh-aw-actions/setup","sha":"5e508589e03a7757a7e05b26e834292f5445bfb6","version":"v0.88.7"}],"containers":[{"image":"ghcr.io/github/gh-aw-firewall/agent:0.28.14","digest":"sha256:f7df036c86575527b61f3f7df91c4412349a12b2a74988d929eafa2999230c98","pinned_image":"ghcr.io/github/gh-aw-firewall/agent:0.28.14@sha256:f7df036c86575527b61f3f7df91c4412349a12b2a74988d929eafa2999230c98"},{"image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.28.14","digest":"sha256:6f95e2234dd9bd6333a8ff28ccea7ecf0204acd4a09108723844dbd2bf6268c5","pinned_image":"ghcr.io/github/gh-aw-firewall/api-proxy:0.28.14@sha256:6f95e2234dd9bd6333a8ff28ccea7ecf0204acd4a09108723844dbd2bf6268c5"},{"image":"ghcr.io/github/gh-aw-firewall/cli-proxy:0.28.14","digest":"sha256:3a379c5e96e29499c815e9dd2a71334d01c326a9b73991c76544fda9cae35c34","pinned_image":"ghcr.io/github/gh-aw-firewall/cli-proxy:0.28.14@sha256:3a379c5e96e29499c815e9dd2a71334d01c326a9b73991c76544fda9cae35c34"},{"image":"ghcr.io/github/gh-aw-firewall/squid:0.28.14","digest":"sha256:2ce8df3abf3e9b76e9c0cf5863da41f1ab3f89b20ad14b988806ab89e7bf2cd5","pinned_image":"ghcr.io/github/gh-aw-firewall/squid:0.28.14@sha256:2ce8df3abf3e9b76e9c0cf5863da41f1ab3f89b20ad14b988806ab89e7bf2cd5"},{"image":"ghcr.io/github/gh-aw-mcpg:v0.4.18","digest":"sha256:85b940556a8faa4e1fdbef124bfd75f2c4ebd855a10b88a1c3b6f3e97f6f1a53","pinned_image":"ghcr.io/github/gh-aw-mcpg:v0.4.18@sha256:85b940556a8faa4e1fdbef124bfd75f2c4ebd855a10b88a1c3b6f3e97f6f1a53"},{"image":"ghcr.io/github/gh-aw-node","digest":"sha256:0daa8971fa4732b647150cb6524a6b0804b68d5d24f6f58b5dd1af23bd63fb23","pinned_image":"ghcr.io/github/gh-aw-node@sha256:0daa8971fa4732b647150cb6524a6b0804b68d5d24f6f58b5dd1af23bd63fb23"},{"image":"ghcr.io/github/github-mcp-server:v1.11.0","digest":"sha256:fbec75de11c255213fa08d80fb166abe73d851fff631c51c0079872967720699","pinned_image":"ghcr.io/github/github-mcp-server:v1.11.0@sha256:fbec75de11c255213fa08d80fb166abe73d851fff631c51c0079872967720699"}],"has_pull_request":true,"mcp_servers":[{"name":"safeoutputs","tools":["add_comment","add_labels","create_pull_request","missing_data","missing_tool","noop","push_to_pull_request_branch","remove_labels"]}]}
 # This file was automatically generated by gh-aw (v0.88.7). DO NOT EDIT. To debug this workflow, load the skill at https://github.com/github/gh-aw/blob/main/debug.md
 #
 #    ___                   _   _
@@ -29,13 +29,15 @@
 #
 # Secrets used:
 #   - AI_DEVELOPER_APP_PRIVATE_KEY
-#   - ANTHROPIC_API_KEY
+#   - CODEX_API_KEY
 #   - COPILOT_GITHUB_TOKEN
 #   - GH_AW_CI_TRIGGER_TOKEN
 #   - GH_AW_DEFAULT_OTLP_HEADERS
 #   - GH_AW_GITHUB_MCP_SERVER_TOKEN
 #   - GH_AW_GITHUB_TOKEN
 #   - GITHUB_TOKEN
+#   - OPENAI_API_KEY
+#   - X_API_KEY
 #
 # Custom actions used:
 #   - actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -88,7 +90,7 @@ run-name: "AI Developer Agent"
 env:
   OTEL_EXPORTER_OTLP_ENDPOINT: ${{ vars.GH_AW_DEFAULT_OTLP_ENDPOINT }}
   OTEL_SERVICE_NAME: gh-aw.developer-agent
-  OTEL_RESOURCE_ATTRIBUTES: 'gh-aw.workflow.name=AI%20Developer%20Agent,gh-aw.repository=${{ github.repository }},gh-aw.run.id=${{ github.run_id }},github.run_id=${{ github.run_id }},gh-aw.engine.id=claude'
+  OTEL_RESOURCE_ATTRIBUTES: 'gh-aw.workflow.name=AI%20Developer%20Agent,gh-aw.repository=${{ github.repository }},gh-aw.run.id=${{ github.run_id }},github.run_id=${{ github.run_id }},gh-aw.engine.id=codex'
   OTEL_EXPORTER_OTLP_HEADERS: ${{ secrets.GH_AW_DEFAULT_OTLP_HEADERS }}
   GH_AW_OTLP_ENDPOINTS: '[{"url":"${{ vars.GH_AW_DEFAULT_OTLP_ENDPOINT }}","headers":"${{ secrets.GH_AW_DEFAULT_OTLP_HEADERS }}"}]'
   GH_AW_OTLP_IF_MISSING: ignore
@@ -139,25 +141,25 @@ jobs:
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "AI Developer Agent"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/developer-agent.lock.yml@${{ github.ref }}
-          GH_AW_INFO_VERSION: "2.1.247"
+          GH_AW_INFO_VERSION: "0.150.1"
           GH_AW_INFO_AWF_VERSION: "v0.28.14"
-          GH_AW_INFO_ENGINE_ID: "claude"
+          GH_AW_INFO_ENGINE_ID: "codex"
       - name: Mask OTLP telemetry headers
         run: bash "${RUNNER_TEMP}/gh-aw/actions/mask_otlp_headers.sh"
       - name: Generate agentic run info
         id: generate_aw_info
         env:
-          GH_AW_INFO_ENGINE_ID: "claude"
-          GH_AW_INFO_ENGINE_NAME: "Claude Code"
-          GH_AW_INFO_MODEL: "claude-haiku-4-5-20251001"
-          GH_AW_INFO_VERSION: "2.1.247"
-          GH_AW_INFO_AGENT_VERSION: "2.1.247"
+          GH_AW_INFO_ENGINE_ID: "codex"
+          GH_AW_INFO_ENGINE_NAME: "Codex"
+          GH_AW_INFO_MODEL: "grok-4.3"
+          GH_AW_INFO_VERSION: "0.150.1"
+          GH_AW_INFO_AGENT_VERSION: "0.150.1"
           GH_AW_INFO_CLI_VERSION: "v0.88.7"
           GH_AW_INFO_WORKFLOW_NAME: "AI Developer Agent"
           GH_AW_INFO_EXPERIMENTAL: "false"
           GH_AW_INFO_SUPPORTS_TOOLS_ALLOWLIST: "true"
           GH_AW_INFO_STAGED: "false"
-          GH_AW_INFO_ALLOWED_DOMAINS: '["defaults","github","java","api.anthropic.com"]'
+          GH_AW_INFO_ALLOWED_DOMAINS: '["defaults","github","java","api.x.ai"]'
           GH_AW_INFO_FIREWALL_ENABLED: "true"
           GH_AW_INFO_AWF_VERSION: "v0.28.14"
           GH_AW_INFO_AWMG_VERSION: ""
@@ -221,11 +223,12 @@ jobs:
             setupGlobals(core, github, context, exec, io, getOctokit);
             const { main } = require(path.join(actionsDir, 'check_daily_aic_workflow_guardrail.cjs'));
             await main();
-      - name: Validate ANTHROPIC_API_KEY secret
+      - name: Validate CODEX_API_KEY or OPENAI_API_KEY secret
         id: validate-secret
-        run: bash "${RUNNER_TEMP}/gh-aw/actions/validate_multi_secret.sh" ANTHROPIC_API_KEY 'Claude Code' https://github.github.com/gh-aw/reference/engines/#anthropic-claude-code
+        run: bash "${RUNNER_TEMP}/gh-aw/actions/validate_multi_secret.sh" CODEX_API_KEY OPENAI_API_KEY Codex https://github.github.com/gh-aw/reference/engines/#openai-codex
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          CODEX_API_KEY: ${{ secrets.CODEX_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.X_API_KEY }}
       - name: Check for OAuth tokens
         id: check-oauth-tokens
         run: bash "${RUNNER_TEMP}/gh-aw/actions/check_oauth_tokens.sh"
@@ -248,8 +251,8 @@ jobs:
           fetch-depth: 1
       - name: Save agent config folders for base branch restoration
         env:
-          GH_AW_AGENT_FOLDERS: ".agents .claude .github"
-          GH_AW_AGENT_FILES: "AGENTS.md CLAUDE.md"
+          GH_AW_AGENT_FOLDERS: ".agents .codex .github"
+          GH_AW_AGENT_FILES: "AGENTS.md"
         run: |
           bash "${RUNNER_TEMP}/gh-aw/actions/save_base_github_folders.sh"
       - name: Check workflow lock file
@@ -283,7 +286,7 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           GH_AW_ALLOWED_BOTS: "jobshunter-review-agent-crisnct[bot]"
-          GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,*.gradle-enterprise.cloud,adoptium.net,api.adoptium.net,api.anthropic.com,api.foojay.io,api.snapcraft.io,archive.apache.org,archive.ubuntu.com,azure.archive.ubuntu.com,cdn.azul.com,central.sonatype.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,develocity.apache.org,dl.google.com,dlcdn.apache.org,docs.github.com,download.eclipse.org,download.java.net,download.oracle.com,downloads.gradle-dn.com,ge.spockframework.org,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,gradle.org,jcenter.bintray.com,jdk.java.net,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,maven-central.storage-download.googleapis.com,maven.apache.org,maven.google.com,maven.oracle.com,maven.pkg.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,patch-diff.githubusercontent.com,patchdiff.githubusercontent.com,plugins-artifacts.gradle.org,plugins.gradle.org,ppa.launchpad.net,raw.githubusercontent.com,repo.gradle.org,repo.grails.org,repo.maven.apache.org,repo.spring.io,repo1.maven.org,repository.apache.org,s.symcb.com,s.symcd.com,scans-in.gradle.com,security.ubuntu.com,services.gradle.org,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com,www.java.com"
+          GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,*.gradle-enterprise.cloud,adoptium.net,api.adoptium.net,api.foojay.io,api.snapcraft.io,api.x.ai,archive.apache.org,archive.ubuntu.com,azure.archive.ubuntu.com,cdn.azul.com,central.sonatype.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,develocity.apache.org,dl.google.com,dlcdn.apache.org,docs.github.com,download.eclipse.org,download.java.net,download.oracle.com,downloads.gradle-dn.com,ge.spockframework.org,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,gradle.org,jcenter.bintray.com,jdk.java.net,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,maven-central.storage-download.googleapis.com,maven.apache.org,maven.google.com,maven.oracle.com,maven.pkg.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,patch-diff.githubusercontent.com,patchdiff.githubusercontent.com,plugins-artifacts.gradle.org,plugins.gradle.org,ppa.launchpad.net,raw.githubusercontent.com,repo.gradle.org,repo.grails.org,repo.maven.apache.org,repo.spring.io,repo1.maven.org,repository.apache.org,s.symcb.com,s.symcd.com,scans-in.gradle.com,security.ubuntu.com,services.gradle.org,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com,www.java.com"
         with:
           script: |
             const path = require('path');
@@ -327,7 +330,7 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           GH_AW_PROMPT: ${{ runner.temp }}/gh-aw/aw-prompts/prompt.txt
-          GH_AW_ENGINE_ID: "claude"
+          GH_AW_ENGINE_ID: "codex"
         with:
           script: |
             const path = require('path');
@@ -405,8 +408,8 @@ jobs:
             /tmp/gh-aw/aw-prompts/prompt-import-tree.json
             /tmp/gh-aw/github_rate_limits.jsonl
             /tmp/gh-aw/base
-            /tmp/gh-aw/.claude/agents
-            /tmp/gh-aw/.claude/skills
+            /tmp/gh-aw/.codex/agents
+            /tmp/gh-aw/.codex/skills
           if-no-files-found: ignore
           retention-days: 1
 
@@ -469,9 +472,9 @@ jobs:
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "AI Developer Agent"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/developer-agent.lock.yml@${{ github.ref }}
-          GH_AW_INFO_VERSION: "2.1.247"
+          GH_AW_INFO_VERSION: "0.150.1"
           GH_AW_INFO_AWF_VERSION: "v0.28.14"
-          GH_AW_INFO_ENGINE_ID: "claude"
+          GH_AW_INFO_ENGINE_ID: "codex"
       - name: Set runtime paths
         id: set-runtime-paths
         env:
@@ -536,10 +539,10 @@ jobs:
         with:
           node-version: '24'
           package-manager-cache: false
+      - name: Install Codex CLI
+        run: npm install --ignore-scripts -g @openai/codex@0.150.1
       - name: Install AWF binary
         run: bash "${RUNNER_TEMP}/gh-aw/actions/install_awf_binary.sh" v0.28.14 --rootless
-      - name: Install Claude Code CLI
-        run: npm install -g @anthropic-ai/claude-code@2.1.247
       - name: Determine automatic lockdown mode for GitHub MCP Server
         id: determine-automatic-lockdown
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0 (source v9)
@@ -555,17 +558,17 @@ jobs:
       - name: Restore agent config folders from base branch
         if: steps.checkout-pr.outcome == 'success'
         env:
-          GH_AW_AGENT_FOLDERS: ".agents .claude .github"
-          GH_AW_AGENT_FILES: "AGENTS.md CLAUDE.md"
+          GH_AW_AGENT_FOLDERS: ".agents .codex .github"
+          GH_AW_AGENT_FILES: "AGENTS.md"
         run: bash "${RUNNER_TEMP}/gh-aw/actions/restore_base_github_folders.sh"
       - name: Restore inline sub-agents from activation artifact
         env:
-          GH_AW_SUB_AGENT_DIR: ".claude/agents"
+          GH_AW_SUB_AGENT_DIR: ".codex/agents"
           GH_AW_SUB_AGENT_EXT: ".md"
         run: bash "${RUNNER_TEMP}/gh-aw/actions/restore_inline_sub_agents.sh"
       - name: Restore inline skills from activation artifact
         env:
-          GH_AW_SKILL_DIR: ".claude/skills"
+          GH_AW_SKILL_DIR: ".codex/skills"
         run: bash "${RUNNER_TEMP}/gh-aw/actions/restore_inline_skills.sh"
       - name: Download container images
         run: bash "${RUNNER_TEMP}/gh-aw/actions/download_docker_images.sh" ghcr.io/github/gh-aw-firewall/agent:0.28.14@sha256:f7df036c86575527b61f3f7df91c4412349a12b2a74988d929eafa2999230c98 ghcr.io/github/gh-aw-firewall/api-proxy:0.28.14@sha256:6f95e2234dd9bd6333a8ff28ccea7ecf0204acd4a09108723844dbd2bf6268c5 ghcr.io/github/gh-aw-firewall/cli-proxy:0.28.14@sha256:3a379c5e96e29499c815e9dd2a71334d01c326a9b73991c76544fda9cae35c34 ghcr.io/github/gh-aw-firewall/squid:0.28.14@sha256:2ce8df3abf3e9b76e9c0cf5863da41f1ab3f89b20ad14b988806ab89e7bf2cd5 ghcr.io/github/gh-aw-mcpg:v0.4.18@sha256:85b940556a8faa4e1fdbef124bfd75f2c4ebd855a10b88a1c3b6f3e97f6f1a53 ghcr.io/github/gh-aw-node@sha256:0daa8971fa4732b647150cb6524a6b0804b68d5d24f6f58b5dd1af23bd63fb23 ghcr.io/github/github-mcp-server:v1.11.0@sha256:fbec75de11c255213fa08d80fb166abe73d851fff631c51c0079872967720699
@@ -579,7 +582,7 @@ jobs:
         env:
           GH_AW_FILE_ROOT: "${{ runner.temp }}/gh-aw"
           GH_AW_FILE_CONFIG: "{\"files\":[{\"path\":\"safeoutputs/config.json\",\"content_env\":\"GH_AW_SAFE_OUTPUTS_CONFIG\"}]}"
-          GH_AW_SAFE_OUTPUTS_CONFIG: "{\"add_comment\":{\"max\":1,\"target\":\"*\"},\"add_labels\":{\"allowed\":[\"ai:in_progress\",\"ai:wait_for_feedback\",\"ai:to_review\"],\"create_if_missing\":true,\"max\":3,\"target\":\"*\"},\"create_pull_request\":{\"allowed_files\":[\"src/**\",\"pom.xml\",\"README.md\",\"architecture/**\",\"Dockerfile\",\"docker-compose.yml\"],\"draft\":false,\"fallback_as_issue\":false,\"labels\":[\"ai:to_review\"],\"max\":1,\"max_patch_files\":100,\"max_patch_size\":4096,\"protect_top_level_dot_folders\":true,\"protected_files\":[\"package.json\",\"bun.lockb\",\"bunfig.toml\",\"deno.json\",\"deno.jsonc\",\"deno.lock\",\"global.json\",\"NuGet.Config\",\"Directory.Packages.props\",\"mix.exs\",\"mix.lock\",\"go.mod\",\"go.sum\",\"stack.yaml\",\"stack.yaml.lock\",\"pom.xml\",\"build.gradle\",\"build.gradle.kts\",\"settings.gradle\",\"settings.gradle.kts\",\"gradle.properties\",\"package-lock.json\",\"yarn.lock\",\"pnpm-lock.yaml\",\"npm-shrinkwrap.json\",\"requirements.txt\",\"Pipfile\",\"Pipfile.lock\",\"pyproject.toml\",\"setup.py\",\"setup.cfg\",\"Gemfile\",\"Gemfile.lock\",\"uv.lock\",\"CODEOWNERS\",\"DESIGN.md\",\"README.md\",\"CONTRIBUTING.md\",\"CHANGELOG.md\",\"SECURITY.md\",\"CODE_OF_CONDUCT.md\",\"CLAUDE.md\",\"AGENTS.md\"],\"protected_files_policy\":\"request_review\",\"title_prefix\":\"[AI] \"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"true\"},\"push_to_pull_request_branch\":{\"allowed_files\":[\"src/**\",\"pom.xml\",\"README.md\",\"architecture/**\",\"Dockerfile\",\"docker-compose.yml\"],\"if_no_changes\":\"warn\",\"max_patch_size\":4096,\"protect_top_level_dot_folders\":true,\"protected_files\":[\"package.json\",\"bun.lockb\",\"bunfig.toml\",\"deno.json\",\"deno.jsonc\",\"deno.lock\",\"global.json\",\"NuGet.Config\",\"Directory.Packages.props\",\"mix.exs\",\"mix.lock\",\"go.mod\",\"go.sum\",\"stack.yaml\",\"stack.yaml.lock\",\"pom.xml\",\"build.gradle\",\"build.gradle.kts\",\"settings.gradle\",\"settings.gradle.kts\",\"gradle.properties\",\"package-lock.json\",\"yarn.lock\",\"pnpm-lock.yaml\",\"npm-shrinkwrap.json\",\"requirements.txt\",\"Pipfile\",\"Pipfile.lock\",\"pyproject.toml\",\"setup.py\",\"setup.cfg\",\"Gemfile\",\"Gemfile.lock\",\"uv.lock\",\"CODEOWNERS\",\"DESIGN.md\",\"README.md\",\"CONTRIBUTING.md\",\"CHANGELOG.md\",\"SECURITY.md\",\"CODE_OF_CONDUCT.md\",\"CLAUDE.md\",\"AGENTS.md\"],\"target\":\"*\",\"title_prefix\":\"[AI] \"},\"remove_labels\":{\"allowed\":[\"ai:ready\",\"ai:in_progress\",\"ai:wait_for_feedback\",\"ai:needs_work\",\"ai:to_review\"],\"max\":3,\"target\":\"*\"},\"report_incomplete\":{}}"
+          GH_AW_SAFE_OUTPUTS_CONFIG: "{\"add_comment\":{\"max\":1,\"target\":\"*\"},\"add_labels\":{\"allowed\":[\"ai:in_progress\",\"ai:wait_for_feedback\",\"ai:to_review\"],\"create_if_missing\":true,\"max\":3,\"target\":\"*\"},\"create_pull_request\":{\"allowed_files\":[\"src/**\",\"pom.xml\",\"README.md\",\"architecture/**\",\"Dockerfile\",\"docker-compose.yml\"],\"draft\":false,\"fallback_as_issue\":false,\"labels\":[\"ai:to_review\"],\"max\":1,\"max_patch_files\":100,\"max_patch_size\":4096,\"protect_top_level_dot_folders\":true,\"protected_files\":[\"package.json\",\"bun.lockb\",\"bunfig.toml\",\"deno.json\",\"deno.jsonc\",\"deno.lock\",\"global.json\",\"NuGet.Config\",\"Directory.Packages.props\",\"mix.exs\",\"mix.lock\",\"go.mod\",\"go.sum\",\"stack.yaml\",\"stack.yaml.lock\",\"pom.xml\",\"build.gradle\",\"build.gradle.kts\",\"settings.gradle\",\"settings.gradle.kts\",\"gradle.properties\",\"package-lock.json\",\"yarn.lock\",\"pnpm-lock.yaml\",\"npm-shrinkwrap.json\",\"requirements.txt\",\"Pipfile\",\"Pipfile.lock\",\"pyproject.toml\",\"setup.py\",\"setup.cfg\",\"Gemfile\",\"Gemfile.lock\",\"uv.lock\",\"CODEOWNERS\",\"DESIGN.md\",\"README.md\",\"CONTRIBUTING.md\",\"CHANGELOG.md\",\"SECURITY.md\",\"CODE_OF_CONDUCT.md\",\"AGENTS.md\"],\"protected_files_policy\":\"request_review\",\"title_prefix\":\"[AI] \"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"true\"},\"push_to_pull_request_branch\":{\"allowed_files\":[\"src/**\",\"pom.xml\",\"README.md\",\"architecture/**\",\"Dockerfile\",\"docker-compose.yml\"],\"if_no_changes\":\"warn\",\"max_patch_size\":4096,\"protect_top_level_dot_folders\":true,\"protected_files\":[\"package.json\",\"bun.lockb\",\"bunfig.toml\",\"deno.json\",\"deno.jsonc\",\"deno.lock\",\"global.json\",\"NuGet.Config\",\"Directory.Packages.props\",\"mix.exs\",\"mix.lock\",\"go.mod\",\"go.sum\",\"stack.yaml\",\"stack.yaml.lock\",\"pom.xml\",\"build.gradle\",\"build.gradle.kts\",\"settings.gradle\",\"settings.gradle.kts\",\"gradle.properties\",\"package-lock.json\",\"yarn.lock\",\"pnpm-lock.yaml\",\"npm-shrinkwrap.json\",\"requirements.txt\",\"Pipfile\",\"Pipfile.lock\",\"pyproject.toml\",\"setup.py\",\"setup.cfg\",\"Gemfile\",\"Gemfile.lock\",\"uv.lock\",\"CODEOWNERS\",\"DESIGN.md\",\"README.md\",\"CONTRIBUTING.md\",\"CHANGELOG.md\",\"SECURITY.md\",\"CODE_OF_CONDUCT.md\",\"AGENTS.md\"],\"target\":\"*\",\"title_prefix\":\"[AI] \"},\"remove_labels\":{\"allowed\":[\"ai:ready\",\"ai:in_progress\",\"ai:wait_for_feedback\",\"ai:needs_work\",\"ai:to_review\"],\"max\":3,\"target\":\"*\"},\"report_incomplete\":{}}"
         with:
           script: |
             const path = require('path');
@@ -845,6 +848,7 @@ jobs:
       - name: Start MCP Gateway
         id: start-mcp-gateway
         env:
+          CODEX_HOME: /tmp/gh-aw/mcp-config
           GH_AW_POLICY_ALLOW_CREATE_PULL_REQUEST: ${{ vars.GH_AW_POLICY_ALLOW_CREATE_PULL_REQUEST || 'true' }}
           GH_AW_SAFE_OUTPUTS: ${{ steps.set-runtime-paths.outputs.GH_AW_SAFE_OUTPUTS }}
           GH_AW_SAFE_OUTPUTS_CONFIG_PATH: ${{ steps.set-runtime-paths.outputs.GH_AW_SAFE_OUTPUTS_CONFIG_PATH }}
@@ -879,13 +883,39 @@ jobs:
           export GH_AW_PR_HEAD_REPO="${GH_AW_PR_HEAD_REPO:-}"
           export DEBUG="*"
 
-          export GH_AW_ENGINE="claude"
+          export GH_AW_ENGINE="codex"
           export GH_AW_MCP_CLI_SERVERS='["safeoutputs"]'
           MCP_GATEWAY_UID=$(id -u 2>/dev/null || echo '0')
           MCP_GATEWAY_GID=$(id -g 2>/dev/null || echo '0')
           source "${RUNNER_TEMP}/gh-aw/actions/resolve_docker_socket_gid.sh"
-          export MCP_GATEWAY_DOCKER_COMMAND='docker run -i --rm --network bridge -p 127.0.0.1:'"${MCP_GATEWAY_PORT}"':'"${MCP_GATEWAY_PORT}"' --name awmg-mcpg --add-host host.docker.internal:host-gateway --user '"${MCP_GATEWAY_UID}"':'"${MCP_GATEWAY_GID}"' --group-add '"${DOCKER_SOCK_GID}"' -v '"${DOCKER_SOCK_PATH}"':/var/run/docker.sock -e MCP_GATEWAY_PORT -e MCP_GATEWAY_DOMAIN -e MCP_GATEWAY_AGENT_ID -e MCP_GATEWAY_PAYLOAD_DIR -e MCP_GATEWAY_PAYLOAD_SIZE_THRESHOLD -e DOCKER_HOST=unix:///var/run/docker.sock -e DEBUG -e MCP_GATEWAY_LOG_DIR -e GH_AW_MCP_LOG_DIR -e GH_AW_SAFE_OUTPUTS -e GH_AW_SAFE_OUTPUTS_CONFIG_PATH -e GH_AW_SAFE_OUTPUTS_TOOLS_PATH -e GH_AW_PR_HEAD_BASE_BRANCH -e GH_AW_PR_HEAD_BASE_SHA -e GH_AW_PR_HEAD_BASE_REPO -e GH_AW_PR_HEAD_BASE_PR_NUMBER -e GH_AW_PR_HEAD_BASE_REF -e GH_AW_PR_HEAD_REPO -e GH_AW_POLICY_ALLOW_CREATE_PULL_REQUEST -e GH_AW_ASSETS_BRANCH -e GH_AW_ASSETS_MAX_SIZE_KB -e GH_AW_ASSETS_ALLOWED_EXTS -e DEFAULT_BRANCH -e GITHUB_MCP_SERVER_TOKEN -e GITHUB_MCP_GUARD_MIN_INTEGRITY -e GITHUB_MCP_GUARD_REPOS -e GH_AW_SINK_VISIBILITY -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_SHA -e GITHUB_WORKSPACE -e GITHUB_TOKEN -e GITHUB_RUN_ID -e GITHUB_RUN_NUMBER -e GITHUB_RUN_ATTEMPT -e GITHUB_JOB -e GITHUB_ACTION -e GITHUB_EVENT_NAME -e GITHUB_EVENT_PATH -e GITHUB_ACTOR -e GITHUB_ACTOR_ID -e GITHUB_TRIGGERING_ACTOR -e GITHUB_WORKFLOW -e GITHUB_WORKFLOW_REF -e GITHUB_WORKFLOW_SHA -e GITHUB_REF -e GITHUB_REF_NAME -e GITHUB_REF_TYPE -e GITHUB_HEAD_REF -e GITHUB_BASE_REF -e RUNNER_TEMP -e RUNNER_TOOL_CACHE -e MCP_GATEWAY_ALLOWED_MOUNT_ROOTS -e GITHUB_AW_OTEL_TRACE_ID -e GITHUB_AW_OTEL_PARENT_SPAN_ID -e OTEL_EXPORTER_OTLP_HEADERS -v /tmp/gh-aw/mcp-payloads:/tmp/gh-aw/mcp-payloads:rw -v /opt:/opt:ro -v /tmp:/tmp:rw -v '"${GITHUB_WORKSPACE}"':'"${GITHUB_WORKSPACE}"':rw -v '"${RUNNER_TEMP}"'/gh-aw/safeoutputs:'"${RUNNER_TEMP}"'/gh-aw/safeoutputs:rw ghcr.io/github/gh-aw-mcpg:v0.4.18'
+          export MCP_GATEWAY_DOCKER_COMMAND='docker run -i --rm --network bridge -p 127.0.0.1:'"${MCP_GATEWAY_PORT}"':'"${MCP_GATEWAY_PORT}"' --name awmg-mcpg --add-host host.docker.internal:host-gateway --user '"${MCP_GATEWAY_UID}"':'"${MCP_GATEWAY_GID}"' --group-add '"${DOCKER_SOCK_GID}"' -v '"${DOCKER_SOCK_PATH}"':/var/run/docker.sock -e MCP_GATEWAY_PORT -e MCP_GATEWAY_DOMAIN -e MCP_GATEWAY_AGENT_ID -e MCP_GATEWAY_PAYLOAD_DIR -e MCP_GATEWAY_PAYLOAD_SIZE_THRESHOLD -e DOCKER_HOST=unix:///var/run/docker.sock -e DEBUG -e MCP_GATEWAY_LOG_DIR -e GH_AW_MCP_LOG_DIR -e GH_AW_SAFE_OUTPUTS -e GH_AW_SAFE_OUTPUTS_CONFIG_PATH -e GH_AW_SAFE_OUTPUTS_TOOLS_PATH -e GH_AW_PR_HEAD_BASE_BRANCH -e GH_AW_PR_HEAD_BASE_SHA -e GH_AW_PR_HEAD_BASE_REPO -e GH_AW_PR_HEAD_BASE_PR_NUMBER -e GH_AW_PR_HEAD_BASE_REF -e GH_AW_PR_HEAD_REPO -e GH_AW_POLICY_ALLOW_CREATE_PULL_REQUEST -e GH_AW_ASSETS_BRANCH -e GH_AW_ASSETS_MAX_SIZE_KB -e GH_AW_ASSETS_ALLOWED_EXTS -e DEFAULT_BRANCH -e GITHUB_MCP_SERVER_TOKEN -e GITHUB_MCP_GUARD_MIN_INTEGRITY -e GITHUB_MCP_GUARD_REPOS -e GH_AW_SINK_VISIBILITY -e GITHUB_REPOSITORY -e GITHUB_SERVER_URL -e GITHUB_SHA -e GITHUB_WORKSPACE -e GITHUB_TOKEN -e GITHUB_RUN_ID -e GITHUB_RUN_NUMBER -e GITHUB_RUN_ATTEMPT -e GITHUB_JOB -e GITHUB_ACTION -e GITHUB_EVENT_NAME -e GITHUB_EVENT_PATH -e GITHUB_ACTOR -e GITHUB_ACTOR_ID -e GITHUB_TRIGGERING_ACTOR -e GITHUB_WORKFLOW -e GITHUB_WORKFLOW_REF -e GITHUB_WORKFLOW_SHA -e GITHUB_REF -e GITHUB_REF_NAME -e GITHUB_REF_TYPE -e GITHUB_HEAD_REF -e GITHUB_BASE_REF -e RUNNER_TEMP -e RUNNER_TOOL_CACHE -e MCP_GATEWAY_ALLOWED_MOUNT_ROOTS -e GITHUB_AW_OTEL_TRACE_ID -e GITHUB_AW_OTEL_PARENT_SPAN_ID -e OTEL_EXPORTER_OTLP_HEADERS -e CODEX_HOME -v /tmp/gh-aw/mcp-payloads:/tmp/gh-aw/mcp-payloads:rw -v /opt:/opt:ro -v /tmp:/tmp:rw -v '"${GITHUB_WORKSPACE}"':'"${GITHUB_WORKSPACE}"':rw -v '"${RUNNER_TEMP}"'/gh-aw/safeoutputs:'"${RUNNER_TEMP}"'/gh-aw/safeoutputs:rw ghcr.io/github/gh-aw-mcpg:v0.4.18'
 
+          cat > "${RUNNER_TEMP}/gh-aw/mcp-config/config.toml" << GH_AW_MCP_CONFIG_8d115127497c954f_EOF
+          [history]
+          persistence = "none"
+          [otel]
+          metrics_exporter = "none"
+
+          [shell_environment_policy]
+          inherit = "core"
+          include_only = ["^CODEX_API_KEY$", "^GH_AW_ASSETS_ALLOWED_EXTS$", "^GH_AW_ASSETS_BRANCH$", "^GH_AW_ASSETS_MAX_SIZE_KB$", "^GH_AW_SAFE_OUTPUTS$", "^GITHUB_REPOSITORY$", "^GITHUB_SERVER_URL$", "^HOME$", "^OPENAI_API_KEY$", "^PATH$"]
+
+          [mcp_servers.safeoutputs]
+          container = "ghcr.io/github/gh-aw-node"
+          mounts = ["\${GITHUB_WORKSPACE}:\${GITHUB_WORKSPACE}:rw", "${RUNNER_TEMP}/gh-aw/safeoutputs:${RUNNER_TEMP}/gh-aw/safeoutputs:rw", "/tmp/gh-aw:/tmp/gh-aw:rw"]
+          args = ["-w", "$GITHUB_WORKSPACE"]
+          entrypoint = "sh"
+          entrypointArgs = ["-c", "sh ${RUNNER_TEMP}/gh-aw/safeoutputs/start_safe_outputs_mcp.sh"]
+          env_vars = ["DEBUG", "DEFAULT_BRANCH", "GH_AW_ASSETS_ALLOWED_EXTS", "GH_AW_ASSETS_BRANCH", "GH_AW_ASSETS_MAX_SIZE_KB", "GH_AW_MCP_LOG_DIR", "GH_AW_SAFE_OUTPUTS", "GH_AW_SAFE_OUTPUTS_CONFIG_PATH", "GH_AW_SAFE_OUTPUTS_TOOLS_PATH", "GH_AW_POLICY_ALLOW_CREATE_PULL_REQUEST", "GH_AW_PR_HEAD_BASE_BRANCH", "GH_AW_PR_HEAD_BASE_SHA", "GH_AW_PR_HEAD_BASE_REPO", "GH_AW_PR_HEAD_BASE_PR_NUMBER", "GH_AW_PR_HEAD_BASE_REF", "GH_AW_PR_HEAD_REPO", "GITHUB_EVENT_NAME", "GITHUB_EVENT_PATH", "GITHUB_REPOSITORY", "GITHUB_SHA", "GITHUB_TOKEN", "GITHUB_WORKSPACE", "RUNNER_TEMP"]
+
+          [mcp_servers.safeoutputs."guard-policies"]
+
+          [mcp_servers.safeoutputs."guard-policies".write-sink]
+          accept = ["*"]
+          sink-visibility = "${GH_AW_SINK_VISIBILITY}"
+          GH_AW_MCP_CONFIG_8d115127497c954f_EOF
+
+          # Generate JSON config for MCP gateway
           GH_AW_NODE=$(which node 2>/dev/null || command -v node 2>/dev/null || echo node)
           cat << GH_AW_MCP_CONFIG_dbcafd561cd90286_EOF | "$GH_AW_NODE" "${RUNNER_TEMP}/gh-aw/actions/start_mcp_gateway.cjs"
           {
@@ -945,6 +975,37 @@ jobs:
             }
           }
           GH_AW_MCP_CONFIG_dbcafd561cd90286_EOF
+
+          # Sync converter output to writable CODEX_HOME for Codex
+          mkdir -p /tmp/gh-aw/mcp-config
+          cat > "/tmp/gh-aw/mcp-config/config.toml" << GH_AW_CODEX_SHELL_POLICY_79e3d2e6e6d538cf_EOF
+
+          model_provider = "openai-proxy"
+
+          [model_providers.openai-proxy]
+          name = "OpenAI AWF proxy"
+          base_url = "http://172.30.0.30:10000"
+          env_key = "CODEX_API_KEY"
+          wire_api = "responses"
+          requires_openai_auth = false
+          supports_websockets = false
+          [features]
+          plugins = false
+          [shell_environment_policy]
+          inherit = "core"
+          include_only = ["^CODEX_API_KEY$", "^GH_AW_ASSETS_ALLOWED_EXTS$", "^GH_AW_ASSETS_BRANCH$", "^GH_AW_ASSETS_MAX_SIZE_KB$", "^GH_AW_SAFE_OUTPUTS$", "^GITHUB_REPOSITORY$", "^GITHUB_SERVER_URL$", "^HOME$", "^OPENAI_API_KEY$", "^PATH$"]
+          GH_AW_CODEX_SHELL_POLICY_79e3d2e6e6d538cf_EOF
+          awk '
+            BEGIN { skip_openai_proxy = 0 }
+            /^[[:space:]]*model_provider[[:space:]]*=/ { next }
+            /^\[model_providers\.openai-proxy\][[:space:]]*$/ { skip_openai_proxy = 1; next }
+            /^\[/ { skip_openai_proxy = 0 }
+            !skip_openai_proxy { print }
+          ' "${RUNNER_TEMP}/gh-aw/mcp-config/config.toml" >> "/tmp/gh-aw/mcp-config/config.toml"
+          chmod 600 "/tmp/gh-aw/mcp-config/config.toml"
+          mkdir -p "${CODEX_HOME}"
+          if [ "/tmp/gh-aw/mcp-config/config.toml" != "${CODEX_HOME}/config.toml" ]; then cp "/tmp/gh-aw/mcp-config/config.toml" "${CODEX_HOME}/config.toml"; fi
+          chmod 600 "${CODEX_HOME}/config.toml"
       - name: Mount MCP servers as CLIs
         id: mount-mcp-clis
         continue-on-error: true
@@ -983,84 +1044,17 @@ jobs:
           CLI_PROXY_IMAGE: 'ghcr.io/github/gh-aw-mcpg:v0.4.18'
         run: |
           bash "${RUNNER_TEMP}/gh-aw/actions/start_cli_proxy.sh"
-      - name: Execute Claude Code CLI
+      - name: Execute Codex CLI
         id: agentic_execution
-        # Allowed tools (sorted):
-        # - Bash
-        # - BashOutput
-        # - Edit
-        # - Edit(/tmp/*)
-        # - ExitPlanMode
-        # - Glob
-        # - Grep
-        # - KillBash
-        # - LS
-        # - MultiEdit
-        # - MultiEdit(/tmp/*)
-        # - NotebookEdit
-        # - NotebookRead
-        # - Read
-        # - Read(/tmp/*)
-        # - Task
-        # - TodoWrite
-        # - Write
-        # - Write(/tmp/*)
-        # - mcp__github__actions_get
-        # - mcp__github__actions_list
-        # - mcp__github__get_code_scanning_alert
-        # - mcp__github__get_commit
-        # - mcp__github__get_dependabot_alert
-        # - mcp__github__get_discussion
-        # - mcp__github__get_discussion_comments
-        # - mcp__github__get_file_contents
-        # - mcp__github__get_job_logs
-        # - mcp__github__get_label
-        # - mcp__github__get_latest_release
-        # - mcp__github__get_me
-        # - mcp__github__get_notification_details
-        # - mcp__github__get_pull_request
-        # - mcp__github__get_pull_request_comments
-        # - mcp__github__get_pull_request_diff
-        # - mcp__github__get_pull_request_files
-        # - mcp__github__get_pull_request_review_comments
-        # - mcp__github__get_pull_request_reviews
-        # - mcp__github__get_pull_request_status
-        # - mcp__github__get_release_by_tag
-        # - mcp__github__get_secret_scanning_alert
-        # - mcp__github__get_tag
-        # - mcp__github__issue_read
-        # - mcp__github__list_branches
-        # - mcp__github__list_code_scanning_alerts
-        # - mcp__github__list_commits
-        # - mcp__github__list_dependabot_alerts
-        # - mcp__github__list_discussion_categories
-        # - mcp__github__list_discussions
-        # - mcp__github__list_issue_types
-        # - mcp__github__list_issues
-        # - mcp__github__list_label
-        # - mcp__github__list_notifications
-        # - mcp__github__list_pull_requests
-        # - mcp__github__list_releases
-        # - mcp__github__list_secret_scanning_alerts
-        # - mcp__github__list_starred_repositories
-        # - mcp__github__list_tags
-        # - mcp__github__pull_request_read
-        # - mcp__github__search_code
-        # - mcp__github__search_issues
-        # - mcp__github__search_orgs
-        # - mcp__github__search_pull_requests
-        # - mcp__github__search_repositories
-        # - mcp__github__search_users
-        # - mcp__safeoutputs
         timeout-minutes: ${{ fromJSON(vars.GH_AW_DEFAULT_TIMEOUT_MINUTES || '20') }}
         run: |
           set -o pipefail
           trap 'gh_aw_exit_code=$?; mkdir -p /tmp/gh-aw >/dev/null 2>&1 || true; printf "%s" "$gh_aw_exit_code" > /tmp/gh-aw/agent_execution_exit_code.txt || true; if [ "$gh_aw_exit_code" -ne 0 ]; then echo "::error::Agent execution exited with code $gh_aw_exit_code"; fi' EXIT
           printf '%s' "$(date +%s%3N)" > /tmp/gh-aw/agent_cli_start_ms.txt
-          mkdir -p /tmp/gh-aw && (umask 177 && touch /tmp/gh-aw/claude-debug.log) && touch /tmp/gh-aw/agent-step-summary.md
+          mkdir -p "$CODEX_HOME/logs" && touch /tmp/gh-aw/agent-step-summary.md
           (umask 177 && touch /tmp/gh-aw/agent-stdio.log)
           # shellcheck disable=SC2016
-          printf '%s\n' '{"$schema":"https://github.com/github/gh-aw-firewall/releases/download/v0.28.14/awf-config.schema.json","network":{"allowDomains":["*.githubusercontent.com","*.gradle-enterprise.cloud","adoptium.net","api.adoptium.net","api.anthropic.com","api.foojay.io","api.snapcraft.io","archive.apache.org","archive.ubuntu.com","azure.archive.ubuntu.com","cdn.azul.com","central.sonatype.com","codeload.github.com","crl.geotrust.com","crl.globalsign.com","crl.identrust.com","crl.sectigo.com","crl.thawte.com","crl.usertrust.com","crl.verisign.com","crl3.digicert.com","crl4.digicert.com","crls.ssl.com","develocity.apache.org","dl.google.com","dlcdn.apache.org","docs.github.com","download.eclipse.org","download.java.net","download.oracle.com","downloads.gradle-dn.com","ge.spockframework.org","github-cloud.githubusercontent.com","github-cloud.s3.amazonaws.com","github.blog","github.com","github.githubassets.com","gradle.org","jcenter.bintray.com","jdk.java.net","json-schema.org","json.schemastore.org","keyserver.ubuntu.com","lfs.github.com","maven-central.storage-download.googleapis.com","maven.apache.org","maven.google.com","maven.oracle.com","maven.pkg.github.com","objects.githubusercontent.com","ocsp.digicert.com","ocsp.geotrust.com","ocsp.globalsign.com","ocsp.identrust.com","ocsp.sectigo.com","ocsp.ssl.com","ocsp.thawte.com","ocsp.usertrust.com","ocsp.verisign.com","packagecloud.io","packages.cloud.google.com","packages.microsoft.com","patch-diff.githubusercontent.com","patchdiff.githubusercontent.com","plugins-artifacts.gradle.org","plugins.gradle.org","ppa.launchpad.net","raw.githubusercontent.com","repo.gradle.org","repo.grails.org","repo.maven.apache.org","repo.spring.io","repo1.maven.org","repository.apache.org","s.symcb.com","s.symcd.com","scans-in.gradle.com","security.ubuntu.com","services.gradle.org","ts-crl.ws.symantec.com","ts-ocsp.ws.symantec.com","www.googleapis.com","www.java.com"],"isolation":true,"topologyAttach":["awmg-mcpg","awmg-cli-proxy"]},"apiProxy":{"enabled":true,"enableTokenSteering":true,"maxRuns":200,"maxCacheMisses":5,"maxAiCredits":200,"models":{"agent":["sonnet-6x","gpt-5.4","gpt-5.5","gpt-5.6","gpt-5.3","gemini-pro","any"],"antigravity":["copilot/antigravity*","google/antigravity*","gemini/antigravity*"],"any":["copilot/*","anthropic/*","openai/*","google/*","gemini/*"],"auto":["copilot/auto","large"],"claude":["agent"],"codex":["agent"],"coding":["copilot/gpt-5*codex*","openai/gpt-5*codex*","gpt-5-codex","kimi"],"computer-use":["copilot/*computer-use*","google/*computer-use*","gemini/*computer-use*","openai/*computer-use*"],"copilot":["agent"],"deep-research":["copilot/deep-research*","copilot/o3-deep-research*","copilot/o4-mini-deep-research*","google/deep-research*","gemini/deep-research*","openai/o3-deep-research*","openai/o4-mini-deep-research*"],"detection":["small"],"evals":["small"],"fable":["copilot/*fable*","anthropic/*fable*"],"gemini":["agent"],"gemini-3-flash":["copilot/gemini-3*flash*","google/gemini-3*flash*","gemini/gemini-3*flash*"],"gemini-3-pro":["copilot/gemini-3*pro*","google/gemini-3*pro*","google/nano-banana*","gemini/gemini-3*pro*"],"gemini-3.1-flash":["copilot/gemini-3.1*flash*","google/gemini-3.1*flash*","gemini/gemini-3.1*flash*"],"gemini-3.1-pro":["copilot/gemini-3.1*pro*","google/gemini-3.1*pro*","gemini/gemini-3.1*pro*"],"gemini-3.5-flash":["copilot/gemini-3.5*flash*","google/gemini-3.5*flash*","gemini/gemini-3.5*flash*"],"gemini-3.6-flash":["copilot/gemini-3.6*flash*","google/gemini-3.6*flash*","gemini/gemini-3.6*flash*"],"gemini-3.7-flash":["copilot/gemini-3.7*flash*","google/gemini-3.7*flash*","gemini/gemini-3.7*flash*"],"gemini-flash":["copilot/gemini-*flash*","google/gemini-*flash*","gemini/gemini-*flash*"],"gemini-flash-lite":["copilot/gemini-*flash*lite*","google/gemini-*flash*lite*","gemini/gemini-*flash*lite*"],"gemini-omni":["copilot/gemini-omni*","google/gemini-omni*","gemini/gemini-omni*"],"gemini-pro":["copilot/gemini-*pro*","google/gemini-*pro*","gemini/gemini-*pro*"],"gemma":["copilot/gemma*","google/gemma*","gemini/gemma*"],"gpt-5":["copilot/gpt-5*","openai/gpt-5*"],"gpt-5-codex":["copilot/gpt-5*codex*","openai/gpt-5*codex*"],"gpt-5-mini":["copilot/gpt-5*mini*","openai/gpt-5*mini*"],"gpt-5-nano":["copilot/gpt-5*nano*","openai/gpt-5*nano*"],"gpt-5-pro":["copilot/gpt-5*pro*","openai/gpt-5*pro*"],"gpt-5.1":["copilot/gpt-5.1*","openai/gpt-5.1*"],"gpt-5.2":["copilot/gpt-5.2*","openai/gpt-5.2*"],"gpt-5.3":["copilot/gpt-5.3*","openai/gpt-5.3*"],"gpt-5.4":["copilot/gpt-5.4*","openai/gpt-5.4*"],"gpt-5.5":["copilot/gpt-5.5*","openai/gpt-5.5*"],"gpt-5.6":["copilot/gpt-5.6*","openai/gpt-5.6*"],"grok":["copilot/*grok*","openai/*grok*"],"haiku":["copilot/*haiku*","anthropic/*haiku*"],"image-generation":["copilot/gpt-image*","openai/gpt-image*","openai/chatgpt-image*","copilot/gemini-*image*","google/gemini-*image*","gemini/gemini-*image*","google/imagen*"],"kimi":["copilot/kimi*","openai/kimi*"],"kiwi":["copilot/kiwi*","openai/kiwi*"],"large":["sonnet","gpt-5-pro","gpt-5","gemini-pro"],"lyria":["google/lyria*","gemini/lyria*","copilot/lyria*"],"mai-code":["copilot/MAI-Code*","copilot/mai-code*","openai/MAI-Code*"],"mai-code-1-flash-picker":["copilot/MAI-Code-1-Flash-picker*","copilot/mai-code-1-flash-picker*","openai/MAI-Code-1-Flash-picker*"],"mini":["haiku","gpt-5-mini","gpt-5-nano","gemini-flash-lite"],"nano-banana":["copilot/nano-banana*","google/nano-banana*","gemini/nano-banana*"],"opus":["copilot/*opus*","anthropic/*opus*"],"opusplan":["opus?effort=high"],"raptor-mini":["copilot/raptor*","openai/raptor*"],"reasoning":["copilot/o1*","copilot/o3*","copilot/o4*","openai/o1*","openai/o3*","openai/o4*"],"robotics":["copilot/*robotics*","google/*robotics*","gemini/*robotics*"],"small":["mini"],"small-agent":["haiku","gpt-5-mini","gemini-flash"],"sonnet":["copilot/*sonnet*","anthropic/*sonnet*"],"sonnet-6x":["copilot/*sonnet-4.5*","copilot/*sonnet-4.6*","copilot/*sonnet-5*","copilot/*sonnet-4-5-*","anthropic/*sonnet-4-5-*","copilot/*sonnet-4-6*","anthropic/*sonnet-4-6*","anthropic/*sonnet-5*"],"summarization":["haiku","gpt-5-mini","gemini-flash-lite","mini"],"veo":["google/veo*","gemini/veo*"],"vision":["copilot/gemini-*image*","google/gemini-*image*","gemini/gemini-*image*","copilot/gemini-*flash*","google/gemini-*flash*","gemini/gemini-*flash*"]}},"container":{"imageTag":"0.28.14,squid=sha256:2ce8df3abf3e9b76e9c0cf5863da41f1ab3f89b20ad14b988806ab89e7bf2cd5,agent=sha256:f7df036c86575527b61f3f7df91c4412349a12b2a74988d929eafa2999230c98,api-proxy=sha256:6f95e2234dd9bd6333a8ff28ccea7ecf0204acd4a09108723844dbd2bf6268c5,cli-proxy=sha256:3a379c5e96e29499c815e9dd2a71334d01c326a9b73991c76544fda9cae35c34"},"logging":{"proxyLogsDir":"/tmp/gh-aw/sandbox/firewall/logs","auditDir":"/tmp/gh-aw/sandbox/firewall/audit"}}' > "${RUNNER_TEMP}/gh-aw/awf-config.json"
+          printf '%s\n' '{"$schema":"https://github.com/github/gh-aw-firewall/releases/download/v0.28.14/awf-config.schema.json","network":{"allowDomains":["*.githubusercontent.com","*.gradle-enterprise.cloud","adoptium.net","api.adoptium.net","api.foojay.io","api.snapcraft.io","api.x.ai","archive.apache.org","archive.ubuntu.com","azure.archive.ubuntu.com","cdn.azul.com","central.sonatype.com","codeload.github.com","crl.geotrust.com","crl.globalsign.com","crl.identrust.com","crl.sectigo.com","crl.thawte.com","crl.usertrust.com","crl.verisign.com","crl3.digicert.com","crl4.digicert.com","crls.ssl.com","develocity.apache.org","dl.google.com","dlcdn.apache.org","docs.github.com","download.eclipse.org","download.java.net","download.oracle.com","downloads.gradle-dn.com","ge.spockframework.org","github-cloud.githubusercontent.com","github-cloud.s3.amazonaws.com","github.blog","github.com","github.githubassets.com","gradle.org","jcenter.bintray.com","jdk.java.net","json-schema.org","json.schemastore.org","keyserver.ubuntu.com","lfs.github.com","maven-central.storage-download.googleapis.com","maven.apache.org","maven.google.com","maven.oracle.com","maven.pkg.github.com","objects.githubusercontent.com","ocsp.digicert.com","ocsp.geotrust.com","ocsp.globalsign.com","ocsp.identrust.com","ocsp.sectigo.com","ocsp.ssl.com","ocsp.thawte.com","ocsp.usertrust.com","ocsp.verisign.com","packagecloud.io","packages.cloud.google.com","packages.microsoft.com","patch-diff.githubusercontent.com","patchdiff.githubusercontent.com","plugins-artifacts.gradle.org","plugins.gradle.org","ppa.launchpad.net","raw.githubusercontent.com","repo.gradle.org","repo.grails.org","repo.maven.apache.org","repo.spring.io","repo1.maven.org","repository.apache.org","s.symcb.com","s.symcd.com","scans-in.gradle.com","security.ubuntu.com","services.gradle.org","ts-crl.ws.symantec.com","ts-ocsp.ws.symantec.com","www.googleapis.com","www.java.com"],"isolation":true,"topologyAttach":["awmg-mcpg","awmg-cli-proxy"]},"apiProxy":{"enabled":true,"enableTokenSteering":true,"maxRuns":200,"maxCacheMisses":5,"maxAiCredits":200,"modelFallback":{"enabled":false},"targets":{"openai":{"host":"api.x.ai"}},"models":{"agent":["sonnet-6x","gpt-5.4","gpt-5.5","gpt-5.6","gpt-5.3","gemini-pro","any"],"antigravity":["copilot/antigravity*","google/antigravity*","gemini/antigravity*"],"any":["copilot/*","anthropic/*","openai/*","google/*","gemini/*"],"auto":["copilot/auto","large"],"claude":["agent"],"codex":["agent"],"coding":["copilot/gpt-5*codex*","openai/gpt-5*codex*","gpt-5-codex","kimi"],"computer-use":["copilot/*computer-use*","google/*computer-use*","gemini/*computer-use*","openai/*computer-use*"],"copilot":["agent"],"deep-research":["copilot/deep-research*","copilot/o3-deep-research*","copilot/o4-mini-deep-research*","google/deep-research*","gemini/deep-research*","openai/o3-deep-research*","openai/o4-mini-deep-research*"],"detection":["small"],"evals":["small"],"fable":["copilot/*fable*","anthropic/*fable*"],"gemini":["agent"],"gemini-3-flash":["copilot/gemini-3*flash*","google/gemini-3*flash*","gemini/gemini-3*flash*"],"gemini-3-pro":["copilot/gemini-3*pro*","google/gemini-3*pro*","google/nano-banana*","gemini/gemini-3*pro*"],"gemini-3.1-flash":["copilot/gemini-3.1*flash*","google/gemini-3.1*flash*","gemini/gemini-3.1*flash*"],"gemini-3.1-pro":["copilot/gemini-3.1*pro*","google/gemini-3.1*pro*","gemini/gemini-3.1*pro*"],"gemini-3.5-flash":["copilot/gemini-3.5*flash*","google/gemini-3.5*flash*","gemini/gemini-3.5*flash*"],"gemini-3.6-flash":["copilot/gemini-3.6*flash*","google/gemini-3.6*flash*","gemini/gemini-3.6*flash*"],"gemini-3.7-flash":["copilot/gemini-3.7*flash*","google/gemini-3.7*flash*","gemini/gemini-3.7*flash*"],"gemini-flash":["copilot/gemini-*flash*","google/gemini-*flash*","gemini/gemini-*flash*"],"gemini-flash-lite":["copilot/gemini-*flash*lite*","google/gemini-*flash*lite*","gemini/gemini-*flash*lite*"],"gemini-omni":["copilot/gemini-omni*","google/gemini-omni*","gemini/gemini-omni*"],"gemini-pro":["copilot/gemini-*pro*","google/gemini-*pro*","gemini/gemini-*pro*"],"gemma":["copilot/gemma*","google/gemma*","gemini/gemma*"],"gpt-5":["copilot/gpt-5*","openai/gpt-5*"],"gpt-5-codex":["copilot/gpt-5*codex*","openai/gpt-5*codex*"],"gpt-5-mini":["copilot/gpt-5*mini*","openai/gpt-5*mini*"],"gpt-5-nano":["copilot/gpt-5*nano*","openai/gpt-5*nano*"],"gpt-5-pro":["copilot/gpt-5*pro*","openai/gpt-5*pro*"],"gpt-5.1":["copilot/gpt-5.1*","openai/gpt-5.1*"],"gpt-5.2":["copilot/gpt-5.2*","openai/gpt-5.2*"],"gpt-5.3":["copilot/gpt-5.3*","openai/gpt-5.3*"],"gpt-5.4":["copilot/gpt-5.4*","openai/gpt-5.4*"],"gpt-5.5":["copilot/gpt-5.5*","openai/gpt-5.5*"],"gpt-5.6":["copilot/gpt-5.6*","openai/gpt-5.6*"],"grok":["copilot/*grok*","openai/*grok*"],"haiku":["copilot/*haiku*","anthropic/*haiku*"],"image-generation":["copilot/gpt-image*","openai/gpt-image*","openai/chatgpt-image*","copilot/gemini-*image*","google/gemini-*image*","gemini/gemini-*image*","google/imagen*"],"kimi":["copilot/kimi*","openai/kimi*"],"kiwi":["copilot/kiwi*","openai/kiwi*"],"large":["sonnet","gpt-5-pro","gpt-5","gemini-pro"],"lyria":["google/lyria*","gemini/lyria*","copilot/lyria*"],"mai-code":["copilot/MAI-Code*","copilot/mai-code*","openai/MAI-Code*"],"mai-code-1-flash-picker":["copilot/MAI-Code-1-Flash-picker*","copilot/mai-code-1-flash-picker*","openai/MAI-Code-1-Flash-picker*"],"mini":["haiku","gpt-5-mini","gpt-5-nano","gemini-flash-lite"],"nano-banana":["copilot/nano-banana*","google/nano-banana*","gemini/nano-banana*"],"opus":["copilot/*opus*","anthropic/*opus*"],"opusplan":["opus?effort=high"],"raptor-mini":["copilot/raptor*","openai/raptor*"],"reasoning":["copilot/o1*","copilot/o3*","copilot/o4*","openai/o1*","openai/o3*","openai/o4*"],"robotics":["copilot/*robotics*","google/*robotics*","gemini/*robotics*"],"small":["mini"],"small-agent":["haiku","gpt-5-mini","gemini-flash"],"sonnet":["copilot/*sonnet*","anthropic/*sonnet*"],"sonnet-6x":["copilot/*sonnet-4.5*","copilot/*sonnet-4.6*","copilot/*sonnet-5*","copilot/*sonnet-4-5-*","anthropic/*sonnet-4-5-*","copilot/*sonnet-4-6*","anthropic/*sonnet-4-6*","anthropic/*sonnet-5*"],"summarization":["haiku","gpt-5-mini","gemini-flash-lite","mini"],"veo":["google/veo*","gemini/veo*"],"vision":["copilot/gemini-*image*","google/gemini-*image*","gemini/gemini-*image*","copilot/gemini-*flash*","google/gemini-*flash*","gemini/gemini-*flash*"]}},"container":{"imageTag":"0.28.14,squid=sha256:2ce8df3abf3e9b76e9c0cf5863da41f1ab3f89b20ad14b988806ab89e7bf2cd5,agent=sha256:f7df036c86575527b61f3f7df91c4412349a12b2a74988d929eafa2999230c98,api-proxy=sha256:6f95e2234dd9bd6333a8ff28ccea7ecf0204acd4a09108723844dbd2bf6268c5,cli-proxy=sha256:3a379c5e96e29499c815e9dd2a71334d01c326a9b73991c76544fda9cae35c34"},"logging":{"proxyLogsDir":"/tmp/gh-aw/sandbox/firewall/logs","auditDir":"/tmp/gh-aw/sandbox/firewall/audit"}}' > "${RUNNER_TEMP}/gh-aw/awf-config.json"
           cp "${RUNNER_TEMP}/gh-aw/awf-config.json" /tmp/gh-aw/awf-config.json
           export GH_AW_MODELS_JSON_PATH="/tmp/gh-aw/models.json"
           GH_AW_DOCKER_HOST=""
@@ -1078,26 +1072,21 @@ jobs:
             fi
           fi
           # shellcheck disable=SC1003,SC2016,SC2086
-          GH_AW_AWF_ENGINE_NAME=claude \
-          GH_AW_AWF_HARNESS_MARKER='[claude-harness]' \
+          GH_AW_AWF_ENGINE_NAME=codex \
+          GH_AW_AWF_HARNESS_MARKER='[codex-harness]' \
           GH_AW_AWF_LOG_FILE=/tmp/gh-aw/agent-stdio.log \
-          GH_AW_AWF_ATTEMPT_LOG_NAME=claude \
+          GH_AW_AWF_ATTEMPT_LOG_NAME=codex \
           bash "${RUNNER_TEMP}/gh-aw/actions/run_awf_with_startup_retries.sh" -- \
-            awf --config "${RUNNER_TEMP}/gh-aw/awf-config.json" --container-workdir "${GITHUB_WORKSPACE}" --mount "${RUNNER_TEMP}/gh-aw:${RUNNER_TEMP}/gh-aw:ro" --mount "${RUNNER_TEMP}/gh-aw:/host${RUNNER_TEMP}/gh-aw:ro" ${GH_AW_TOOL_CACHE_MOUNT:+--mount "$GH_AW_TOOL_CACHE_MOUNT"} ${GH_AW_DOCKER_HOST:+--docker-host "$GH_AW_DOCKER_HOST"} --tty --env-all --exclude-env ACTIONS_ID_TOKEN_REQUEST_TOKEN --exclude-env ACTIONS_ID_TOKEN_REQUEST_URL --exclude-env ANTHROPIC_API_KEY --exclude-env GH_TOKEN --exclude-env GITHUB_MCP_SERVER_TOKEN --exclude-env MCP_GATEWAY_AGENT_ID --mount /tmp/gh-aw:/tmp/gh-aw:rw --log-level info --skip-pull --difc-proxy-host awmg-cli-proxy:18443 --difc-proxy-ca-cert /tmp/gh-aw/difc-proxy-tls/ca.crt \
-            -- /bin/bash -c 'set +o histexpand; export PATH="${RUNNER_TEMP}/gh-aw/mcp-cli/bin:$PATH" && : "${RUNNER_TOOL_CACHE:?RUNNER_TOOL_CACHE must be set}"; GH_AW_TOOL_CACHE="$RUNNER_TOOL_CACHE"; GH_AW_TOOL_BINS="$(find "$GH_AW_TOOL_CACHE" -maxdepth 5 -type d -name bin 2>/dev/null | tr '\''\n'\'' '\'':'\'')"; GH_AW_TOOL_BINS="${GH_AW_TOOL_BINS%:}"; export PATH="$PATH${GH_AW_TOOL_BINS:+:}$GH_AW_TOOL_BINS"; [ -n "$GOROOT" ] && export PATH="$GOROOT/bin:$PATH" || true; [ -n "$ERLANG_HOME" ] && export PATH="$ERLANG_HOME/bin:$PATH" || true && GH_AW_NODE_EXEC="${GH_AW_NODE_BIN:-}"; if [ -z "$GH_AW_NODE_EXEC" ] || [ ! -x "$GH_AW_NODE_EXEC" ]; then GH_AW_NODE_EXEC="$(command -v node 2>/dev/null || true)"; fi; if [ -z "$GH_AW_NODE_EXEC" ]; then echo "node runtime missing on this runner — check runtimes.node in workflow YAML" >&2; exit 127; fi; GH_AW_NPM_GLOBAL_ROOT="$(npm root -g 2>/dev/null || true)"; if [ -n "$GH_AW_NPM_GLOBAL_ROOT" ]; then export NODE_PATH="${GH_AW_NPM_GLOBAL_ROOT}${NODE_PATH:+:${NODE_PATH}}"; fi; "$GH_AW_NODE_EXEC" ${RUNNER_TEMP}/gh-aw/actions/claude_harness.cjs claude --print --no-chrome --max-turns 200 --allowed-tools '\''Bash,BashOutput,Edit,Edit(/tmp/*),ExitPlanMode,Glob,Grep,KillBash,LS,MultiEdit,MultiEdit(/tmp/*),NotebookEdit,NotebookRead,Read,Read(/tmp/*),Task,TodoWrite,Write,Write(/tmp/*),mcp__github__actions_get,mcp__github__actions_list,mcp__github__get_code_scanning_alert,mcp__github__get_commit,mcp__github__get_dependabot_alert,mcp__github__get_discussion,mcp__github__get_discussion_comments,mcp__github__get_file_contents,mcp__github__get_job_logs,mcp__github__get_label,mcp__github__get_latest_release,mcp__github__get_me,mcp__github__get_notification_details,mcp__github__get_pull_request,mcp__github__get_pull_request_comments,mcp__github__get_pull_request_diff,mcp__github__get_pull_request_files,mcp__github__get_pull_request_review_comments,mcp__github__get_pull_request_reviews,mcp__github__get_pull_request_status,mcp__github__get_release_by_tag,mcp__github__get_secret_scanning_alert,mcp__github__get_tag,mcp__github__issue_read,mcp__github__list_branches,mcp__github__list_code_scanning_alerts,mcp__github__list_commits,mcp__github__list_dependabot_alerts,mcp__github__list_discussion_categories,mcp__github__list_discussions,mcp__github__list_issue_types,mcp__github__list_issues,mcp__github__list_label,mcp__github__list_notifications,mcp__github__list_pull_requests,mcp__github__list_releases,mcp__github__list_secret_scanning_alerts,mcp__github__list_starred_repositories,mcp__github__list_tags,mcp__github__pull_request_read,mcp__github__search_code,mcp__github__search_issues,mcp__github__search_orgs,mcp__github__search_pull_requests,mcp__github__search_repositories,mcp__github__search_users,mcp__safeoutputs'\'' --debug-file /tmp/gh-aw/claude-debug.log --verbose --permission-mode acceptEdits --output-format stream-json --effort medium --mcp-config "${RUNNER_TEMP}/gh-aw/mcp-config/mcp-servers.json" --prompt-file /tmp/gh-aw/aw-prompts/prompt.txt'
+            awf --config "${RUNNER_TEMP}/gh-aw/awf-config.json" --container-workdir "${GITHUB_WORKSPACE}" --mount "${RUNNER_TEMP}/gh-aw:${RUNNER_TEMP}/gh-aw:ro" --mount "${RUNNER_TEMP}/gh-aw:/host${RUNNER_TEMP}/gh-aw:ro" ${GH_AW_TOOL_CACHE_MOUNT:+--mount "$GH_AW_TOOL_CACHE_MOUNT"} ${GH_AW_DOCKER_HOST:+--docker-host "$GH_AW_DOCKER_HOST"} --env-all --exclude-env ACTIONS_ID_TOKEN_REQUEST_TOKEN --exclude-env ACTIONS_ID_TOKEN_REQUEST_URL --exclude-env CODEX_API_KEY --exclude-env COPILOT_GITHUB_TOKEN --exclude-env GH_TOKEN --exclude-env GITHUB_MCP_SERVER_TOKEN --exclude-env MCP_GATEWAY_AGENT_ID --exclude-env OPENAI_API_KEY --mount /tmp/gh-aw:/tmp/gh-aw:rw --log-level info --skip-pull --difc-proxy-host awmg-cli-proxy:18443 --difc-proxy-ca-cert /tmp/gh-aw/difc-proxy-tls/ca.crt --openai-api-base-path /v1 \
+            -- /bin/bash -c 'set +o histexpand; export PATH="${RUNNER_TEMP}/gh-aw/mcp-cli/bin:$PATH" && : "${RUNNER_TOOL_CACHE:?RUNNER_TOOL_CACHE must be set}"; GH_AW_TOOL_CACHE="$RUNNER_TOOL_CACHE"; GH_AW_TOOL_BINS="$(find "$GH_AW_TOOL_CACHE" -maxdepth 5 -type d -name bin 2>/dev/null | tr '\''\n'\'' '\'':'\'')"; GH_AW_TOOL_BINS="${GH_AW_TOOL_BINS%:}"; export PATH="$PATH${GH_AW_TOOL_BINS:+:}$GH_AW_TOOL_BINS"; [ -n "$GOROOT" ] && export PATH="$GOROOT/bin:$PATH" || true; [ -n "$ERLANG_HOME" ] && export PATH="$ERLANG_HOME/bin:$PATH" || true && GH_AW_NODE_EXEC="${GH_AW_NODE_BIN:-}"; if [ -z "$GH_AW_NODE_EXEC" ] || [ ! -x "$GH_AW_NODE_EXEC" ]; then GH_AW_NODE_EXEC="$(command -v node 2>/dev/null || true)"; fi; if [ -z "$GH_AW_NODE_EXEC" ]; then echo "node runtime missing on this runner — check runtimes.node in workflow YAML" >&2; exit 127; fi; GH_AW_NPM_GLOBAL_ROOT="$(npm root -g 2>/dev/null || true)"; if [ -n "$GH_AW_NPM_GLOBAL_ROOT" ]; then export NODE_PATH="${GH_AW_NPM_GLOBAL_ROOT}${NODE_PATH:+:${NODE_PATH}}"; fi; "$GH_AW_NODE_EXEC" ${RUNNER_TEMP}/gh-aw/actions/codex_harness.cjs codex exec${GH_AW_MODEL_AGENT_CODEX:+ --model "$GH_AW_MODEL_AGENT_CODEX"} -c web_search="disabled" -c fetch="disabled" --dangerously-bypass-approvals-and-sandbox --skip-git-repo-check -c model_reasoning_effort="medium"  --prompt-file /tmp/gh-aw/aw-prompts/prompt.txt'
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ANTHROPIC_MAX_RETRIES: 0
-          ANTHROPIC_MODEL: claude-haiku-4-5-20251001
-          BASH_DEFAULT_TIMEOUT_MS: 60000
-          BASH_MAX_TIMEOUT_MS: 60000
-          CLAUDE_CODE_DISABLE_FAST_MODE: 1
-          DISABLE_BUG_COMMAND: 1
-          DISABLE_ERROR_REPORTING: 1
-          DISABLE_TELEMETRY: 1
-          GH_AW_LLM_PROVIDER: anthropic
+          AWF_REFLECT_ENABLED: 1
+          CODEX_API_KEY: ${{ secrets.CODEX_API_KEY || secrets.OPENAI_API_KEY }}
+          CODEX_HOME: /tmp/gh-aw/mcp-config
+          GH_AW_LLM_PROVIDER: openai
           GH_AW_MAX_TURNS: 200
-          GH_AW_MCP_CONFIG: ${{ runner.temp }}/gh-aw/mcp-config/mcp-servers.json
+          GH_AW_MCP_CONFIG: ${{ runner.temp }}/gh-aw/mcp-config/config.toml
+          GH_AW_MODEL_AGENT_CODEX: grok-4.3
           GH_AW_PHASE: agent
           GH_AW_PROMPT: /tmp/gh-aw/aw-prompts/prompt.txt
           GH_AW_SAFE_OUTPUTS: ${{ steps.set-runtime-paths.outputs.GH_AW_SAFE_OUTPUTS }}
@@ -1105,14 +1094,14 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || github.token }}
           GITHUB_AW: true
           GITHUB_STEP_SUMMARY: /tmp/gh-aw/agent-step-summary.md
-          GITHUB_WORKSPACE: ${{ github.workspace }}
           GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
           GIT_AUTHOR_NAME: github-actions[bot]
           GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
           GIT_COMMITTER_NAME: github-actions[bot]
-          MCP_TIMEOUT: 120000
-          MCP_TOOL_TIMEOUT: 60000
+          OPENAI_API_KEY: ${{ secrets.X_API_KEY }}
+          OPENAI_BASE_URL: https://api.x.ai/v1
           RUNNER_TEMP: ${{ runner.temp }}
+          RUST_LOG: ${{ runner.debug == 1 && 'trace,hyper_util=info,mio=info,reqwest=info,os_info=info,codex_otel=warn,codex_core=debug,codex_exec=debug' || 'warn' }}
           TRACEPARENT: ${{ env.GITHUB_AW_OTEL_TRACE_ID != '' && env.GITHUB_AW_OTEL_PARENT_SPAN_ID != '' && format('00-{0}-{1}-01', env.GITHUB_AW_OTEL_TRACE_ID, env.GITHUB_AW_OTEL_PARENT_SPAN_ID) || '' }}
       - name: Stop CLI Proxy
         if: always()
@@ -1125,6 +1114,7 @@ jobs:
         env:
           GH_AW_AGENTIC_EXECUTION_OUTCOME: ${{ steps.agentic_execution.outcome }}
           GH_AW_ENGINE_STEP_TIMEOUT_MINUTES: ${{ fromJSON(vars.GH_AW_DEFAULT_TIMEOUT_MINUTES || '20') }}
+          GH_AW_ENGINE_INTERNAL_LOGS_DIR: /tmp/gh-aw/mcp-config/logs
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
@@ -1161,11 +1151,13 @@ jobs:
             const { main } = require(path.join(actionsDir, 'redact_secrets.cjs'));
             await main();
         env:
-          GH_AW_SECRET_NAMES: 'ANTHROPIC_API_KEY,GH_AW_GITHUB_MCP_SERVER_TOKEN,GH_AW_GITHUB_TOKEN,GITHUB_TOKEN'
-          SECRET_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GH_AW_SECRET_NAMES: 'CODEX_API_KEY,GH_AW_GITHUB_MCP_SERVER_TOKEN,GH_AW_GITHUB_TOKEN,GITHUB_TOKEN,OPENAI_API_KEY,X_API_KEY'
+          SECRET_CODEX_API_KEY: ${{ secrets.CODEX_API_KEY }}
           SECRET_GH_AW_GITHUB_MCP_SERVER_TOKEN: ${{ secrets.GH_AW_GITHUB_MCP_SERVER_TOKEN }}
           SECRET_GH_AW_GITHUB_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN }}
           SECRET_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SECRET_OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SECRET_X_API_KEY: ${{ secrets.X_API_KEY }}
       - name: Append agent step summary
         if: always()
         run: bash "${RUNNER_TEMP}/gh-aw/actions/append_agent_step_summary.sh"
@@ -1182,7 +1174,7 @@ jobs:
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           GH_AW_SAFE_OUTPUTS: ${{ steps.set-runtime-paths.outputs.GH_AW_SAFE_OUTPUTS }}
-          GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,*.gradle-enterprise.cloud,adoptium.net,api.adoptium.net,api.anthropic.com,api.foojay.io,api.snapcraft.io,archive.apache.org,archive.ubuntu.com,azure.archive.ubuntu.com,cdn.azul.com,central.sonatype.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,develocity.apache.org,dl.google.com,dlcdn.apache.org,docs.github.com,download.eclipse.org,download.java.net,download.oracle.com,downloads.gradle-dn.com,ge.spockframework.org,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,gradle.org,jcenter.bintray.com,jdk.java.net,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,maven-central.storage-download.googleapis.com,maven.apache.org,maven.google.com,maven.oracle.com,maven.pkg.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,patch-diff.githubusercontent.com,patchdiff.githubusercontent.com,plugins-artifacts.gradle.org,plugins.gradle.org,ppa.launchpad.net,raw.githubusercontent.com,repo.gradle.org,repo.grails.org,repo.maven.apache.org,repo.spring.io,repo1.maven.org,repository.apache.org,s.symcb.com,s.symcd.com,scans-in.gradle.com,security.ubuntu.com,services.gradle.org,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com,www.java.com"
+          GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,*.gradle-enterprise.cloud,adoptium.net,api.adoptium.net,api.foojay.io,api.snapcraft.io,api.x.ai,archive.apache.org,archive.ubuntu.com,azure.archive.ubuntu.com,cdn.azul.com,central.sonatype.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,develocity.apache.org,dl.google.com,dlcdn.apache.org,docs.github.com,download.eclipse.org,download.java.net,download.oracle.com,downloads.gradle-dn.com,ge.spockframework.org,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,gradle.org,jcenter.bintray.com,jdk.java.net,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,maven-central.storage-download.googleapis.com,maven.apache.org,maven.google.com,maven.oracle.com,maven.pkg.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,patch-diff.githubusercontent.com,patchdiff.githubusercontent.com,plugins-artifacts.gradle.org,plugins.gradle.org,ppa.launchpad.net,raw.githubusercontent.com,repo.gradle.org,repo.grails.org,repo.maven.apache.org,repo.spring.io,repo1.maven.org,repository.apache.org,s.symcb.com,s.symcd.com,scans-in.gradle.com,security.ubuntu.com,services.gradle.org,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com,www.java.com"
           GITHUB_SERVER_URL: ${{ github.server_url }}
           GITHUB_API_URL: ${{ github.api_url }}
         with:
@@ -1205,7 +1197,7 @@ jobs:
             const actionsDir = path.join(process.env.RUNNER_TEMP, 'gh-aw', 'actions');
             const { setupGlobals } = require(path.join(actionsDir, 'setup_globals.cjs'));
             setupGlobals(core, github, context, exec, io, getOctokit);
-            const { main } = require(path.join(actionsDir, 'parse_claude_log.cjs'));
+            const { main } = require(path.join(actionsDir, 'parse_codex_log.cjs'));
             await main();
       - name: Parse MCP Gateway logs for step summary
         if: always()
@@ -1286,7 +1278,7 @@ jobs:
           name: agent
           path: |
             /tmp/gh-aw/aw-prompts/prompt.txt
-            /tmp/gh-aw/claude-debug.log
+            /tmp/gh-aw/mcp-config/logs/
             /tmp/gh-aw/redacted-urls.log
             /tmp/gh-aw/mcp-logs/
             /tmp/gh-aw/agent_usage.json
@@ -1343,9 +1335,9 @@ jobs:
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "AI Developer Agent"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/developer-agent.lock.yml@${{ github.ref }}
-          GH_AW_INFO_VERSION: "2.1.247"
+          GH_AW_INFO_VERSION: "0.150.1"
           GH_AW_INFO_AWF_VERSION: "v0.28.14"
-          GH_AW_INFO_ENGINE_ID: "claude"
+          GH_AW_INFO_ENGINE_ID: "codex"
       - name: Generate GitHub App token
         id: safe-outputs-app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
@@ -1519,7 +1511,7 @@ jobs:
           GH_AW_AGENT_CONCLUSION: ${{ needs.agent.result }}
           GH_AW_WORKFLOW_ID: "developer-agent"
           GH_AW_ACTION_FAILURE_ISSUE_EXPIRES_HOURS: "168"
-          GH_AW_ENGINE_ID: "claude"
+          GH_AW_ENGINE_ID: "codex"
           GH_AW_SECRET_VERIFICATION_RESULT: ${{ needs.activation.outputs.secret_verification_result }}
           GH_AW_CHECKOUT_PR_SUCCESS: ${{ needs.agent.outputs.checkout_pr_success }}
           GH_AW_EFFECTIVE_TOKENS: ${{ needs.agent.outputs.effective_tokens || '' }}
@@ -1536,7 +1528,7 @@ jobs:
           GH_AW_MISSING_MODEL_PRICING_ERROR: ${{ needs.agent.outputs.missing_model_pricing_error }}
           GH_AW_MISSING_MODEL_PRICING_MODEL_NAME: ${{ needs.agent.outputs.missing_model_pricing_model_name }}
           GH_AW_SHELL_EXPANSION_GUARD_REJECTED: ${{ needs.agent.outputs.shell_expansion_guard_rejected }}
-          GH_AW_ENGINE_API_HOSTS: "api.anthropic.com"
+          GH_AW_ENGINE_API_HOSTS: "api.openai.com"
           GH_AW_CODE_PUSH_FAILURE_ERRORS: ${{ needs.safe_outputs.outputs.code_push_failure_errors }}
           GH_AW_CODE_PUSH_FAILURE_COUNT: ${{ needs.safe_outputs.outputs.code_push_failure_count }}
           GH_AW_SAFE_OUTPUTS_APP_TOKEN_MINTING_FAILED: ${{ needs.safe_outputs.outputs.app_token_minting_failed }}
@@ -1605,9 +1597,9 @@ jobs:
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "AI Developer Agent"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/developer-agent.lock.yml@${{ github.ref }}
-          GH_AW_INFO_VERSION: "2.1.247"
+          GH_AW_INFO_VERSION: "0.150.1"
           GH_AW_INFO_AWF_VERSION: "v0.28.14"
-          GH_AW_INFO_ENGINE_ID: "claude"
+          GH_AW_INFO_ENGINE_ID: "codex"
       - name: Check team membership for workflow
         id: check_membership
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
@@ -1641,8 +1633,8 @@ jobs:
       GH_AW_AMBIENT_CONTEXT: ${{ needs.agent.outputs.ambient_context }}
       GH_AW_CALLER_WORKFLOW_ID: "${{ github.repository }}/developer-agent"
       GH_AW_EFFECTIVE_TOKENS: ${{ needs.agent.outputs.effective_tokens }}
-      GH_AW_ENGINE_ID: "claude"
-      GH_AW_ENGINE_MODEL: "claude-haiku-4-5-20251001"
+      GH_AW_ENGINE_ID: "codex"
+      GH_AW_ENGINE_MODEL: "grok-4.3"
       GH_AW_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
       GH_AW_RUNTIME_FEATURES: ${{ vars.GH_AW_RUNTIME_FEATURES }}
       GH_AW_WORKFLOW_ID: "developer-agent"
@@ -1682,9 +1674,9 @@ jobs:
         env:
           GH_AW_SETUP_WORKFLOW_NAME: "AI Developer Agent"
           GH_AW_CURRENT_WORKFLOW_REF: ${{ github.repository }}/.github/workflows/developer-agent.lock.yml@${{ github.ref }}
-          GH_AW_INFO_VERSION: "2.1.247"
+          GH_AW_INFO_VERSION: "0.150.1"
           GH_AW_INFO_AWF_VERSION: "v0.28.14"
-          GH_AW_INFO_ENGINE_ID: "claude"
+          GH_AW_INFO_ENGINE_ID: "codex"
       - name: Mask OTLP telemetry headers
         run: bash "${RUNNER_TEMP}/gh-aw/actions/mask_otlp_headers.sh"
       - name: Download agent output artifact
@@ -1751,10 +1743,10 @@ jobs:
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
           GH_AW_COMMENT_ID: ${{ needs.activation.outputs.comment_id }}
-          GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,*.gradle-enterprise.cloud,adoptium.net,api.adoptium.net,api.anthropic.com,api.foojay.io,api.snapcraft.io,archive.apache.org,archive.ubuntu.com,azure.archive.ubuntu.com,cdn.azul.com,central.sonatype.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,develocity.apache.org,dl.google.com,dlcdn.apache.org,docs.github.com,download.eclipse.org,download.java.net,download.oracle.com,downloads.gradle-dn.com,ge.spockframework.org,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,gradle.org,jcenter.bintray.com,jdk.java.net,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,maven-central.storage-download.googleapis.com,maven.apache.org,maven.google.com,maven.oracle.com,maven.pkg.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,patch-diff.githubusercontent.com,patchdiff.githubusercontent.com,plugins-artifacts.gradle.org,plugins.gradle.org,ppa.launchpad.net,raw.githubusercontent.com,repo.gradle.org,repo.grails.org,repo.maven.apache.org,repo.spring.io,repo1.maven.org,repository.apache.org,s.symcb.com,s.symcd.com,scans-in.gradle.com,security.ubuntu.com,services.gradle.org,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com,www.java.com"
+          GH_AW_ALLOWED_DOMAINS: "*.githubusercontent.com,*.gradle-enterprise.cloud,adoptium.net,api.adoptium.net,api.foojay.io,api.snapcraft.io,api.x.ai,archive.apache.org,archive.ubuntu.com,azure.archive.ubuntu.com,cdn.azul.com,central.sonatype.com,codeload.github.com,crl.geotrust.com,crl.globalsign.com,crl.identrust.com,crl.sectigo.com,crl.thawte.com,crl.usertrust.com,crl.verisign.com,crl3.digicert.com,crl4.digicert.com,crls.ssl.com,develocity.apache.org,dl.google.com,dlcdn.apache.org,docs.github.com,download.eclipse.org,download.java.net,download.oracle.com,downloads.gradle-dn.com,ge.spockframework.org,github-cloud.githubusercontent.com,github-cloud.s3.amazonaws.com,github.blog,github.com,github.githubassets.com,gradle.org,jcenter.bintray.com,jdk.java.net,json-schema.org,json.schemastore.org,keyserver.ubuntu.com,lfs.github.com,maven-central.storage-download.googleapis.com,maven.apache.org,maven.google.com,maven.oracle.com,maven.pkg.github.com,objects.githubusercontent.com,ocsp.digicert.com,ocsp.geotrust.com,ocsp.globalsign.com,ocsp.identrust.com,ocsp.sectigo.com,ocsp.ssl.com,ocsp.thawte.com,ocsp.usertrust.com,ocsp.verisign.com,packagecloud.io,packages.cloud.google.com,packages.microsoft.com,patch-diff.githubusercontent.com,patchdiff.githubusercontent.com,plugins-artifacts.gradle.org,plugins.gradle.org,ppa.launchpad.net,raw.githubusercontent.com,repo.gradle.org,repo.grails.org,repo.maven.apache.org,repo.spring.io,repo1.maven.org,repository.apache.org,s.symcb.com,s.symcd.com,scans-in.gradle.com,security.ubuntu.com,services.gradle.org,ts-crl.ws.symantec.com,ts-ocsp.ws.symantec.com,www.googleapis.com,www.java.com"
           GITHUB_SERVER_URL: ${{ github.server_url }}
           GITHUB_API_URL: ${{ github.api_url }}
-          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"max\":1,\"target\":\"*\"},\"add_labels\":{\"allowed\":[\"ai:in_progress\",\"ai:wait_for_feedback\",\"ai:to_review\"],\"create_if_missing\":true,\"max\":3,\"target\":\"*\"},\"create_pull_request\":{\"allowed_files\":[\"src/**\",\"pom.xml\",\"README.md\",\"architecture/**\",\"Dockerfile\",\"docker-compose.yml\"],\"draft\":false,\"fallback_as_issue\":false,\"labels\":[\"ai:to_review\"],\"max\":1,\"max_patch_files\":100,\"max_patch_size\":4096,\"protect_top_level_dot_folders\":true,\"protected_files\":[\"package.json\",\"bun.lockb\",\"bunfig.toml\",\"deno.json\",\"deno.jsonc\",\"deno.lock\",\"global.json\",\"NuGet.Config\",\"Directory.Packages.props\",\"mix.exs\",\"mix.lock\",\"go.mod\",\"go.sum\",\"stack.yaml\",\"stack.yaml.lock\",\"pom.xml\",\"build.gradle\",\"build.gradle.kts\",\"settings.gradle\",\"settings.gradle.kts\",\"gradle.properties\",\"package-lock.json\",\"yarn.lock\",\"pnpm-lock.yaml\",\"npm-shrinkwrap.json\",\"requirements.txt\",\"Pipfile\",\"Pipfile.lock\",\"pyproject.toml\",\"setup.py\",\"setup.cfg\",\"Gemfile\",\"Gemfile.lock\",\"uv.lock\",\"CODEOWNERS\",\"DESIGN.md\",\"README.md\",\"CONTRIBUTING.md\",\"CHANGELOG.md\",\"SECURITY.md\",\"CODE_OF_CONDUCT.md\",\"CLAUDE.md\",\"AGENTS.md\"],\"protected_files_policy\":\"request_review\",\"title_prefix\":\"[AI] \"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"true\"},\"push_to_pull_request_branch\":{\"allowed_files\":[\"src/**\",\"pom.xml\",\"README.md\",\"architecture/**\",\"Dockerfile\",\"docker-compose.yml\"],\"if_no_changes\":\"warn\",\"max_patch_size\":4096,\"protect_top_level_dot_folders\":true,\"protected_files\":[\"package.json\",\"bun.lockb\",\"bunfig.toml\",\"deno.json\",\"deno.jsonc\",\"deno.lock\",\"global.json\",\"NuGet.Config\",\"Directory.Packages.props\",\"mix.exs\",\"mix.lock\",\"go.mod\",\"go.sum\",\"stack.yaml\",\"stack.yaml.lock\",\"pom.xml\",\"build.gradle\",\"build.gradle.kts\",\"settings.gradle\",\"settings.gradle.kts\",\"gradle.properties\",\"package-lock.json\",\"yarn.lock\",\"pnpm-lock.yaml\",\"npm-shrinkwrap.json\",\"requirements.txt\",\"Pipfile\",\"Pipfile.lock\",\"pyproject.toml\",\"setup.py\",\"setup.cfg\",\"Gemfile\",\"Gemfile.lock\",\"uv.lock\",\"CODEOWNERS\",\"DESIGN.md\",\"README.md\",\"CONTRIBUTING.md\",\"CHANGELOG.md\",\"SECURITY.md\",\"CODE_OF_CONDUCT.md\",\"CLAUDE.md\",\"AGENTS.md\"],\"target\":\"*\",\"title_prefix\":\"[AI] \"},\"remove_labels\":{\"allowed\":[\"ai:ready\",\"ai:in_progress\",\"ai:wait_for_feedback\",\"ai:needs_work\",\"ai:to_review\"],\"max\":3,\"target\":\"*\"},\"report_incomplete\":{}}"
+          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"max\":1,\"target\":\"*\"},\"add_labels\":{\"allowed\":[\"ai:in_progress\",\"ai:wait_for_feedback\",\"ai:to_review\"],\"create_if_missing\":true,\"max\":3,\"target\":\"*\"},\"create_pull_request\":{\"allowed_files\":[\"src/**\",\"pom.xml\",\"README.md\",\"architecture/**\",\"Dockerfile\",\"docker-compose.yml\"],\"draft\":false,\"fallback_as_issue\":false,\"labels\":[\"ai:to_review\"],\"max\":1,\"max_patch_files\":100,\"max_patch_size\":4096,\"protect_top_level_dot_folders\":true,\"protected_files\":[\"package.json\",\"bun.lockb\",\"bunfig.toml\",\"deno.json\",\"deno.jsonc\",\"deno.lock\",\"global.json\",\"NuGet.Config\",\"Directory.Packages.props\",\"mix.exs\",\"mix.lock\",\"go.mod\",\"go.sum\",\"stack.yaml\",\"stack.yaml.lock\",\"pom.xml\",\"build.gradle\",\"build.gradle.kts\",\"settings.gradle\",\"settings.gradle.kts\",\"gradle.properties\",\"package-lock.json\",\"yarn.lock\",\"pnpm-lock.yaml\",\"npm-shrinkwrap.json\",\"requirements.txt\",\"Pipfile\",\"Pipfile.lock\",\"pyproject.toml\",\"setup.py\",\"setup.cfg\",\"Gemfile\",\"Gemfile.lock\",\"uv.lock\",\"CODEOWNERS\",\"DESIGN.md\",\"README.md\",\"CONTRIBUTING.md\",\"CHANGELOG.md\",\"SECURITY.md\",\"CODE_OF_CONDUCT.md\",\"AGENTS.md\"],\"protected_files_policy\":\"request_review\",\"title_prefix\":\"[AI] \"},\"create_report_incomplete_issue\":{},\"missing_data\":{},\"missing_tool\":{},\"noop\":{\"max\":1,\"report-as-issue\":\"true\"},\"push_to_pull_request_branch\":{\"allowed_files\":[\"src/**\",\"pom.xml\",\"README.md\",\"architecture/**\",\"Dockerfile\",\"docker-compose.yml\"],\"if_no_changes\":\"warn\",\"max_patch_size\":4096,\"protect_top_level_dot_folders\":true,\"protected_files\":[\"package.json\",\"bun.lockb\",\"bunfig.toml\",\"deno.json\",\"deno.jsonc\",\"deno.lock\",\"global.json\",\"NuGet.Config\",\"Directory.Packages.props\",\"mix.exs\",\"mix.lock\",\"go.mod\",\"go.sum\",\"stack.yaml\",\"stack.yaml.lock\",\"pom.xml\",\"build.gradle\",\"build.gradle.kts\",\"settings.gradle\",\"settings.gradle.kts\",\"gradle.properties\",\"package-lock.json\",\"yarn.lock\",\"pnpm-lock.yaml\",\"npm-shrinkwrap.json\",\"requirements.txt\",\"Pipfile\",\"Pipfile.lock\",\"pyproject.toml\",\"setup.py\",\"setup.cfg\",\"Gemfile\",\"Gemfile.lock\",\"uv.lock\",\"CODEOWNERS\",\"DESIGN.md\",\"README.md\",\"CONTRIBUTING.md\",\"CHANGELOG.md\",\"SECURITY.md\",\"CODE_OF_CONDUCT.md\",\"AGENTS.md\"],\"target\":\"*\",\"title_prefix\":\"[AI] \"},\"remove_labels\":{\"allowed\":[\"ai:ready\",\"ai:in_progress\",\"ai:wait_for_feedback\",\"ai:needs_work\",\"ai:to_review\"],\"max\":3,\"target\":\"*\"},\"report_incomplete\":{}}"
           GH_AW_CI_TRIGGER_TOKEN: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
           GITHUB_TOKEN: ${{ steps.safe-outputs-app-token.outputs.token }}
         with:
