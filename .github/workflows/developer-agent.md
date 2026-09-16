@@ -2,85 +2,86 @@
 name: AI Developer Agent
 description: Act as Senior Java Developer and implements approved GitHub issues and fixes mandatory AI review findings
 intent: >-
-  Drive an issue/PR through the ai:* label state machine: ai:ready -> ai:in_progress ->
-  (ai:wait_for_feedback <-> ai:in_progress)* -> ai:to_review, and resume from ai:needs_work
-  on an existing pull request until no mandatory review findings remain.
+   Drive an issue/PR through the ai:* label state machine: ai:ready -> ai:in_progress ->
+   (ai:wait_for_feedback <-> ai:in_progress)* -> ai:to_review, and resume from ai:needs_work
+   on an existing pull request until no mandatory review findings remain.
 on:
-  issues:
-    types: [labeled]
-    names: [ai:ready]
-  pull_request:
-    types: [labeled]
-    names: [ai:needs_work]
-  issue_comment:
-    types: [created]
-  bots:
-    - "jobshunter-review-agent-crisnct[bot]"
+   issues:
+      types: [labeled]
+      names: [ai:ready]
+   pull_request:
+      types: [labeled]
+      names: [ai:needs_work]
+   issue_comment:
+      types: [created]
+   bots:
+      - "jobshunter-review-agent-crisnct[bot]"
 if: >-
-  github.event_name == 'issues' ||
-  github.event_name == 'pull_request' ||
-  (github.event_name == 'issue_comment' &&
-   github.event.comment.user.type != 'Bot' &&
-   contains(github.event.issue.labels.*.name, 'ai:wait_for_feedback'))
+   github.event_name == 'issues' ||
+   github.event_name == 'pull_request' ||
+   (github.event_name == 'issue_comment' &&
+    github.event.comment.user.type != 'Bot' &&
+    contains(github.event.issue.labels.*.name, 'ai:wait_for_feedback'))
 concurrency:
-  group: gh-aw-${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number }}-${{ github.event.label.name || github.event.comment.id }}
-  cancel-in-progress: false
+   group: gh-aw-${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number }}-${{ github.event.label.name || github.event.comment.id }}
+   cancel-in-progress: false
 max-turns: 200
 max-ai-credits: 200
 engine:
-  id: claude
-  model: claude-haiku-4-5-20251001
-  args: ["--effort", "medium"]
-  env:
-    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+   id: codex
+   model: grok-4.3
+   args: ["-c", "model_reasoning_effort=\"medium\""]
+   env:
+      OPENAI_API_KEY: ${{ secrets.X_API_KEY }}
+      OPENAI_BASE_URL: "https://api.x.ai/v1"
 permissions:
-  contents: read
-  issues: read
-  pull-requests: read
+   contents: read
+   issues: read
+   pull-requests: read
 runtimes:
-  java:
-    version: "25"
+   java:
+      version: "25"
 network:
-  allowed: [defaults, github, java, api.anthropic.com]
+   allowed: [defaults, github, java, api.x.ai]
 tools:
-  cli-proxy: true
-  github:
-    mode: gh-proxy
-    toolsets: [repos, issues, pull_requests]
+   cli-proxy: true
+   github:
+      mode: gh-proxy
+      toolsets: [repos, issues, pull_requests]
 safe-outputs:
-  threat-detection: false
-  github-app:
-    client-id: ${{ vars.AI_DEVELOPER_APP_CLIENT_ID }}
-    private-key: ${{ secrets.AI_DEVELOPER_APP_PRIVATE_KEY }}
-  create-pull-request:
-    title-prefix: "[AI] "
-    draft: false
-    fallback-as-issue: false
-    labels: [ai:to_review]
-    allowed-files: &implementation-files
-      - "src/**"
-      - "pom.xml"
-      - "README.md"
-      - "architecture/**"
-      - "Dockerfile"
-      - "docker-compose.yml"
-  push-to-pull-request-branch:
-    required-title-prefix: "[AI] "
-    target: "*"
-    allowed-files: *implementation-files
-  add-comment:
-    max: 1
-    target: "*"
-  add-labels:
-    allowed: [ai:in_progress, ai:wait_for_feedback, ai:to_review]
-    target: "*"
-    create-if-missing: true
-    max: 3
-  remove-labels:
-    allowed: [ai:ready, ai:in_progress, ai:wait_for_feedback, ai:needs_work, ai:to_review]
-    target: "*"
-    max: 3
-  noop:
+   threat-detection: false
+   github-app:
+      client-id: ${{ vars.AI_DEVELOPER_APP_CLIENT_ID }}
+      private-key: ${{ secrets.AI_DEVELOPER_APP_PRIVATE_KEY }}
+   create-pull-request:
+      title-prefix: "[AI] "
+      draft: false
+      fallback-as-issue: false
+      labels: [ai:to_review]
+      allowed-files: &implementation-files
+         - "src/**"
+         - "pom.xml"
+         - "README.md"
+         - "architecture/**"
+         - "Dockerfile"
+         - "docker-compose.yml"
+   push-to-pull-request-branch:
+      required-title-prefix: "[AI] "
+      target: "*"
+      allowed-files: *implementation-files
+   add-comment:
+      max: 1
+      target: "*"
+   add-labels:
+      allowed: [ai:in_progress, ai:wait_for_feedback, ai:to_review]
+      target: "*"
+      create-if-missing: true
+      max: 3
+   remove-labels:
+      allowed: [ai:ready, ai:in_progress, ai:wait_for_feedback, ai:needs_work, ai:to_review]
+      target: "*"
+      max: 3
+   noop:
 ---
 
 # AI Developer Agent
@@ -132,15 +133,15 @@ Every safe-output in this workflow (`create_pull_request` excepted, since it alw
 Every numbered exit below (`noop`, blocked, done) carries its own mandatory label transition on the **issue** — never call `noop`, `add_comment`, or `create_pull_request` without also (in the same turn) calling the `add_labels`/`remove_labels` pair for the issue for that exact case. Do not defer the label change to "step 1" and assume it already happened. `create_pull_request` is the one exit that also affects a PR, but that PR has no number yet when you call it — do not attempt to `add_labels` against it; its `ai:to_review` label is applied automatically by this workflow's config (see **Labels** above), and step 8 below still separately labels the issue.
 
 1. Search for an open `[AI]` PR already covering the issue (branch `ai/issue-<issue-number>-*` or body containing `Closes #<issue-number>`). If one exists:
-    - Read its current `ai:*` label. Remove `ai:ready` from the issue and add whatever `ai:*` label the PR currently carries (or `ai:to_review` if the PR predates this label scheme and carries none) to the issue, so issue and PR match.
-    - Emit `noop` with the PR number and stop.
+   - Read its current `ai:*` label. Remove `ai:ready` from the issue and add whatever `ai:*` label the PR currently carries (or `ai:to_review` if the PR predates this label scheme and carries none) to the issue, so issue and PR match.
+   - Emit `noop` with the PR number and stop.
 2. Otherwise, remove `ai:ready` and add `ai:in_progress` on the issue — you are now actively working on it.
 3. Read the issue/comments and only relevant project instructions, code, and tests; extract scope, criteria, constraints, and expected tests.
 4. Do not invent API, persistence, OAuth, authorization, token, or security decisions. If ambiguity blocks safe implementation:
-    - Commit whatever safe partial progress exists (may be none).
-    - Emit one `create_pull_request` on branch `ai/issue-<issue-number>-<short-purpose>`, with the open questions in the body and `Closes #<issue-number>`. (The PR is born with `ai:to_review` from workflow config; immediately follow with the label swap below so its *state* label reads `ai:wait_for_feedback`, not `ai:to_review` — remove `ai:to_review`, add `ai:wait_for_feedback`, on the PR.)
-    - Remove `ai:in_progress` and add `ai:wait_for_feedback` on the issue (mirroring the PR).
-    - Emit `noop` and stop. Do not use `add_comment` here — there is no prior PR to comment on; the questions live in the PR body.
+   - Commit whatever safe partial progress exists (may be none).
+   - Emit one `create_pull_request` on branch `ai/issue-<issue-number>-<short-purpose>`, with the open questions in the body and `Closes #<issue-number>`. (The PR is born with `ai:to_review` from workflow config; immediately follow with the label swap below so its *state* label reads `ai:wait_for_feedback`, not `ai:to_review` — remove `ai:to_review`, add `ai:wait_for_feedback`, on the PR.)
+   - Remove `ai:in_progress` and add `ai:wait_for_feedback` on the issue (mirroring the PR).
+   - Emit `noop` and stop. Do not use `add_comment` here — there is no prior PR to comment on; the questions live in the PR body.
 5. Otherwise implement the smallest cohesive change, preserving contracts, architecture, constructor injection, validation, and deny-by-default security. Add focused tests.
 6. Run `mvn -B verify`; never weaken checks. Inspect the final diff for unrelated files, secrets, sensitive config, debug output, or binaries.
 7. Commit on `ai/issue-<issue-number>-<short-purpose>` and emit one `create_pull_request`. Summarize the change, criteria, exact verification result, risks, and `Closes #<issue-number>`. (Do not try to label this PR yourself — see the note above this list; it is born with `ai:to_review`.)
@@ -164,9 +165,9 @@ Every numbered exit below carries its own mandatory label transition — never c
 2. If the reviewed SHA is stale (the verdict's commit differs from the current head for reasons other than your own pending fix), emit `noop` and stop. Leave `ai:needs_work` untouched — nothing was actually done.
 3. Remove `ai:needs_work` and add `ai:in_progress` on the pull request and its linked issue — you are now actively working on it.
 4. Fix every `MANDATORY` finding; skip optional suggestions unless needed for correctness and scope. If mandatory findings conflict or need human judgment:
-    - Emit `add_comment` on the PR with concise questions.
-    - Remove `ai:in_progress`, add `ai:wait_for_feedback` (PR + issue).
-    - Emit `noop` and stop.
+   - Emit `add_comment` on the PR with concise questions.
+   - Remove `ai:in_progress`, add `ai:wait_for_feedback` (PR + issue).
+   - Emit `noop` and stop.
 5. At the fourth consecutive `ai:needs_work` cycle on this PR, request human help the same way (step 4) instead of continuing to fix.
 6. Add regression tests, run `mvn -B verify`, and inspect the final diff. Report environmental failures honestly.
 7. Commit, emit one `push_to_pull_request_branch`, then `add_comment` listing resolved IDs and the exact test result.

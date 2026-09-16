@@ -17,11 +17,12 @@ concurrency:
 max-turns: 50
 max-ai-credits: 200
 engine:
-  id: claude
-  model: claude-sonnet-4-6
-  args: ["--effort", "xhigh"]
+  id: codex
+  model: grok-4.3
+  args: ["-c", "model_reasoning_effort=\"xhigh\""]
   env:
-    ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    OPENAI_API_KEY: ${{ secrets.X_API_KEY }}
+    OPENAI_BASE_URL: "https://api.x.ai/v1"
 permissions:
   contents: read
   issues: read
@@ -30,7 +31,7 @@ runtimes:
   java:
     version: "25"
 network:
-  allowed: [defaults, github, java, api.anthropic.com]
+  allowed: [defaults, github, java, api.x.ai]
 tools:
   cli-proxy: true
   github:
