@@ -25,11 +25,12 @@ if: >-
 concurrency:
   group: gh-aw-${{ github.workflow }}-${{ github.event.issue.number || github.event.pull_request.number }}-${{ github.event.label.name || github.event.comment.id }}
   cancel-in-progress: false
-max-turns: 100
-max-ai-credits: 300
+max-turns: 200
+max-ai-credits: 200
 engine:
   id: claude
   model: claude-haiku-4-5-20251001
+  args: ["--effort", "medium"]
   env:
     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 permissions:
