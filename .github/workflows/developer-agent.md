@@ -28,12 +28,11 @@ concurrency:
 max-turns: 200
 max-ai-credits: 200
 engine:
-   id: codex
-   version: "0.116.0"
-   model: grok-4-1-fast-reasoning
+   id: gemini
+   model: gemini-3.8-flash
+   args: ["--approval-mode", "yolo"]
    env:
-      OPENAI_API_KEY: ${{ secrets.X_API_KEY }}
-      OPENAI_BASE_URL: "https://api.x.ai/v1"
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 permissions:
    contents: read
    issues: read
@@ -42,7 +41,7 @@ runtimes:
    java:
       version: "25"
 network:
-   allowed: [defaults, github, java, api.x.ai]
+   allowed: [defaults, github, java, generativelanguage.googleapis.com]
 tools:
    cli-proxy: true
    github:
