@@ -34,9 +34,6 @@ network:
   allowed: [defaults, github, java, api.x.ai]
 tools:
   cli-proxy: true
-  github:
-    mode: gh-proxy
-    toolsets: [repos, issues, pull_requests]
 safe-outputs:
   threat-detection: false
   github-app:
