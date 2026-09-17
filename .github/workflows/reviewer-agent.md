@@ -19,7 +19,7 @@ max-ai-credits: 200
 engine:
   id: claude
   model: claude-sonnet-5
-  args: ["--effort", "xhigh"]
+  args: ["--effort", "high"]
   env:
     ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 permissions:
@@ -106,3 +106,14 @@ Do not report speculative statements such as:
 
 If you cannot prove a defect within the review scope, omit it or classify it as `OPTIONAL` only when useful.
 `MANDATORY` findings require strong evidence.
+
+---
+
+# 3. Publishing the verdict — definition of done
+Submitting the review is **half the job**. A run that posts a review but leaves the PR labeled `ai:to_review` is incomplete: the developer agent only triggers off `ai:needs_work`, so nothing will ever pick this PR back up, and a human has to notice and fix the label by hand.
+
+After `submit_pull_request_review` succeeds, always finish with the label transition that matches your verdict:
+- **APPROVE** → add `ai:done`, then remove `ai:to_review`.
+- **REQUEST_CHANGES** → add `ai:needs_work`, then remove `ai:to_review`.
+
+Both the add and the remove are required — they are two separate calls, neither implied by the other. Treat the run as finished only once all three actions have gone through: the review, the added label, and the removed `ai:to_review`. Do not stop right after posting the review, and do not end the run early because the invocation budget feels tight — the label swap is cheap and is the step that actually hands the PR back into the workflow.
