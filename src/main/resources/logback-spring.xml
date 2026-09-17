@@ -3,9 +3,10 @@
   <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
   <conversionRule conversionWord="levelIcon" class="com.jobshunter.mcp.config.LevelIconConverter"/>
+  <conversionRule conversionWord="coloredLevel" class="com.jobshunter.mcp.config.ColoredLevelConverter"/>
 
   <property name="CONSOLE_LOG_PATTERN"
-      value="${CONSOLE_LOG_PATTERN:-%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %levelIcon %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+      value="${CONSOLE_LOG_PATTERN:-%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd HH:mm:ss.SSS}}){faint} %levelIcon %coloredLevel %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
 
   <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
