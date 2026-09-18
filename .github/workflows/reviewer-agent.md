@@ -178,9 +178,17 @@ Independently of the report you write below, keep the `ai:*` label on this pull 
 4. Treat every remove/add call across both targets as independent. If any call errors, note it and continue with all remaining calls — a failure on one target, or on one operation, must never block the other operation, the other target, or the final report.
 5. Never add, remove, or otherwise touch a label that does not start with `ai:`.
 
+## Publishing the review
+
+Writing the report text is not enough by itself — GitHub only sees what is submitted through tool calls. Before finishing:
+
+1. Call `submit_pull_request_review` exactly once with `event: APPROVE` when the verdict is `APPROVE`, otherwise `event: REQUEST_CHANGES`, and `body` set to the exact report text (the `VERDICT:` / `PROBLEMS:` / `WELL_IMPLEMENTED:` / `OPTIONAL:` block below). This is what actually posts the review — printing the report as your own final message does not post anything and must never be treated as a substitute for this call.
+2. For every `PROBLEMS` item that names an exact file and current line number, also call `create_pull_request_review_comment` (side `RIGHT`) with that file/line and the same problem text, up to the configured maximum. Skip this for items identified only by symbol or issue requirement (no concrete line to anchor to).
+3. Do the label management above in addition to, not instead of, steps 1–2.
+
 ## Output rules
 
-- Perform label management (above) before writing this report; those tool calls are separate from the report and never appear inside it.
+- Perform label management and publish the review (both above) before writing this report; those tool calls are separate from the report and never appear inside it.
 - Output only the final report.
 - Use one concise sentence per item.
 - Do not duplicate findings across sections.
