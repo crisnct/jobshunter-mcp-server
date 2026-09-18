@@ -55,11 +55,11 @@ safe-outputs:
     allowed: [ai:done, ai:needs_work]
     target: "*"
     create-if-missing: true
-    max: 3
+    max: 5
   remove-labels:
-    allowed: [ai:to_review]
+    allowed: [ai:to_review, ai:needs_work, ai:done]
     target: "*"
-    max: 3
+    max: 5
   noop:
 ---
 
@@ -158,8 +158,29 @@ Return `VERDICT: APPROVE` only when:
 
 Otherwise, return `VERDICT: CHANGES_REQUIRED`.
 
+If you cannot confidently produce one of these two verdicts (interrupted review, ambiguous state, unexpected error), still emit `VERDICT: CHANGES_REQUIRED` — never omit the verdict line or invent a third value.
+
+## Label management
+
+Independently of the report you write below, keep the `ai:*` label on this pull request, and on the issue actually linked to it, in sync with the verdict. This runs on every completed review, including a verdict produced by the CI early-stop path below.
+
+1. Map the verdict to exactly one label:
+   - `APPROVE` -> `ai:done`
+   - `CHANGES_REQUIRED`, or any verdict you could not confidently resolve to `APPROVE` -> `ai:needs_work`
+2. Resolve the targets:
+   - Target 1: this pull request.
+   - Target 2: the issue GitHub reports as linked to this pull request through its closing-issue relationship, e.g. via `gh api graphql -f query='query($o:String!,$r:String!,$p:Int!){repository(owner:$o,name:$r){pullRequest(number:$p){closingIssuesReferences(first:10){nodes{number}}}}}'` with this repository's owner/name and this PR's number. Never treat a bare `#123` mention in a title, body, or comment as a linked issue.
+   - If that query returns no node, Target 2 does not exist: update only Target 1 and continue normally — this is not a failure.
+3. For each existing target, independently and unconditionally, even if it already carries the correct label:
+   - Read its current labels.
+   - If any of `ai:to_review`, `ai:needs_work`, `ai:done` are present on it, remove all of them with one `remove_labels` call for that target.
+   - Add the single label from step 1 with one `add_labels` call for that target (it is created automatically if the repository does not already have it).
+4. Treat every remove/add call across both targets as independent. If any call errors, note it and continue with all remaining calls — a failure on one target, or on one operation, must never block the other operation, the other target, or the final report.
+5. Never add, remove, or otherwise touch a label that does not start with `ai:`.
+
 ## Output rules
 
+- Perform label management (above) before writing this report; those tool calls are separate from the report and never appear inside it.
 - Output only the final report.
 - Use one concise sentence per item.
 - Do not duplicate findings across sections.
@@ -182,6 +203,8 @@ OPTIONAL:
 1. `<file>:<line-or-symbol>` — <optional improvement>
 
 ## CI early-stop output
+
+Label management above still applies here: it is `VERDICT: CHANGES_REQUIRED` either way, so map it to `ai:needs_work` on the pull request and on its linked issue, if any.
 
 For failed CI, output exactly:
 
