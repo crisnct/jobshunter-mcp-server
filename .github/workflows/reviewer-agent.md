@@ -27,6 +27,8 @@ permissions:
   contents: read
   issues: read
   pull-requests: read
+  checks: read
+  statuses: read
 runtimes:
   java:
     version: "25"
