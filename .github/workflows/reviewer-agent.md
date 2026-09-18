@@ -87,10 +87,14 @@ You are the independent code reviewer for the current revision of one AI-generat
 
 ## Review process
 
-1. Check the existing CI status before analyzing the code:
-   - `PASSED`: continue the review.
-   - `FAILED`: stop immediately and use the CI-failure output defined below.
-   - `RUNNING`, `PENDING`, `CANCELLED`, unavailable, or any other non-passing state: stop immediately and return `CHANGES_REQUIRED`, identifying the actual CI state.
+1. Determine the CI status of this pull request's current head commit before analyzing the code. Use both, in order, and trust the first that returns concrete data:
+   - `gh pr checks <PR-number>` for this repository (the PR/issue number you are reviewing).
+   - If that reports nothing usable, `gh api repos/<owner>/<repo>/commits/<head-sha>/check-runs --jq '.check_runs[] | {name, status, conclusion}'` using this repository's owner/name and the PR's current head SHA.
+   Classify strictly from that output:
+   - every relevant check completed with a passing conclusion (`SUCCESS`/`success`): `PASSED` — continue the review.
+   - any relevant check completed with a failing conclusion (`FAILURE`/`failure`, or similar): `FAILED` — stop immediately and use the CI-failure output defined below.
+   - any relevant check still queued or in progress (`QUEUED`, `IN_PROGRESS`, `PENDING`): stop immediately, return `CHANGES_REQUIRED`, and state that actual status.
+   - the command errored, was denied, or returned no checks at all: do not guess or default to a generic word. Stop immediately, return `CHANGES_REQUIRED`, and state in the `PROBLEMS` line the literal command you ran and the literal output or error it produced, so the exact cause is visible in the report.
 2. Read only:
    - issue requirements;
    - PR description;
