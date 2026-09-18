@@ -1,5 +1,10 @@
 name: Compile Agentic Workflows
 
+# This recompiles *.lock.yml from the frontmatter of {reviewer,developer}-agent.md — required only for
+# frontmatter changes (on:, permissions:, safe-outputs: allow-lists/max/etc.). Edits to the markdown BODY (the
+# actual AI instructions) do NOT need this: gh-aw reads that live at run time via {{#runtime-import}} off the
+# base branch. See CLAUDE.md's "AI agent workflows (gh-aw)" section.
+
 on:
   push:
     paths:
