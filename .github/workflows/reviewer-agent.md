@@ -6,13 +6,26 @@ on:
   pull_request:
     types: [labeled]
     names: [ai:to_review]
+  # Second entry point: CI finished for an AI branch. The label event usually fires while CI
+  # is still queued (the label is applied in the same step that opens/pushes the PR), so the
+  # review is deferred to this event instead of being failed as "CI pending".
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: ["ai/issue-*"]
   bots:
     - "jobshunter-dev-agent-crisnct[bot]"
 if: >-
-  startsWith(github.event.pull_request.title, '[AI] ') &&
-  github.event.pull_request.user.login == 'jobshunter-dev-agent-crisnct[bot]'
+  (github.event_name == 'pull_request' &&
+   startsWith(github.event.pull_request.title, '[AI] ') &&
+   github.event.pull_request.user.login == 'jobshunter-dev-agent-crisnct[bot]') ||
+  (github.event_name == 'workflow_run' &&
+   github.event.workflow_run.event == 'pull_request' &&
+   github.event.workflow_run.head_repository.id == github.repository_id)
 concurrency:
-  group: gh-aw-${{ github.workflow }}-${{ github.event.pull_request.number }}-${{ github.event.label.name }}
+  # Keyed by head branch so the label run and the CI-completion run for the same PR serialize;
+  # whichever runs second sees the label already swapped and emits noop.
+  group: gh-aw-${{ github.workflow }}-${{ github.event.pull_request.head.ref || github.event.workflow_run.head_branch }}
   cancel-in-progress: false
 max-turns: 35
 max-ai-credits: 200
@@ -85,16 +98,31 @@ You are the independent code reviewer for the current revision of one AI-generat
 - Do not report speculative concerns.
 - Review only the PR’s current revision; ignore findings that apply only to older revisions.
 
+## Entry points
+
+This workflow starts from one of two events. Resolve the pull request once, then follow the same review process.
+
+- **`pull_request` labeled `ai:to_review`**: the pull request is the one in the event.
+- **`workflow_run` (the `CI` workflow completed)**: CI finished for head commit `${{ github.event.workflow_run.head_sha }}` with conclusion `${{ github.event.workflow_run.conclusion }}`. Find the pull request with `gh api repos/<owner>/<repo>/commits/<that-sha>/pulls --jq '.[] | {number, state, title, user: .user.login, labels: [.labels[].name], head: .head.sha}'`. Emit `noop` and stop, without touching any label, unless exactly one open pull request is returned for which all of these hold:
+  - its title starts with `[AI] ` and its author is `jobshunter-dev-agent-crisnct[bot]`;
+  - it currently carries `ai:to_review` (otherwise it was already reviewed, or is not ready for review);
+  - its current head SHA equals the CI run's head SHA (otherwise a newer push exists and its own CI completion will trigger the review).
+
+## CI gate
+
+The only relevant check is the `Build and test` job of the `CI` workflow for the pull request's **current head SHA**. Ignore every other check run, in particular the runs of the AI agent workflows themselves (including this one), which always show as in progress while you work.
+
+1. On the `workflow_run` entry point, the event's conclusion is the CI result. On the `pull_request` entry point, read it with `gh api repos/<owner>/<repo>/commits/<head-sha>/check-runs --jq '.check_runs[] | select(.name == "Build and test") | {status, conclusion}'`.
+2. Classify:
+   - completed with `success`: `PASSED` — continue the review.
+   - completed with `failure`, `cancelled`, `timed_out` or another non-success conclusion: `FAILED` — stop and use the CI-failure output defined below.
+   - queued or in progress: `PENDING` — emit `noop` and stop. Do **not** submit a review and do **not** change any label: `ai:to_review` stays, and the CI completion event re-triggers this workflow for the same pull request.
+   - no `Build and test` check exists for the head SHA: if every changed file matches the CI workflow's `paths-ignore` (`.github/workflows/*.md`, `.github/dependabot.yml`, `README.md`, `LICENSE`), CI is `NOT_REQUIRED` — continue the review. Otherwise treat it as `PENDING` (the run may not have been created yet).
+   - the command errored or was denied: do not guess. Stop, return `CHANGES_REQUIRED`, and state in the `PROBLEMS` line the literal command you ran and the literal output or error it produced.
+
 ## Review process
 
-1. Determine the CI status of this pull request's current head commit before analyzing the code. Use both, in order, and trust the first that returns concrete data:
-   - `gh pr checks <PR-number>` for this repository (the PR/issue number you are reviewing).
-   - If that reports nothing usable, `gh api repos/<owner>/<repo>/commits/<head-sha>/check-runs --jq '.check_runs[] | {name, status, conclusion}'` using this repository's owner/name and the PR's current head SHA.
-   Classify strictly from that output:
-   - every relevant check completed with a passing conclusion (`SUCCESS`/`success`): `PASSED` — continue the review.
-   - any relevant check completed with a failing conclusion (`FAILURE`/`failure`, or similar): `FAILED` — stop immediately and use the CI-failure output defined below.
-   - any relevant check still queued or in progress (`QUEUED`, `IN_PROGRESS`, `PENDING`): stop immediately, return `CHANGES_REQUIRED`, and state that actual status.
-   - the command errored, was denied, or returned no checks at all: do not guess or default to a generic word. Stop immediately, return `CHANGES_REQUIRED`, and state in the `PROBLEMS` line the literal command you ran and the literal output or error it produced, so the exact cause is visible in the report.
+1. Pass the **CI gate** above before analyzing the code.
 2. Read only:
    - issue requirements;
    - PR description;
@@ -157,7 +185,7 @@ Optional suggestions never affect the verdict.
 
 Return `VERDICT: APPROVE` only when:
 
-- CI passed;
+- CI passed (or was not required, per the CI gate);
 - every issue requirement is satisfied;
 - every changed file was reviewed;
 - no mandatory problem remains.
@@ -168,7 +196,7 @@ If you cannot confidently produce one of these two verdicts (interrupted review,
 
 ## Label management
 
-Independently of the report you write below, keep the `ai:*` label on this pull request, and on the issue actually linked to it, in sync with the verdict. This runs on every completed review, including a verdict produced by the CI early-stop path below.
+Independently of the report you write below, keep the `ai:*` label on this pull request, and on the issue actually linked to it, in sync with the verdict. This runs on every completed review, including a verdict produced by the CI early-stop path below. A `noop` run (CI still pending, or a `workflow_run` event that does not apply) is not a completed review: leave every label untouched.
 
 1. Map the verdict to exactly one label:
    - `APPROVE` -> `ai:done`
@@ -206,6 +234,7 @@ Writing the report text is not enough by itself — GitHub only sees what is sub
 Use exactly this structure:
 
 VERDICT: <APPROVE|CHANGES_REQUIRED>
+COMMIT: <full head SHA that was reviewed>
 
 PROBLEMS:
 1. `<file>:<line-or-symbol>` — <problem and concrete impact> — Fix: <required change>
@@ -223,6 +252,7 @@ Label management above still applies here: it is `VERDICT: CHANGES_REQUIRED` eit
 For failed CI, output exactly:
 
 VERDICT: CHANGES_REQUIRED
+COMMIT: <full head SHA that was reviewed>
 
 PROBLEMS:
 1. `CI` — CI tests failed — Fix: resolve the failing CI tests before further review.
@@ -233,12 +263,13 @@ Not evaluated because review stopped after CI failure.
 OPTIONAL:
 None
 
-For any CI state other than `PASSED` or `FAILED`, use the same structure but state the actual condition and required resolution:
+When the CI status command errored or was denied, use the same structure but state the actual condition and required resolution (pending CI never produces a report — it is a `noop`):
 
 VERDICT: CHANGES_REQUIRED
+COMMIT: <full head SHA that was reviewed>
 
 PROBLEMS:
-1. `CI` — CI status is <actual status> — Fix: obtain a passing CI result before code review.
+1. `CI` — CI status could not be read: `<command>` returned `<output or error>` — Fix: make the CI result readable, then re-apply `ai:to_review`.
 
 WELL_IMPLEMENTED:
 Not evaluated because review stopped before code analysis.
@@ -282,7 +313,7 @@ None
 
 **Question:** How should each CI state be handled?
 
-**Answer:** Stop immediately when CI failed. Continue only when CI passed. Return `CHANGES_REQUIRED` for every other CI state.
+**Answer:** Stop with `CHANGES_REQUIRED` when CI failed. Continue when CI passed or was not required. When CI is still pending, emit `noop` and keep `ai:to_review` — the CI completion event re-triggers the review. Return `CHANGES_REQUIRED` only when the CI status cannot be read.
 
 ## Pre-existing problems
 

@@ -388,19 +388,37 @@ Read only:
 
 * current PR;
 * linked issue;
-* latest `AI Reviewer Verdict`;
-* mandatory findings;
+* the latest pull request review by `jobshunter-review-agent-crisnct[bot]` whose body starts with `VERDICT:`;
+* that reviewer's inline review comments on the same commit;
 * current diff.
 
+The review body has this structure:
+
+```text
+VERDICT: <APPROVE|CHANGES_REQUIRED>
+COMMIT: <reviewed head SHA>
+
+PROBLEMS:
+1. `<file>:<line-or-symbol>` — <problem> — Fix: <required change>
+
+WELL_IMPLEMENTED:
+...
+
+OPTIONAL:
+...
+```
+
 Do not re-review the repository.
+
+If the `COMMIT:` SHA is not the PR's current head SHA, the review is stale: emit `noop`, leave the labels unchanged and stop.
 
 Transition:
 
 `ai:needs_work → ai:in_progress`
 
-Fix every `MANDATORY` finding.
+Every numbered item under `PROBLEMS:` is **mandatory**: fix all of them. A `CI` item means the CI `Build and test` job failed on that commit — reproduce it with `mvn -B verify` and fix the failing tests.
 
-Ignore optional findings unless required for correctness.
+Items under `OPTIONAL:` are non-blocking: ignore them unless required for correctness.
 
 Run testing according to the task classification.
 
